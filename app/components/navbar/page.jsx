@@ -11,11 +11,11 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Home', href: '/' },
-    { name: 'Courses', href: '/courses' },
-    { name: 'Blogs', href: '/blogs' },
-    { name: 'Our Teachers', href: '/teachers' },
-    { name: 'About Us', href: '/about' },
-    { name: 'Contact Us', href: '/contact' },
+    { name: 'Courses', href: '/pages/courses' },
+    { name: 'Blogs', href: '/pages/blogs' },
+    { name: 'Our Teachers', href: '/pages/teachers' },
+    { name: 'About Us', href: '/pages/about' },
+    { name: 'Contact Us', href: '/pages/contact' },
   ];
 
   const isActive = (path) => {
@@ -37,33 +37,30 @@ const Navbar = () => {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`transition duration-300 text-sm font-medium ${
-                  isActive(link.href)
+                className={`transition duration-300 text-sm font-medium ${isActive(link.href)
                     ? 'text-blue-500 border-b-2 border-blue-500 pb-1'
                     : 'text-gray-300 hover:text-blue-500'
-                }`}
+                  }`}
               >
                 {link.name}
               </Link>
             ))}
-            
+
             {/* Auth Buttons */}
             <div className="flex items-center space-x-3 ml-4">
               <Link
-                href="/login"
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-300 ${
-                  isActive('/login')
+                href="/pages/auth/login"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-300 ${isActive('/login')
                     ? 'bg-blue-600 text-white'
                     : 'text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white'
-                }`}
+                  }`}
               >
                 Login
               </Link>
               <Link
-                href="/signup"
-                className={`px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ${
-                  isActive('/signup') ? 'bg-blue-700' : ''
-                }`}
+                href="/pages/auth/signup"
+                className={`px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ${isActive('/signup') ? 'bg-blue-700' : ''
+                  }`}
               >
                 Sign Up
               </Link>
@@ -71,7 +68,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button 
+          <button
             className="lg:hidden text-gray-300 hover:text-white"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
@@ -100,11 +97,10 @@ const Navbar = () => {
                   <Link
                     key={link.name}
                     href={link.href}
-                    className={`transition py-3 text-sm font-medium rounded-lg px-3 ${
-                      isActive(link.href)
+                    className={`transition py-3 text-sm font-medium rounded-lg px-3 ${isActive(link.href)
                         ? 'text-blue-500 bg-white/5'
                         : 'text-gray-300 hover:text-blue-500 hover:bg-white/5'
-                    }`}
+                      }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {link.name}
@@ -114,21 +110,19 @@ const Navbar = () => {
                 {/* Mobile Auth Buttons */}
                 <div className="flex flex-col gap-3 pt-4 mt-2 border-t border-gray-800">
                   <Link
-                    href="/login"
-                    className={`text-center px-4 py-3 text-sm font-medium rounded-lg transition duration-300 ${
-                      isActive('/login')
+                    href="/pages/auth/login"
+                    className={`text-center px-4 py-3 text-sm font-medium rounded-lg transition duration-300 ${isActive('/login')
                         ? 'bg-blue-600 text-white'
                         : 'text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white'
-                    }`}
+                      }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Login
                   </Link>
                   <Link
-                    href="/signup"
-                    className={`text-center px-4 py-3 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ${
-                      isActive('/signup') ? 'bg-blue-700' : ''
-                    }`}
+                    href="/pages/auth/signup"
+                    className={`text-center px-4 py-3 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 ${isActive('/signup') ? 'bg-blue-700' : ''
+                      }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign Up
