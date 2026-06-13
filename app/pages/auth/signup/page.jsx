@@ -2,10 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
 import Navbar from "@/app/components/navbar/page";
 
 export default function SignupPage() {
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+  const router = useRouter();
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState("");
@@ -33,9 +37,42 @@ export default function SignupPage() {
     if (Object.keys(v).length) return;
     setSubmitting(true);
     try {
-      await new Promise((r) => setTimeout(r, 900));
-      setSuccess("Account created — check your email to verify.");
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          password: form.password,
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data?.success) {
+        const message = data?.message || "Signup failed. Please try again.";
+        setErrors({ form: message });
+        toast.error(message);
+        return;
+      }
+
+      // Persist the JWT as a cookie so the user stays verified across visits
+      if (data?.token) {
+        Cookies.set("flp_token", data.token, { expires: 7, sameSite: "lax" });
+        localStorage.setItem("flp_token", data.token);
+      }
+
+      toast.success(data?.message || "Account created successfully.");
+      setSuccess(data?.message || "Account created successfully.");
       setForm({ name: "", email: "", phone: "", password: "" });
+
+      // Send the user home; the navbar reads the cookie on mount
+      router.push("/");
+      router.refresh();
+    } catch {
+      const message = "Network error. Please try again.";
+      setErrors({ form: message });
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -114,7 +151,7 @@ export default function SignupPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((s) => !s)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/3 text-slate-100 hover:bg-white/6"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/3 text-slate-100 hover:bg-white/6 cursor-pointer"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
@@ -136,11 +173,15 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full items-center justify-center rounded-3xl bg-linear-to-r from-blue-600 to-purple-600 px-5 py-3 text-base font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+              className="flex w-full items-center justify-center rounded-3xl bg-linear-to-r from-blue-600 to-purple-600 px-5 py-3 text-base font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
             >
               {submitting ? "Creating..." : "Create account"}
             </button>
           </form>
+
+          {errors.form && (
+            <div className="mt-6 rounded-3xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">{errors.form}</div>
+          )}
 
           {success ? (
             <div className="mt-6 rounded-3xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div>

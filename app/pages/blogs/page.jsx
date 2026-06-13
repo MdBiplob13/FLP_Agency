@@ -1,270 +1,533 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { motion, useAnimation, useInView } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import {
+  motion,
+  animate,
+  useInView,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValue,
+  useMotionTemplate,
+  useReducedMotion,
+  AnimatePresence,
+} from 'framer-motion';
+import {
+  FiArrowRight,
+  FiArrowUpRight,
+  FiClock,
+  FiCalendar,
+  FiUser,
+  FiSearch,
+  FiTrendingUp,
+  FiMail,
+  FiBookOpen,
+} from 'react-icons/fi';
 import Footer from '../../components/footer/page.jsx';
 import Navbar from '@/app/components/navbar/page.jsx';
 
-const AnimatedSection = ({ children, delay = 0 }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
-  const controls = useAnimation();
+/* ------------------------------------------------------------------ */
+/*  Data                                                              */
+/* ------------------------------------------------------------------ */
 
-  useEffect(() => {
-    if (isInView) controls.start('visible');
-  }, [isInView, controls]);
+const featured = {
+  title: 'How to build a career-ready portfolio that stands out',
+  category: 'Career',
+  excerpt:
+    'Learn the exact framework designers and developers use to create stories, case studies, and project presentations that hire and impress.',
+  author: 'Maya Khan',
+  date: 'June 1, 2026',
+  readTime: '7 min read',
+  img: '/image1.jpg',
+};
 
+const articles = [
+  { title: 'Design systems for fast product launches', category: 'Design', excerpt: 'Use consistent patterns and reusable components to ship faster and keep products polished.', author: 'Rina Paul', date: 'May 24, 2026', readTime: '5 min read', img: '/image1.jpg' },
+  { title: 'From idea to MVP: a practical startup guide', category: 'Startup', excerpt: 'Turn your concept into a launch-ready product with a lean workflow, testing, and growth focus.', author: 'Sara Ahmed', date: 'May 18, 2026', readTime: '6 min read', img: '/image1.jpg' },
+  { title: 'Learning JavaScript with project-based training', category: 'Development', excerpt: 'Build meaningful projects while you learn the language, not just the syntax.', author: 'Arif Rahman', date: 'May 12, 2026', readTime: '8 min read', img: '/image1.jpg' },
+  { title: 'The marketing habits every creator should know', category: 'Marketing', excerpt: 'Create content, launch campaigns, and build an audience without wasting time.', author: 'Nadia Chowdhury', date: 'May 8, 2026', readTime: '4 min read', img: '/image1.jpg' },
+  { title: 'UX research made simple for busy teams', category: 'UX', excerpt: 'Capture feedback, validate ideas, and improve your design choices with fast research methods.', author: 'Tanvir Hasan', date: 'May 2, 2026', readTime: '5 min read', img: '/image1.jpg' },
+  { title: 'Pricing freelance projects without guesswork', category: 'Career', excerpt: 'A simple system to value your work, quote with confidence, and stop leaving money on the table.', author: 'Maya Khan', date: 'Apr 27, 2026', readTime: '6 min read', img: '/image1.jpg' },
+];
+
+const categories = ['All', 'Design', 'Development', 'Marketing', 'UX', 'Startup', 'Career'];
+
+const popular = [
+  { title: 'How to price freelance projects', reads: '3.1k' },
+  { title: 'Top productivity tools for remote learners', reads: '2.4k' },
+  { title: 'A/B testing your course landing page', reads: '1.9k' },
+];
+
+const stats = [
+  { to: 75, suffix: '+', label: 'Published posts' },
+  { to: 22, suffix: 'k+', label: 'Monthly readers' },
+];
+
+/* ------------------------------------------------------------------ */
+/*  Helpers (shared design language with the home page)               */
+/* ------------------------------------------------------------------ */
+
+const easeOut = [0.22, 1, 0.36, 1];
+
+function Reveal({ children, delay = 0, y = 36, className = '' }) {
+  const reduce = useReducedMotion();
   return (
     <motion.div
-      ref={ref}
-      initial="hidden"
-      animate={controls}
-      variants={{
-        hidden: { opacity: 0, y: 40 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.75, delay } },
-      }}
+      initial={{ opacity: 0, y: reduce ? 0 : y }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.7, delay, ease: easeOut }}
+      className={className}
     >
       {children}
     </motion.div>
   );
-};
+}
 
-export default function BlogsPage() {
-  const featured = {
-    title: 'How to build a career-ready portfolio that stands out',
-    category: 'Career',
-    excerpt: 'Learn the exact framework designers and developers use to create stories, case studies, and project presentations that hire and impress.',
-    author: 'Maya Khan',
-    date: 'June 1, 2026',
-  };
+function CountUp({ to, suffix = '', duration = 1.8 }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const reduce = useReducedMotion();
+  const [val, setVal] = useState(0);
 
-  const articles = [
-    {
-      title: 'Design systems for fast product launches',
-      category: 'Design',
-      excerpt: 'Use consistent patterns and reusable components to ship faster and keep products polished.',
-      author: 'Rina Paul',
-      date: 'May 24, 2026',
-    },
-    {
-      title: 'From idea to MVP: a practical startup guide',
-      category: 'Startup',
-      excerpt: 'Turn your concept into a launch-ready product with a lean workflow, testing, and growth focus.',
-      author: 'Sara Ahmed',
-      date: 'May 18, 2026',
-    },
-    {
-      title: 'Learning JavaScript with project-based training',
-      category: 'Development',
-      excerpt: 'Build meaningful projects while you learn the language, not just the syntax.',
-      author: 'Arif Rahman',
-      date: 'May 12, 2026',
-    },
-    {
-      title: 'The marketing habits every creator should know',
-      category: 'Marketing',
-      excerpt: 'Create content, launch campaigns, and build an audience without wasting time.',
-      author: 'Nadia Chowdhury',
-      date: 'May 8, 2026',
-    },
-    {
-      title: 'UX research made simple for busy teams',
-      category: 'UX',
-      excerpt: 'Capture feedback, validate ideas, and improve your design choices with fast research methods.',
-      author: 'Tanvir Hasan',
-      date: 'May 2, 2026',
-    },
-  ];
-
-  const categories = ['All', 'Design', 'Development', 'Product', 'Marketing', 'Career', 'Startup'];
-
-  const popular = [
-    'How to price freelance projects',
-    'Top productivity tools for remote learners',
-    'A/B testing your course landing page',
-  ];
+  useEffect(() => {
+    if (!inView) return;
+    if (reduce) {
+      setVal(to);
+      return;
+    }
+    const controls = animate(0, to, { duration, ease: 'easeOut', onUpdate: (v) => setVal(v) });
+    return () => controls.stop();
+  }, [inView, to, duration, reduce]);
 
   return (
-    <div className="bg-black text-white">
-        <Navbar/>
-      <section className="relative overflow-hidden bg-[#020205]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.18),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.14),transparent_24%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-linear-to-b from-black/90 via-black/80 to-black" />
+    <span ref={ref}>
+      {Math.round(val).toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 lg:py-32">
-          <div className="grid gap-16 xl:grid-cols-[1.05fr_0.95fr] items-center">
-            <AnimatedSection>
-              <div className="space-y-8">
-                <span className="inline-flex items-center gap-3 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm text-blue-200">
-                  <span className="h-2 w-2 rounded-full bg-blue-400" />
-                  Content for future freelancers
-                </span>
+// Card that emits a soft glow following the cursor
+function SpotlightCard({ children, className = '', glow = 'rgba(99,102,241,0.18)' }) {
+  const ref = useRef(null);
+  const mx = useMotionValue(-200);
+  const my = useMotionValue(-200);
+  const [hover, setHover] = useState(false);
+  const reduce = useReducedMotion();
 
-                <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-bold tracking-tight text-white">
-                  Read stories, strategies, and learning playbooks that help you grow faster.
-                </h1>
+  function handleMove(e) {
+    const r = ref.current?.getBoundingClientRect();
+    if (!r) return;
+    mx.set(e.clientX - r.left);
+    my.set(e.clientY - r.top);
+  }
 
-                <p className="max-w-2xl text-lg leading-8 text-gray-300">
-                  The blog brings together practical guides, career advice, and design systems for makers who want more clarity, confidence, and momentum.
-                </p>
+  const background = useMotionTemplate`radial-gradient(240px circle at ${mx}px ${my}px, ${glow}, transparent 60%)`;
 
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 shadow-2xl shadow-black/20">
-                    <p className="text-sm uppercase tracking-[0.35em] text-gray-400">Latest update</p>
-                    <p className="mt-4 text-2xl font-semibold text-white">Stay current</p>
-                  </div>
-                  <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 shadow-2xl shadow-black/20">
-                    <p className="text-sm uppercase tracking-[0.35em] text-gray-400">Read time</p>
-                    <p className="mt-4 text-2xl font-semibold text-white">5 min average</p>
-                  </div>
-                  <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-6 shadow-2xl shadow-black/20">
-                    <p className="text-sm uppercase tracking-[0.35em] text-gray-400">Topics</p>
-                    <p className="mt-4 text-2xl font-semibold text-white">Design, dev, career</p>
-                  </div>
+  return (
+    <div
+      ref={ref}
+      onMouseMove={reduce ? undefined : handleMove}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className={`relative overflow-hidden ${className}`}
+    >
+      {!reduce && (
+        <motion.div aria-hidden style={{ background }} animate={{ opacity: hover ? 1 : 0 }} transition={{ duration: 0.25 }} className="pointer-events-none absolute inset-0" />
+      )}
+      <div className="relative z-10 h-full">{children}</div>
+    </div>
+  );
+}
+
+// Button that gently leans toward the cursor
+function MagneticButton({ children, className = '', as = 'a', ...props }) {
+  const ref = useRef(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const sx = useSpring(x, { stiffness: 250, damping: 18 });
+  const sy = useSpring(y, { stiffness: 250, damping: 18 });
+  const reduce = useReducedMotion();
+  const Comp = motion[as];
+
+  function handleMove(e) {
+    if (reduce) return;
+    const r = ref.current?.getBoundingClientRect();
+    if (!r) return;
+    x.set((e.clientX - (r.left + r.width / 2)) * 0.3);
+    y.set((e.clientY - (r.top + r.height / 2)) * 0.3);
+  }
+  function reset() {
+    x.set(0);
+    y.set(0);
+  }
+
+  return (
+    <Comp ref={ref} onMouseMove={handleMove} onMouseLeave={reset} style={{ x: sx, y: sy }} whileTap={{ scale: 0.96 }} className={className} {...props}>
+      {children}
+    </Comp>
+  );
+}
+
+// Element that tilts in 3D toward the cursor (same feel as the home banner)
+function Tilt3D({ children, className = '', max = 14 }) {
+  const ref = useRef(null);
+  const reduce = useReducedMotion();
+  const rx = useMotionValue(0);
+  const ry = useMotionValue(0);
+  const srx = useSpring(rx, { stiffness: 150, damping: 18 });
+  const sry = useSpring(ry, { stiffness: 150, damping: 18 });
+
+  function handleMove(e) {
+    if (reduce) return;
+    const r = ref.current?.getBoundingClientRect();
+    if (!r) return;
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    ry.set(px * max);
+    rx.set(py * -max);
+  }
+  function reset() {
+    rx.set(0);
+    ry.set(0);
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMove}
+      onMouseLeave={reset}
+      style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}
+      className={`[transform-style:preserve-3d] ${className}`}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                              */
+/* ------------------------------------------------------------------ */
+
+export default function BlogsPage() {
+  const reduce = useReducedMotion();
+
+  /* ---- Hero mouse spotlight + parallax ---- */
+  const heroRef = useRef(null);
+  const spotX = useMotionValue(0);
+  const spotY = useMotionValue(0);
+  const sSpotX = useSpring(spotX, { stiffness: 120, damping: 25 });
+  const sSpotY = useSpring(spotY, { stiffness: 120, damping: 25 });
+
+  const offX = useMotionValue(0);
+  const offY = useMotionValue(0);
+  const sOffX = useSpring(offX, { stiffness: 80, damping: 20 });
+  const sOffY = useSpring(offY, { stiffness: 80, damping: 20 });
+  const orb1X = useTransform(sOffX, (v) => v * 40);
+  const orb1Y = useTransform(sOffY, (v) => v * 40);
+  const orb2X = useTransform(sOffX, (v) => v * -34);
+  const orb2Y = useTransform(sOffY, (v) => v * -34);
+
+  function handleHeroMove(e) {
+    if (reduce || !heroRef.current) return;
+    const r = heroRef.current.getBoundingClientRect();
+    spotX.set(e.clientX - r.left);
+    spotY.set(e.clientY - r.top);
+    offX.set((e.clientX - r.left) / r.width - 0.5);
+    offY.set((e.clientY - r.top) / r.height - 0.5);
+  }
+  function handleHeroLeave() {
+    offX.set(0);
+    offY.set(0);
+  }
+
+  const heroSpotlight = useMotionTemplate`radial-gradient(550px circle at ${sSpotX}px ${sSpotY}px, rgba(99,102,241,0.16), transparent 65%)`;
+
+  /* ---- Category + search filtering ---- */
+  const [activeCat, setActiveCat] = useState('All');
+  const [query, setQuery] = useState('');
+  const filtered = articles.filter(
+    (a) => (activeCat === 'All' || a.category === activeCat) && a.title.toLowerCase().includes(query.trim().toLowerCase())
+  );
+
+  return (
+    <div className="bg-[#020205] font-sans text-slate-100 antialiased">
+      <Navbar />
+
+      {/* ============================ HERO ============================ */}
+      <section
+        ref={heroRef}
+        onMouseMove={handleHeroMove}
+        onMouseLeave={handleHeroLeave}
+        className="relative overflow-hidden pt-28 pb-20 lg:pt-36 lg:pb-28"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(79,70,229,0.22),transparent_40%),radial-gradient(circle_at_85%_25%,rgba(168,85,247,0.18),transparent_42%)]" />
+        <div className="absolute inset-0 bg-linear-to-b from-[#020205]/0 via-[#020205]/40 to-[#020205]" />
+        <div className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:56px_56px]" />
+        {!reduce && <motion.div aria-hidden style={{ background: heroSpotlight }} className="pointer-events-none absolute inset-0" />}
+        <motion.div aria-hidden style={{ x: orb1X, y: orb1Y }} className="pointer-events-none absolute -left-20 top-24 h-72 w-72 rounded-full bg-blue-600/20 blur-[100px]" />
+        <motion.div aria-hidden style={{ x: orb2X, y: orb2Y }} className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-purple-600/20 blur-[110px]" />
+
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-16 px-6 xl:grid-cols-[1.05fr_0.95fr]">
+          {/* copy */}
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: easeOut }} className="space-y-8">
+            <span className="inline-flex items-center gap-3 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 ring-1 ring-blue-200/10">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
+              </span>
+              Content for future freelancers
+            </span>
+
+            <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl xl:text-7xl">
+              Stories & playbooks to{' '}
+              <span className="bg-linear-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">help you grow faster.</span>
+            </h1>
+
+            <p className="max-w-xl text-lg leading-8 text-slate-300">
+              Practical guides, career advice, and design systems for makers who want more clarity, confidence, and momentum.
+            </p>
+
+            <div className="grid max-w-lg gap-4 sm:grid-cols-3">
+              {[
+                { k: 'Latest', v: 'Stay current' },
+                { k: 'Read time', v: '5 min avg' },
+                { k: 'Topics', v: 'Design · Dev · Career' },
+              ].map((s) => (
+                <div key={s.k} className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
+                  <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{s.k}</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{s.v}</p>
                 </div>
-              </div>
-            </AnimatedSection>
+              ))}
+            </div>
+          </motion.div>
 
-            <AnimatedSection delay={0.1}>
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-950/85 p-8 shadow-2xl shadow-black/40 backdrop-blur-xl">
-                <div className="absolute -top-10 -right-10 h-36 w-36 rounded-full bg-blue-500/20 blur-3xl" />
-                <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-purple-500/20 blur-3xl" />
-                <div className="rounded-4xl border border-white/10 bg-black/60 p-8 shadow-xl shadow-black/20">
-                  <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Featured article</p>
-                  <div className="mt-6 space-y-6">
-                    <div className="rounded-4xl bg-white/5 p-6 shadow-lg shadow-black/10">
-                      <span className="inline-flex rounded-full bg-blue-500/10 px-3 py-1 text-xs uppercase tracking-[0.35em] text-blue-200">
-                        {featured.category}
-                      </span>
-                      <h2 className="mt-5 text-3xl font-semibold text-white">{featured.title}</h2>
-                      <p className="mt-4 text-gray-300 leading-8">{featured.excerpt}</p>
-                    </div>
-                    <div className="flex flex-wrap items-center justify-between gap-4 text-gray-400">
-                      <p>{featured.author}</p>
-                      <p>{featured.date}</p>
-                    </div>
-                    <button className="inline-flex items-center justify-center rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:scale-[1.01]">
-                      Read full story
-                    </button>
-                  </div>
+          {/* featured article with 3D tilt image */}
+          <motion.div initial={{ opacity: 0, y: 40, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.9, delay: 0.15, ease: easeOut }}>
+            <Tilt3D>
+              <SpotlightCard className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/50 backdrop-blur-xl">
+                <div className="relative overflow-hidden rounded-[1.4rem] border border-white/10">
+                  <img src={featured.img} alt={featured.title} className="h-56 w-full object-cover sm:h-64" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent" />
+                  <span className="absolute left-4 top-4 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">Featured · {featured.category}</span>
                 </div>
-              </div>
-            </AnimatedSection>
-          </div>
+                <div className="px-2 pb-2 pt-5">
+                  <h2 className="text-2xl font-semibold leading-snug text-white">{featured.title}</h2>
+                  <p className="mt-3 leading-7 text-slate-400">{featured.excerpt}</p>
+                  <div className="mt-5 flex items-center justify-between text-sm text-slate-400">
+                    <span className="flex items-center gap-2"><FiUser className="h-4 w-4" /> {featured.author}</span>
+                    <span className="flex items-center gap-2"><FiClock className="h-4 w-4" /> {featured.readTime}</span>
+                  </div>
+                  <MagneticButton
+                    href="#articles"
+                    className="group mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25"
+                  >
+                    Read full story
+                    <FiArrowRight className="transition-transform group-hover:translate-x-1" />
+                  </MagneticButton>
+                </div>
+              </SpotlightCard>
+            </Tilt3D>
+          </motion.div>
         </div>
       </section>
 
-      <section className="py-24 bg-slate-950/90">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid gap-10 xl:grid-cols-[1fr_320px]">
-            <div className="space-y-8">
-              <div className="rounded-4xl border border-white/10 bg-black/60 p-8 shadow-2xl shadow-black/20">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Browse topics</p>
-                    <h2 className="mt-4 text-4xl font-bold text-white">Explore insightful posts.</h2>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    {categories.map((category) => (
-                      <span key={category} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-gray-300">
-                        {category}
-                      </span>
-                    ))}
-                  </div>
+      {/* ============================ ARTICLES + SIDEBAR ============================ */}
+      <section id="articles" className="bg-slate-950/40 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          {/* toolbar: heading, search, category pills */}
+          <Reveal>
+            <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-6 sm:p-8">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Browse topics</p>
+                  <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">Explore insightful posts</h2>
                 </div>
+                <label className="relative w-full max-w-sm">
+                  <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search articles…"
+                    className="w-full rounded-full border border-white/10 bg-slate-900/80 py-3 pl-12 pr-4 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+                  />
+                </label>
               </div>
 
-              <div className="grid gap-6 xl:grid-cols-2">
-                {articles.map((article, idx) => (
-                  <AnimatedSection key={article.title} delay={idx * 0.05}>
-                    <motion.div
-                      whileHover={{ y: -6 }}
-                      className="group rounded-4xl border border-white/10 bg-slate-950/80 p-8 shadow-2xl shadow-black/20 transition-all"
+              <div className="mt-6 flex flex-wrap gap-2.5">
+                {categories.map((cat) => {
+                  const active = activeCat === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCat(cat)}
+                      className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                        active ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-600/20' : 'border border-white/10 bg-white/5 text-slate-300 hover:border-blue-500/30 hover:text-blue-200'
+                      }`}
                     >
-                      <span className="inline-flex rounded-full bg-blue-500/10 px-3 py-1 text-xs uppercase tracking-[0.35em] text-blue-200">
-                        {article.category}
-                      </span>
-                      <h3 className="mt-5 text-2xl font-semibold text-white">{article.title}</h3>
-                      <p className="mt-4 text-gray-300 leading-7">{article.excerpt}</p>
-                      <div className="mt-6 flex items-center justify-between text-sm text-gray-400">
-                        <span>{article.author}</span>
-                        <span>{article.date}</span>
-                      </div>
-                    </motion.div>
-                  </AnimatedSection>
-                ))}
+                      {cat}
+                    </button>
+                  );
+                })}
               </div>
             </div>
+          </Reveal>
 
-            <aside className="space-y-8">
-              <AnimatedSection>
-                <div className="rounded-4xl border border-white/10 bg-black/60 p-8 shadow-2xl shadow-black/20">
-                  <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Subscribe</p>
-                  <h2 className="mt-4 text-3xl font-bold text-white">Never miss a post.</h2>
-                  <p className="mt-4 text-gray-400 leading-7">
-                    Get the latest articles and updates delivered to your inbox every week.
-                  </p>
-                  <div className="mt-8 space-y-4">
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      className="w-full rounded-3xl border border-white/10 bg-slate-950/80 px-4 py-3 text-white outline-none transition focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10"
-                    />
-                    <button className="w-full rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-base font-semibold text-white shadow-xl shadow-blue-500/20 transition hover:scale-[1.01]">
-                      Subscribe
-                    </button>
-                  </div>
+          <div className="mt-10 grid gap-10 xl:grid-cols-[1fr_320px]">
+            {/* article grid */}
+            <div>
+              <motion.div layout className="grid gap-6 sm:grid-cols-2">
+                <AnimatePresence mode="popLayout">
+                  {filtered.map((article, idx) => (
+                    <motion.div
+                      key={article.title}
+                      layout
+                      initial={{ opacity: 0, y: 24 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.96 }}
+                      transition={{ duration: 0.4, delay: reduce ? 0 : idx * 0.04, ease: easeOut }}
+                    >
+                      <motion.div whileHover={reduce ? undefined : { y: -8 }} transition={{ duration: 0.3 }} className="h-full">
+                        <SpotlightCard className="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-950/60 shadow-xl shadow-black/20">
+                          <div className="relative overflow-hidden rounded-t-3xl">
+                            <img src={article.img} alt={article.title} className="h-44 w-full object-cover transition-transform duration-500 hover:scale-105" />
+                            <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+                            <span className="absolute left-3 top-3 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">{article.category}</span>
+                          </div>
+                          <div className="flex flex-1 flex-col p-6">
+                            <h3 className="text-xl font-semibold leading-snug text-white">{article.title}</h3>
+                            <p className="mt-3 flex-1 leading-7 text-slate-400">{article.excerpt}</p>
+                            <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-4 text-xs text-slate-400">
+                              <span className="flex items-center gap-1.5"><FiUser className="h-3.5 w-3.5" /> {article.author}</span>
+                              <span className="flex items-center gap-1.5"><FiClock className="h-3.5 w-3.5" /> {article.readTime}</span>
+                            </div>
+                            <a href="#" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-300 transition-colors hover:text-blue-200">
+                              Read article <FiArrowUpRight />
+                            </a>
+                          </div>
+                        </SpotlightCard>
+                      </motion.div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+
+              {filtered.length === 0 && (
+                <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-12 text-center">
+                  <FiBookOpen className="mx-auto h-10 w-10 text-slate-600" />
+                  <p className="mt-4 text-lg font-semibold text-white">No articles found</p>
+                  <p className="mt-1 text-slate-400">Try a different topic or clear your search.</p>
+                  <button
+                    onClick={() => {
+                      setActiveCat('All');
+                      setQuery('');
+                    }}
+                    className="mt-6 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+                  >
+                    Reset filters
+                  </button>
                 </div>
-              </AnimatedSection>
+              )}
+            </div>
 
-              <AnimatedSection>
-                <div className="rounded-4xl border border-white/10 bg-slate-950/80 p-8 shadow-2xl shadow-black/20">
-                  <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Popular reads</p>
-                  <div className="mt-6 space-y-4">
-                    {popular.map((item) => (
-                      <div key={item} className="rounded-4xl border border-white/10 bg-black/60 p-5">
-                        <p className="text-sm text-gray-300">{item}</p>
+            {/* sidebar */}
+            <aside className="space-y-6">
+              {/* popular reads */}
+              <Reveal>
+                <SpotlightCard className="rounded-3xl border border-white/10 bg-slate-950/60 p-7">
+                  <p className="flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-blue-300">
+                    <FiTrendingUp className="h-4 w-4" /> Popular reads
+                  </p>
+                  <div className="mt-6 space-y-3">
+                    {popular.map((item, i) => (
+                      <a key={item.title} href="#" className="flex items-start gap-4 rounded-2xl border border-white/10 bg-black/40 p-4 transition-colors hover:border-blue-500/30">
+                        <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-2xl font-bold text-transparent">{String(i + 1).padStart(2, '0')}</span>
+                        <div>
+                          <p className="text-sm font-medium leading-snug text-slate-200">{item.title}</p>
+                          <p className="mt-1 text-xs text-slate-500">{item.reads} reads</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </SpotlightCard>
+              </Reveal>
+
+              {/* quick stats */}
+              <Reveal delay={0.05}>
+                <SpotlightCard className="rounded-3xl border border-white/10 bg-slate-950/60 p-7">
+                  <p className="text-sm uppercase tracking-[0.3em] text-blue-300">Quick stats</p>
+                  <div className="mt-6 grid grid-cols-2 gap-4">
+                    {stats.map((s) => (
+                      <div key={s.label} className="rounded-2xl bg-black/40 p-5 text-center">
+                        <p className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-3xl font-bold text-transparent">
+                          <CountUp to={s.to} />
+                          {s.suffix}
+                        </p>
+                        <p className="mt-2 text-xs text-slate-400">{s.label}</p>
                       </div>
                     ))}
                   </div>
-                </div>
-              </AnimatedSection>
+                </SpotlightCard>
+              </Reveal>
 
-              <AnimatedSection>
-                <div className="rounded-4xl border border-white/10 bg-black/60 p-8 shadow-2xl shadow-black/20">
-                  <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Quick stats</p>
-                  <div className="mt-8 grid gap-4">
-                    <div className="rounded-4xl bg-slate-950/80 p-5">
-                      <p className="text-3xl font-bold text-white">75+</p>
-                      <p className="mt-2 text-sm text-gray-400">Published posts</p>
-                    </div>
-                    <div className="rounded-4xl bg-slate-950/80 p-5">
-                      <p className="text-3xl font-bold text-white">22k+</p>
-                      <p className="mt-2 text-sm text-gray-400">Monthly readers</p>
-                    </div>
-                  </div>
-                </div>
-              </AnimatedSection>
+              {/* newsletter */}
+              <Reveal delay={0.1}>
+                <SpotlightCard glow="rgba(168,85,247,0.18)" className="rounded-3xl border border-white/10 bg-linear-to-br from-purple-600/10 to-slate-950/60 p-7">
+                  <p className="flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-blue-300">
+                    <FiMail className="h-4 w-4" /> Subscribe
+                  </p>
+                  <h3 className="mt-3 text-2xl font-bold text-white">Never miss a post</h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-400">Fresh articles and updates in your inbox every week.</p>
+                  <form className="mt-5 space-y-3" onSubmit={(e) => e.preventDefault()}>
+                    <input
+                      type="email"
+                      placeholder="you@email.com"
+                      className="w-full rounded-full border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+                    />
+                    <MagneticButton
+                      as="button"
+                      type="submit"
+                      className="w-full rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25"
+                    >
+                      Subscribe
+                    </MagneticButton>
+                  </form>
+                </SpotlightCard>
+              </Reveal>
             </aside>
           </div>
         </div>
       </section>
 
+      {/* ============================ FINAL CTA ============================ */}
       <section className="relative overflow-hidden py-24">
-        <div className="absolute inset-0 bg-linear-to-r from-blue-600/10 via-transparent to-purple-600/10" />
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <AnimatedSection>
-            <div className="rounded-4xl border border-white/10 bg-slate-950/90 p-12 text-center shadow-2xl shadow-black/20">
-              <p className="text-sm uppercase tracking-[0.35em] text-blue-300 mb-4">Want more insights?</p>
-              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">Discover more guides, tutorials, and course stories.</h2>
-              <p className="mx-auto max-w-2xl text-base leading-8 text-gray-400 mb-10">
-                Follow the blog for weekly updates, skills guides, and actionable advice for your career in tech and design.
-              </p>
-              <button className="rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-12 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/20 transition hover:scale-[1.01]">
-                Browse all posts
-              </button>
-            </div>
-          </AnimatedSection>
+        <div className="mx-auto max-w-7xl px-6">
+          <Reveal>
+            <SpotlightCard
+              glow="rgba(99,102,241,0.25)"
+              className="relative rounded-[2.5rem] border border-white/10 bg-linear-to-br from-blue-600/15 via-slate-950/70 to-purple-600/15 p-10 text-center shadow-2xl shadow-black/40 sm:p-16"
+            >
+              <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:44px_44px]" />
+              <div className="relative">
+                <h2 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">Want more guides, tutorials, and course stories?</h2>
+                <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+                  Follow the blog for weekly updates, skills guides, and actionable advice for your career in tech and design.
+                </p>
+                <div className="mt-10 flex justify-center">
+                  <MagneticButton
+                    href="#articles"
+                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-10 py-4 text-base font-semibold text-white shadow-xl shadow-blue-600/30"
+                  >
+                    Browse all posts
+                    <FiArrowRight className="transition-transform group-hover:translate-x-1" />
+                  </MagneticButton>
+                </div>
+              </div>
+            </SpotlightCard>
+          </Reveal>
         </div>
       </section>
 

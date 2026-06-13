@@ -1,72 +1,119 @@
 import React from 'react';
+import Link from 'next/link';
 import { AiFillFacebook, AiOutlineInstagram, AiFillLinkedin, AiOutlineTwitter } from 'react-icons/ai';
+import { FiZap, FiMail, FiPhone, FiArrowRight } from 'react-icons/fi';
+
+const socials = [
+  { icon: AiFillFacebook, label: 'Facebook', hover: 'hover:bg-blue-500/20' },
+  { icon: AiOutlineInstagram, label: 'Instagram', hover: 'hover:bg-pink-500/20' },
+  { icon: AiFillLinkedin, label: 'LinkedIn', hover: 'hover:bg-blue-700/20' },
+  { icon: AiOutlineTwitter, label: 'X', hover: 'hover:bg-slate-300/20' },
+];
+
+const exploreLinks = [
+  { name: 'Courses', href: '/pages/courses' },
+  { name: 'Blogs', href: '/pages/blogs' },
+  { name: 'Our Teachers', href: '/pages/teachers' },
+  { name: 'About Us', href: '/pages/about' },
+];
+
+const companyLinks = [
+  { name: 'Contact Us', href: '/pages/contact' },
+  { name: 'Login', href: '/pages/auth/login' },
+  { name: 'Sign Up', href: '/pages/auth/signup' },
+  { name: 'Terms & Privacy', href: '#' },
+];
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-950/95 border-t border-white/10 text-gray-300">
-      <div className="max-w-7xl mx-auto px-6 py-16 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-[1.8fr_1fr_1fr]">
+    <footer className="relative overflow-hidden border-t border-white/10 bg-[#020205] text-slate-300">
+      {/* top gradient glow + grid texture */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-blue-500/50 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:48px_48px]" />
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-blue-600/10 blur-[120px]" />
+
+      <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-[1.8fr_1fr_1fr]">
+          {/* brand */}
           <div className="space-y-6">
-            <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-blue-300 mb-3">Freelancer Learning Platform</p>
-              <h3 className="text-3xl font-bold text-white">Courses built for freelancers and independent creators.</h3>
-            </div>
-            <p className="max-w-2xl leading-7 text-gray-400">
-              Learn practical skills for web development, design, marketing, and freelancing with project-led training made for fast progress.
+            <Link href="/" className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-600/30">
+                <FiZap className="h-5 w-5" />
+              </span>
+              <span className="text-xl font-bold tracking-tight text-white">
+                FLP <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Agency</span>
+              </span>
+            </Link>
+
+            <p className="max-w-md leading-7 text-slate-400">
+              Project-led courses for web development, design, marketing, and freelancing — built to help independent creators learn fast and get hired.
             </p>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <a href="mailto:support@flpacademy.com" className="rounded-3xl bg-white/5 px-5 py-4 text-sm text-gray-200 transition hover:bg-white/10">
+              <a href="mailto:support@flpacademy.com" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition-colors hover:border-blue-500/30 hover:text-white">
+                <FiMail className="h-4 w-4 text-blue-300" />
                 support@flpacademy.com
               </a>
-              <a href="tel:+15551234567" className="rounded-3xl bg-white/5 px-5 py-4 text-sm text-gray-200 transition hover:bg-white/10">
+              <a href="tel:+15551234567" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition-colors hover:border-blue-500/30 hover:text-white">
+                <FiPhone className="h-4 w-4 text-blue-300" />
                 +1 (555) 123-4567
               </a>
             </div>
 
-            <div className="flex items-center gap-3 text-slate-300">
-              <a href="#" aria-label="Facebook" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-lg transition hover:bg-blue-500/20 hover:text-white">
-                <AiFillFacebook />
-              </a>
-              <a href="#" aria-label="Instagram" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-lg transition hover:bg-pink-500/20 hover:text-white">
-                <AiOutlineInstagram />
-              </a>
-              <a href="#" aria-label="LinkedIn" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-lg transition hover:bg-blue-700/20 hover:text-white">
-                <AiFillLinkedin />
-              </a>
-              <a href="#" aria-label="X" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-lg transition hover:bg-slate-300/20 hover:text-white">
-                <AiOutlineTwitter />
-              </a>
+            <div className="flex items-center gap-3">
+              {socials.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <a
+                    key={s.label}
+                    href="#"
+                    aria-label={s.label}
+                    className={`flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-lg ring-1 ring-white/10 transition-colors hover:text-white ${s.hover}`}
+                  >
+                    <Icon />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
+          {/* explore */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-5">Popular courses</h4>
-            <ul className="space-y-3 text-sm text-gray-400">
-              <li><a href="#featured-work" className="transition hover:text-white">Freelance Web Dev</a></li>
-              <li><a href="#services" className="transition hover:text-white">UI/UX Foundations</a></li>
-              <li><a href="#services" className="transition hover:text-white">Digital Marketing</a></li>
-              <li><a href="#services" className="transition hover:text-white">Freelancer Growth</a></li>
+            <h4 className="mb-5 text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">Explore</h4>
+            <ul className="space-y-3 text-sm">
+              {exploreLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="group inline-flex items-center gap-1.5 text-slate-400 transition-colors hover:text-white">
+                    <FiArrowRight className="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
+          {/* company */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-5">Resources</h4>
-            <ul className="space-y-3 text-sm text-gray-400">
-              <li><a href="#" className="transition hover:text-white">Course catalog</a></li>
-              <li><a href="#" className="transition hover:text-white">Student success</a></li>
-              <li><a href="#" className="transition hover:text-white">Pricing</a></li>
-              <li><a href="#" className="transition hover:text-white">Terms & privacy</a></li>
+            <h4 className="mb-5 text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">Company</h4>
+            <ul className="space-y-3 text-sm">
+              {companyLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="group inline-flex items-center gap-1.5 text-slate-400 transition-colors hover:text-white">
+                    <FiArrowRight className="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
-        <div className="mt-14 border-t border-white/10 pt-8 text-sm text-gray-500 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Freelancer Learning Platform. All rights reserved.</p>
-          <div className="flex flex-wrap gap-4 text-gray-400">
-            <a href="#" className="transition hover:text-white">Terms</a>
-            <a href="#" className="transition hover:text-white">Privacy</a>
-            <a href="#" className="transition hover:text-white">Contact</a>
+        <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} FLP Agency. All rights reserved.</p>
+          <div className="flex flex-wrap gap-5 text-slate-400">
+            <a href="#" className="transition-colors hover:text-white">Terms</a>
+            <a href="#" className="transition-colors hover:text-white">Privacy</a>
+            <Link href="/pages/contact" className="transition-colors hover:text-white">Contact</Link>
           </div>
         </div>
       </div>

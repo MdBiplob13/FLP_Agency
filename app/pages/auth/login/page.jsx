@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
 import Navbar from "@/app/components/navbar/page";
 
 export default function LoginPage() {
+    const router = useRouter();
     const [form, setForm] = useState({ email: "", password: "" });
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
-    const [success, setSuccess] = useState("");
 
     function handleChange(event) {
         const { name, value } = event.target;
@@ -30,7 +33,6 @@ export default function LoginPage() {
 
     async function handleSubmit(event) {
         event.preventDefault();
-        setSuccess("");
         const nextErrors = validate();
         setErrors(nextErrors);
         if (Object.keys(nextErrors).length) {
@@ -39,9 +41,42 @@ export default function LoginPage() {
 
         setSubmitting(true);
         try {
-            await new Promise((resolve) => setTimeout(resolve, 900));
-            setSuccess("Successfully signed in. Welcome back!");
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: form.email, password: form.password }),
+            });
+            const data = await res.json();
+
+            if (!res.ok || !data?.success) {
+                const message = data?.message || "Login failed. Please try again.";
+                setErrors({ form: message });
+                toast.error(message);
+                return;
+            }
+
+            // Persist the JWT as a cookie so the user stays verified across visits
+            if (data?.token) {
+                Cookies.set("flp_token", data.token, { expires: 7, sameSite: "lax" });
+                localStorage.setItem("flp_token", data.token);
+            }
+
+            toast.success(data?.message || "Logged in successfully.");
             setForm({ email: "", password: "" });
+
+            // Honor a ?redirect=… target (e.g. buy flow on a course page),
+            // falling back home. Only allow same-origin relative paths.
+            let dest = "/";
+            if (typeof window !== "undefined") {
+                const param = new URLSearchParams(window.location.search).get("redirect");
+                if (param && param.startsWith("/")) dest = param;
+            }
+            router.push(dest);
+            router.refresh();
+        } catch {
+            const message = "Network error. Please try again.";
+            setErrors({ form: message });
+            toast.error(message);
         } finally {
             setSubmitting(false);
         }
@@ -98,15 +133,15 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="flex w-full items-center justify-center rounded-3xl bg-linear-to-r from-blue-600 to-purple-600 px-5 py-3 text-base font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+                            className="flex w-full items-center justify-center rounded-3xl bg-linear-to-r from-blue-600 to-purple-600 px-5 py-3 text-base font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
                         >
-                            {submitting ? "Signing in..." : "Sign in"}
+                            {submitting ? "Logging In..." : "Login"}
                         </button>
                     </form>
 
-                    {success ? (
-                        <div className="mt-6 rounded-3xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                            {success}
+                    {errors.form ? (
+                        <div className="mt-6 rounded-3xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                            {errors.form}
                         </div>
                     ) : (
                         <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
