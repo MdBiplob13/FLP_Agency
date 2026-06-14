@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   motion,
   animate,
@@ -34,6 +35,18 @@ import {
   FiLayers,
 } from 'react-icons/fi';
 import Footer from '../../components/footer/page.jsx';
+import useCourses from '@/hooks/course/courseHook';
+
+const FALLBACK_IMG = '/image1.jpg';
+
+// Resolve a course doc into a display price ({ isFree, price, oldPrice }).
+function coursePrice(c) {
+  if (c.priceTier === 'free') return { isFree: true, price: 0, oldPrice: null };
+  if (c.priceTier === 'discounted' && c.discountPrice) {
+    return { isFree: false, price: c.discountPrice, oldPrice: c.price || null };
+  }
+  return { isFree: false, price: c.price || 0, oldPrice: null };
+}
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                              */
@@ -53,13 +66,6 @@ const categories = [
   { icon: FiTarget, title: 'Career Coaching', desc: 'Resume reviews, interview prep, and portfolio guidance from pros.' },
   { icon: FiSmartphone, title: 'Mobile Apps', desc: 'Ship mobile-first experiences for iOS and Android with React Native.' },
   { icon: FiBriefcase, title: 'Freelancing', desc: 'Price your services, win clients, and scale a freelance business.' },
-];
-
-const courses = [
-  { title: 'Full-Stack Web Development', category: 'Web Development', lessons: 142, hours: 38, rating: 4.9, price: 49, oldPrice: 199, badge: 'Bestseller', img: '/image1.jpg' },
-  { title: 'Product Design Masterclass', category: 'UI/UX Design', lessons: 96, hours: 24, rating: 4.8, price: 39, oldPrice: 149, badge: 'New', img: '/image1.jpg' },
-  { title: 'Growth Marketing Bootcamp', category: 'Digital Marketing', lessons: 78, hours: 19, rating: 4.9, price: 45, oldPrice: 179, badge: 'Hot', img: '/image1.jpg' },
-  { title: 'Freelance Launchpad', category: 'Career', lessons: 54, hours: 12, rating: 5.0, price: 29, oldPrice: 99, badge: 'Top rated', img: '/image1.jpg' },
 ];
 
 // "Slide in from the right" — exactly four in a line
@@ -315,6 +321,28 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
 
+  /* ---- Popular courses: 1 bestseller + the first 2 featured ---- */
+  const { courses: allCourses, coursesLoading } = useCourses({ limit: 50 });
+  const popularCourses = useMemo(() => {
+    const bestseller = allCourses.find((c) => c.isBestseller);
+    const featured = allCourses
+      .filter((c) => c.isFeatured && c._id !== bestseller?._id)
+      .slice(0, 2);
+    const picked = [bestseller, ...featured].filter(Boolean);
+    // Backfill from the rest so all three slots stay populated.
+    if (picked.length < 3) {
+      const used = new Set(picked.map((c) => c._id));
+      for (const c of allCourses) {
+        if (picked.length >= 3) break;
+        if (!used.has(c._id)) {
+          picked.push(c);
+          used.add(c._id);
+        }
+      }
+    }
+    return picked.slice(0, 3);
+  }, [allCourses]);
+
   return (
     <div className="bg-[#020205] text-slate-100 font-sans antialiased">
       {/* ============================ HERO / BANNER ============================ */}
@@ -490,84 +518,93 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ============================ CATEGORIES ============================ */}
-      <section id="categories" className="relative overflow-hidden py-24">
-        <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="relative z-10 mx-auto max-w-7xl px-6">
-          <Reveal className="mx-auto mb-16 max-w-2xl text-center">
-            <p className="mb-4 text-sm uppercase tracking-[0.35em] text-blue-300">What you’ll learn</p>
-            <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Skill tracks built for modern careers</h2>
-            <p className="mt-4 text-slate-400">Pick a track and follow a clear, project-driven path from beginner to job-ready.</p>
-          </Reveal>
-
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {categories.map((c, i) => {
-              const Icon = c.icon;
-              return (
-                <Reveal key={c.title} delay={i * 0.06}>
-                  <SpotlightCard className="group h-full rounded-3xl border border-white/10 bg-slate-950/60 p-7 transition-colors duration-300 hover:border-blue-500/30">
-                    <span className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-blue-500/20 to-purple-500/20 text-blue-300 ring-1 ring-white/10 transition-transform duration-300 group-hover:scale-110">
-                      <Icon className="h-7 w-7" />
-                    </span>
-                    <h3 className="mb-2 text-xl font-semibold text-white">{c.title}</h3>
-                    <p className="leading-7 text-slate-400">{c.desc}</p>
-                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-blue-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      Explore track <FiArrowRight />
-                    </span>
-                  </SpotlightCard>
-                </Reveal>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      
 
       {/* ============================ FEATURED COURSES ============================ */}
       <section id="courses" className="py-24">
         <div className="mx-auto max-w-7xl px-6">
-          <Reveal className="mb-16 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-            <div className="max-w-2xl">
-              <p className="mb-4 text-sm uppercase tracking-[0.35em] text-blue-300">Popular courses</p>
-              <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Courses students love</h2>
-            </div>
+          <Reveal className="mx-auto mb-16 max-w-2xl text-center">
+            <p className="mb-4 text-sm uppercase tracking-[0.35em] text-blue-300">Popular courses</p>
+            <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Courses students love</h2>
           </Reveal>
 
-          <div className="grid gap-7 sm:grid-cols-2 xl:grid-cols-4">
-            {courses.map((course, i) => (
-              <Reveal key={course.title} delay={i * 0.07}>
-                <motion.div whileHover={reduce ? undefined : { y: -8 }} transition={{ duration: 0.3 }} className="h-full">
-                  <SpotlightCard className="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-950/60 shadow-xl shadow-black/20">
-                    <div className="relative overflow-hidden rounded-t-3xl">
-                      <img src={course.img} alt={course.title} className="h-44 w-full object-cover transition-transform duration-500 hover:scale-105" />
-                      <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-                      <span className="absolute left-3 top-3 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">{course.badge}</span>
-                    </div>
-                    <div className="flex flex-1 flex-col p-6">
-                      <p className="text-xs uppercase tracking-[0.2em] text-blue-300">{course.category}</p>
-                      <h3 className="mt-2 text-lg font-semibold leading-snug text-white">{course.title}</h3>
-                      <div className="mt-3 flex items-center gap-3 text-xs text-slate-400">
-                        <span className="flex items-center gap-1"><FiBookOpen className="h-3.5 w-3.5" /> {course.lessons} lessons</span>
-                        <span className="flex items-center gap-1"><FiClock className="h-3.5 w-3.5" /> {course.hours}h</span>
-                      </div>
-                      <div className="mt-3 flex items-center gap-2 text-sm">
-                        <Stars n={Math.round(course.rating)} />
-                        <span className="font-medium text-slate-300">{course.rating.toFixed(1)}</span>
-                      </div>
-                      <div className="mt-auto flex items-center justify-between pt-6">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-bold text-white">৳{course.price}</span>
-                          <span className="text-sm text-slate-500 line-through">৳{course.oldPrice}</span>
+          {coursesLoading && popularCourses.length === 0 ? (
+            <div className="grid gap-7 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60">
+                  <div className="h-60 w-full animate-pulse bg-white/5 sm:h-64" />
+                  <div className="space-y-4 p-7">
+                    <div className="mx-auto h-5 w-2/3 animate-pulse rounded bg-white/10" />
+                    <div className="mx-auto h-6 w-24 animate-pulse rounded bg-white/5" />
+                    <div className="mx-auto h-10 w-48 animate-pulse rounded-full bg-white/5" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : popularCourses.length === 0 ? (
+            <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-12 text-center text-slate-400">
+              No courses to show yet.
+            </div>
+          ) : (
+            <div className="grid gap-7 md:grid-cols-3">
+              {popularCourses.map((course, i) => {
+                const p = coursePrice(course);
+                const badge = course.isBestseller ? 'Bestseller' : course.isFeatured ? 'Featured' : null;
+                return (
+                  <Reveal key={course._id} delay={i * 0.08}>
+                    <motion.div whileHover={reduce ? undefined : { y: -8 }} transition={{ duration: 0.3 }} className="h-full">
+                      <SpotlightCard className="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-950/60 text-center shadow-xl shadow-black/20">
+                        <div className="relative">
+                          <img src={course.thumbnail || FALLBACK_IMG} alt={course.title} className="h-60 w-full object-cover transition-transform duration-500 hover:scale-105 sm:h-64" />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+                          {badge && (
+                            <span className="absolute left-4 top-4 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">{badge}</span>
+                          )}
                         </div>
-                        <button className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-4 py-2 text-sm font-semibold text-blue-200 ring-1 ring-blue-500/30 transition-colors hover:bg-blue-600 hover:text-white">
-                          Enrol <FiArrowRight className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </SpotlightCard>
-                </motion.div>
-              </Reveal>
-            ))}
-          </div>
+                        <div className="flex flex-1 flex-col items-center p-7">
+                          <h3 className="text-xl font-semibold leading-snug text-white">{course.title}</h3>
+                          <div className="mt-4 flex items-baseline justify-center gap-2">
+                            {p.isFree ? (
+                              <span className="text-2xl font-bold text-emerald-300">Free</span>
+                            ) : (
+                              <>
+                                <span className="text-2xl font-bold text-white">৳{p.price}</span>
+                                {p.oldPrice ? <span className="text-sm text-slate-500 line-through">৳{p.oldPrice}</span> : null}
+                              </>
+                            )}
+                          </div>
+                          <div className="mt-auto flex w-full items-center justify-center gap-3 pt-6">
+                            <Link
+                              href={`/pages/courses/${course._id}`}
+                              className="inline-flex items-center gap-1.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
+                            >
+                              Enrol now <FiArrowRight className="h-4 w-4" />
+                            </Link>
+                            <Link
+                              href={`/pages/courses/${course._id}`}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-blue-200"
+                            >
+                              Details
+                            </Link>
+                          </div>
+                        </div>
+                      </SpotlightCard>
+                    </motion.div>
+                  </Reveal>
+                );
+              })}
+            </div>
+          )}
+
+          {/* View all courses */}
+          <Reveal className="mt-12 flex justify-center">
+            <Link
+              href="/pages/courses"
+              className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-base font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+            >
+              View all courses <FiArrowRight className="transition-transform group-hover:translate-x-1" />
+            </Link>
+          </Reveal>
         </div>
       </section>
 
@@ -607,7 +644,7 @@ export default function Home() {
 
       {/* ============================ JOURNEY — STACKING CARDS ON SCROLL ============================ */}
       <section id="journey" className="relative py-24">
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="mx-auto max-w-6xl px-6">
           <Reveal className="mx-auto mb-16 max-w-2xl text-center">
             <p className="mb-4 text-sm uppercase tracking-[0.35em] text-blue-300">Your learning journey</p>
             <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">From signup to career, step by step</h2>

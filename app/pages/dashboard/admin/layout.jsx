@@ -12,6 +12,7 @@ import {
   FiFileText,
   FiUserCheck,
   FiTag,
+  FiUser,
   FiLogOut,
   FiMenu,
   FiX,
@@ -28,6 +29,7 @@ const navItems = [
   { name: 'Categories', href: '/pages/dashboard/admin/categories', icon: FiTag },
   { name: 'Blogs', href: '/pages/dashboard/admin/blogs', icon: FiFileText },
   { name: 'Our Teachers', href: '/pages/dashboard/admin/teachers', icon: FiUserCheck },
+  { name: 'My Profile', href: '/pages/dashboard/admin/profile', icon: FiUser },
 ];
 
 export default function AdminLayout({ children }) {

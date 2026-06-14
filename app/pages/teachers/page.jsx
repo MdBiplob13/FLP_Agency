@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import {
   motion,
@@ -13,7 +14,6 @@ import {
 } from 'framer-motion';
 import {
   FiArrowRight,
-  FiArrowUpRight,
   FiStar,
   FiUsers,
   FiAward,
@@ -21,24 +21,29 @@ import {
   FiCheck,
   FiMessageCircle,
   FiLinkedin,
-  FiTwitter,
-  FiGithub,
+  FiFacebook,
+  FiInstagram,
+  FiMapPin,
+  FiCalendar,
 } from 'react-icons/fi';
 import Navbar from '../../components/navbar/page.jsx';
 import Footer from '../../components/footer/page.jsx';
+import useTeachers from '@/hooks/teacher/teacherHook';
+
+const FALLBACK_IMG = '/image1.jpg';
+
+function formatDate(value) {
+  if (!value) return '—';
+  try {
+    return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
+  } catch {
+    return '—';
+  }
+}
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                              */
 /* ------------------------------------------------------------------ */
-
-const teachers = [
-  { name: 'Amina Rahman', role: 'Head Instructor', tags: ['React', 'Next.js', 'Frontend'], description: 'Builds modern web products with real teams and helps students ship portfolio-ready applications.', img: '/image1.jpg' },
-  { name: 'Rafi Hossain', role: 'Curriculum Lead', tags: ['Product', 'Course design'], description: 'Crafts lessons around real product problems so every student learns skills employers want.', img: '/image1.jpg' },
-  { name: 'Sara Khan', role: 'Career Coach', tags: ['Resumes', 'Interviews', 'Growth'], description: 'Guides students through interview prep, portfolio reviews, and client-ready presentations.', img: '/image1.jpg' },
-  { name: 'Omar Ali', role: 'UX Mentor', tags: ['Design systems', 'Research'], description: 'Reviews UX flows, usability, and accessibility with a focus on polished digital experiences.', img: '/image1.jpg' },
-  { name: 'Dia Islam', role: 'Growth Mentor', tags: ['Marketing', 'Freelance'], description: 'Teaches creators how to launch services, attract clients, and grow their brand online.', img: '/image1.jpg' },
-  { name: 'Karim Noor', role: 'Backend Mentor', tags: ['Node', 'APIs', 'Databases'], description: 'Helps students design reliable services and understand how production systems really work.', img: '/image1.jpg' },
-];
 
 const stats = [
   { to: 6, suffix: '+', label: 'Expert mentors' },
@@ -203,11 +208,26 @@ function Stars({ n = 5 }) {
   );
 }
 
-function Socials({ className = 'text-slate-400' }) {
+function Socials({ links, className = 'text-slate-400' }) {
+  const items = [
+    { href: links?.linkedin, Icon: FiLinkedin },
+    { href: links?.facebook, Icon: FiFacebook },
+    { href: links?.instagram, Icon: FiInstagram },
+  ].filter((s) => s.href);
+
+  if (!items.length) return null;
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {[FiLinkedin, FiTwitter, FiGithub].map((Icon, i) => (
-        <a key={i} href="#" aria-label="Social profile" className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 transition-colors hover:bg-blue-600 hover:text-white">
+      {items.map(({ href, Icon }, i) => (
+        <a
+          key={i}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Social profile"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 transition-colors hover:bg-blue-600 hover:text-white"
+        >
           <Icon className="h-4 w-4" />
         </a>
       ))}
@@ -221,6 +241,17 @@ function Socials({ className = 'text-slate-400' }) {
 
 export default function TeachersPage() {
   const reduce = useReducedMotion();
+
+  /* ---- Real teacher data (active only, featured first) ---- */
+  const { teachers, teachersLoading } = useTeachers({ limit: 100 });
+  const featured = teachers.find((t) => t.isFeatured) || teachers[0] || null;
+
+  // Live mentor count drives the first stat card
+  const liveStats = stats.map((s) =>
+    s.label === 'Expert mentors' && teachers.length
+      ? { ...s, to: teachers.length, display: undefined }
+      : s,
+  );
 
   /* ---- Hero spotlight + parallax ---- */
   const heroRef = useRef(null);
@@ -305,23 +336,31 @@ export default function TeachersPage() {
             </div>
           </motion.div>
 
-          {/* featured mentor — 3D tilt */}
+          {/* featured mentor — 3D tilt, driven by the featured teacher */}
           <motion.div initial={{ opacity: 0, y: 40, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.9, delay: 0.15, ease: easeOut }}>
             <Tilt3D>
               <SpotlightCard className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/50 backdrop-blur-xl">
                 <div className="relative overflow-hidden rounded-[1.4rem] border border-white/10">
-                  <img src="/image1.jpg" alt="Featured mentor leading a workshop" className="h-72 w-full object-cover sm:h-80" />
+                  <img
+                    src={featured?.photo || FALLBACK_IMG}
+                    alt={featured ? featured.name : 'Featured mentor'}
+                    className="h-72 w-full object-cover sm:h-80"
+                  />
                   <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent" />
-                  <span className="absolute left-4 top-4 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">Featured mentor</span>
+                  <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-amber-500/90 px-3 py-1 text-xs font-semibold text-white">
+                    <FiStar className="h-3 w-3 fill-white" /> Featured mentor
+                  </span>
                   <div className="absolute bottom-4 left-4 right-4">
-                    <h2 className="text-2xl font-semibold text-white">Amina Rahman</h2>
-                    <p className="text-sm text-slate-300">Head Instructor · React, Next.js</p>
+                    <h2 className="text-2xl font-semibold text-white">
+                      {featured ? featured.name : teachersLoading ? 'Loading…' : 'Our mentors'}
+                    </h2>
+                    <p className="text-sm text-slate-300">{featured?.address || 'Instructor'}</p>
                     <div className="mt-2 flex items-center gap-2"><Stars n={5} /> <span className="text-sm text-slate-300">4.9</span></div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between px-2 pb-1 pt-4">
+                <div className="flex items-center justify-between gap-3 px-2 pb-1 pt-4">
                   <p className="max-w-[16rem] text-sm leading-6 text-slate-400">Guided code reviews, real-world demos, and portfolio feedback.</p>
-                  <Socials />
+                  <Socials links={featured?.socialLinks} />
                 </div>
               </SpotlightCard>
             </Tilt3D>
@@ -333,7 +372,7 @@ export default function TeachersPage() {
       <section className="pb-8">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((s, i) => (
+            {liveStats.map((s, i) => (
               <Reveal key={s.label} delay={i * 0.08}>
                 <SpotlightCard className="rounded-3xl border border-white/10 bg-slate-950/60 p-7 text-center">
                   <p className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-4xl font-bold text-transparent">
@@ -357,33 +396,82 @@ export default function TeachersPage() {
             <p className="mt-4 text-slate-400">Every teacher brings practical experience from startups, agencies, and product teams to help you build work-ready skills.</p>
           </Reveal>
 
-          <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3">
-            {teachers.map((teacher, i) => (
-              <Reveal key={teacher.name} delay={i * 0.06}>
-                <motion.div whileHover={reduce ? undefined : { y: -8 }} transition={{ duration: 0.3 }} className="h-full">
-                  <SpotlightCard className="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-950/60 shadow-xl shadow-black/20">
-                    <div className="relative overflow-hidden rounded-t-3xl">
-                      <img src={teacher.img} alt={teacher.name} className="h-64 w-full object-cover transition-transform duration-500 hover:scale-105" />
-                      <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/10 to-transparent" />
-                      <span className="absolute left-4 top-4 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">{teacher.role}</span>
-                      <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                        <h3 className="text-2xl font-semibold text-white">{teacher.name}</h3>
-                        <Socials />
+          {/* loading skeletons */}
+          {teachersLoading && !teachers.length && (
+            <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60">
+                  <div className="h-64 w-full animate-pulse bg-white/5" />
+                  <div className="space-y-3 p-6">
+                    <div className="h-4 w-2/3 animate-pulse rounded bg-white/5" />
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-white/5" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* empty state */}
+          {!teachersLoading && !teachers.length && (
+            <div className="mx-auto max-w-md rounded-3xl border border-white/10 bg-slate-950/60 p-12 text-center">
+              <FiUsers className="mx-auto h-10 w-10 text-blue-300" />
+              <p className="mt-4 text-lg font-semibold text-white">No mentors to show yet</p>
+              <p className="mt-2 text-sm text-slate-400">Our teaching team is being onboarded. Please check back soon.</p>
+            </div>
+          )}
+
+          {teachers.length > 0 && (
+            <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3">
+              {teachers.map((teacher, i) => (
+                <Reveal key={teacher._id || teacher.name} delay={i * 0.06}>
+                  <motion.div whileHover={reduce ? undefined : { y: -8 }} transition={{ duration: 0.3 }} className="h-full">
+                    <SpotlightCard className="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-950/60 shadow-xl shadow-black/20">
+                      <div className="relative overflow-hidden rounded-t-3xl">
+                        <img src={teacher.photo || FALLBACK_IMG} alt={teacher.name} className="h-64 w-full object-cover transition-transform duration-500 hover:scale-105" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/10 to-transparent" />
+                        {teacher.isFeatured ? (
+                          <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-amber-500/90 px-3 py-1 text-xs font-semibold text-white">
+                            <FiStar className="h-3 w-3 fill-white" /> Featured
+                          </span>
+                        ) : (
+                          <span className="absolute left-4 top-4 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">Instructor</span>
+                        )}
+                        <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                          <h3 className="text-2xl font-semibold text-white">{teacher.name}</h3>
+                          <Socials links={teacher.socialLinks} />
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-1 flex-col p-6">
-                      <p className="flex-1 leading-7 text-slate-400">{teacher.description}</p>
-                      <div className="mt-5 flex flex-wrap gap-2">
-                        {teacher.tags.map((tag) => (
-                          <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-blue-200">{tag}</span>
-                        ))}
+                      <div className="flex flex-1 flex-col p-6">
+                        <div className="flex-1 space-y-3 text-sm text-slate-400">
+                          <p className="flex items-center gap-2">
+                            <FiMapPin className="h-4 w-4 flex-none text-blue-300" />
+                            {teacher.address || 'Location not set'}
+                          </p>
+                          <p className="flex items-center gap-2">
+                            <FiCalendar className="h-4 w-4 flex-none text-blue-300" />
+                            Joined {formatDate(teacher.createdAt)}
+                          </p>
+                        </div>
+                        <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-4">
+                          <div className="flex items-center gap-2">
+                            <Stars n={5} />
+                            <span className="text-sm text-slate-300">4.9</span>
+                          </div>
+                          <Link
+                            href={`/pages/teachers/${teacher._id}`}
+                            className="group inline-flex items-center gap-1.5 text-sm font-semibold text-blue-300 transition-colors hover:text-blue-200"
+                          >
+                            View profile
+                            <FiArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </Link>
+                        </div>
                       </div>
-                    </div>
-                  </SpotlightCard>
-                </motion.div>
-              </Reveal>
-            ))}
-          </div>
+                    </SpotlightCard>
+                  </motion.div>
+                </Reveal>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

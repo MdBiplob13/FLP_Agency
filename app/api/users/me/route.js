@@ -33,7 +33,8 @@ export async function PATCH(request) {
     }
 
     const body = await request.json();
-    // Users may only change profile fields — never role, status, courses, etc.
+    // Users may only change profile fields — never email, role, status, courses.
+    // Email is deliberately excluded: it's the login identity and isn't editable.
     const updatable = ["name", "phone", "photo", "address", "socialLinks"];
     const updates = {};
     for (const key of updatable) {

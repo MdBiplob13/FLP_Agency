@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dbConnect from "@/lib/dbConnect";
 import Course, { MAX_FEATURED_COURSES } from "@/models/courseModel";
+import User from "@/models/userModel";
 import { requireRole } from "@/lib/auth";
 import { ensureCategory } from "@/lib/categories";
 
@@ -90,6 +91,23 @@ export async function PATCH(request, { params }) {
     ];
     for (const key of updatable) {
       if (key in body) course[key] = body[key];
+    }
+
+    // `teachers` is a relation, so it's handled explicitly instead of via the
+    // blind whitelist above: accept an array of user ids, keep only the ones
+    // that are real teachers, and store them as the course's instructor set.
+    if ("teachers" in body) {
+      if (!Array.isArray(body.teachers)) {
+        return Response.json(
+          { success: false, message: "teachers must be an array of teacher ids." },
+          { status: 400 }
+        );
+      }
+      const ids = body.teachers.filter((tid) => isValidId(tid));
+      const validTeachers = await User.find({ _id: { $in: ids }, role: "teacher" })
+        .select("_id")
+        .lean();
+      course.teachers = validTeachers.map((t) => t._id);
     }
 
     // If the category changed to a new one, register it and use canonical name

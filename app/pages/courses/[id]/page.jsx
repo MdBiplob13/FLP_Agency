@@ -290,7 +290,7 @@ export default function CourseDetailPage({ params }) {
         <div className="mb-8 flex items-center justify-between gap-4">
           <button
             onClick={() => router.push("/pages/courses")}
-            className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white"
+            className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white cursor-pointer"
           >
             <FiArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Back to courses
@@ -567,7 +567,7 @@ export default function CourseDetailPage({ params }) {
 
                   <Link
                     href="/pages/courses"
-                    className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white"
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white cursor-pointer"
                   >
                     <FiArrowLeft className="h-4 w-4" /> Back to courses
                   </Link>

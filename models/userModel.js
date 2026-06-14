@@ -59,6 +59,12 @@ const userSchema = new mongoose.Schema({
       linkedin: "",
     },
   },
+  // Marketing flag for teachers. At most ONE teacher is featured at a time —
+  // the /api/teachers/[id] PATCH clears the flag on everyone else when set.
+  isFeatured: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Reuse the compiled model across hot reloads to avoid OverwriteModelError

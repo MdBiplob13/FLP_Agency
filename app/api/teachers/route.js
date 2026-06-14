@@ -8,19 +8,21 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search");
+    const featured = searchParams.get("featured");
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50", 10)));
 
     const query = { role: "teacher", status: "active" };
+    if (featured === "true") query.isFeatured = true;
     if (search) {
       const rx = new RegExp(search.trim(), "i");
       query.$or = [{ name: rx }, { address: rx }];
     }
 
-    // Only expose public-safe fields
+    // Only expose public-safe fields. Featured teachers surface first.
     const teachers = await User.find(query)
-      .select("name photo role address socialLinks createdAt")
+      .select("name photo role address socialLinks isFeatured createdAt")
+      .sort({ isFeatured: -1, createdAt: -1 })
       .limit(limit)
-      .sort({ createdAt: -1 })
       .lean();
 
     return Response.json(

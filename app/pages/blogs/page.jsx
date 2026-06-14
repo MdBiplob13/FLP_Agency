@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   motion,
   animate,
   useInView,
-  useScroll,
   useTransform,
   useSpring,
   useMotionValue,
@@ -17,7 +17,6 @@ import {
   FiArrowRight,
   FiArrowUpRight,
   FiClock,
-  FiCalendar,
   FiUser,
   FiSearch,
   FiTrendingUp,
@@ -26,43 +25,20 @@ import {
 } from 'react-icons/fi';
 import Footer from '../../components/footer/page.jsx';
 import Navbar from '@/app/components/navbar/page.jsx';
+import useBlogs from '@/hooks/blog/blogHook';
 
-/* ------------------------------------------------------------------ */
-/*  Data                                                              */
-/* ------------------------------------------------------------------ */
+const FALLBACK_IMG = '/image1.jpg';
 
-const featured = {
-  title: 'How to build a career-ready portfolio that stands out',
-  category: 'Career',
-  excerpt:
-    'Learn the exact framework designers and developers use to create stories, case studies, and project presentations that hire and impress.',
-  author: 'Maya Khan',
-  date: 'June 1, 2026',
-  readTime: '7 min read',
-  img: '/image1.jpg',
-};
+function formatDate(value) {
+  if (!value) return '';
+  try {
+    return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch {
+    return '';
+  }
+}
 
-const articles = [
-  { title: 'Design systems for fast product launches', category: 'Design', excerpt: 'Use consistent patterns and reusable components to ship faster and keep products polished.', author: 'Rina Paul', date: 'May 24, 2026', readTime: '5 min read', img: '/image1.jpg' },
-  { title: 'From idea to MVP: a practical startup guide', category: 'Startup', excerpt: 'Turn your concept into a launch-ready product with a lean workflow, testing, and growth focus.', author: 'Sara Ahmed', date: 'May 18, 2026', readTime: '6 min read', img: '/image1.jpg' },
-  { title: 'Learning JavaScript with project-based training', category: 'Development', excerpt: 'Build meaningful projects while you learn the language, not just the syntax.', author: 'Arif Rahman', date: 'May 12, 2026', readTime: '8 min read', img: '/image1.jpg' },
-  { title: 'The marketing habits every creator should know', category: 'Marketing', excerpt: 'Create content, launch campaigns, and build an audience without wasting time.', author: 'Nadia Chowdhury', date: 'May 8, 2026', readTime: '4 min read', img: '/image1.jpg' },
-  { title: 'UX research made simple for busy teams', category: 'UX', excerpt: 'Capture feedback, validate ideas, and improve your design choices with fast research methods.', author: 'Tanvir Hasan', date: 'May 2, 2026', readTime: '5 min read', img: '/image1.jpg' },
-  { title: 'Pricing freelance projects without guesswork', category: 'Career', excerpt: 'A simple system to value your work, quote with confidence, and stop leaving money on the table.', author: 'Maya Khan', date: 'Apr 27, 2026', readTime: '6 min read', img: '/image1.jpg' },
-];
-
-const categories = ['All', 'Design', 'Development', 'Marketing', 'UX', 'Startup', 'Career'];
-
-const popular = [
-  { title: 'How to price freelance projects', reads: '3.1k' },
-  { title: 'Top productivity tools for remote learners', reads: '2.4k' },
-  { title: 'A/B testing your course landing page', reads: '1.9k' },
-];
-
-const stats = [
-  { to: 75, suffix: '+', label: 'Published posts' },
-  { to: 22, suffix: 'k+', label: 'Monthly readers' },
-];
+const readLabel = (m) => `${m || 1} min read`;
 
 /* ------------------------------------------------------------------ */
 /*  Helpers (shared design language with the home page)               */
@@ -214,6 +190,37 @@ function Tilt3D({ children, className = '', max = 14 }) {
 export default function BlogsPage() {
   const reduce = useReducedMotion();
 
+  /* ---- Real blog data (published only, featured first) ---- */
+  const { blogs, blogsLoading } = useBlogs({ limit: 100 });
+
+  // The hero highlights the featured post (or the newest as a fallback). The
+  // grid below lists every published post — including the featured one — so a
+  // post is never hidden just because it's the highlight.
+  const featured = useMemo(
+    () => blogs.find((b) => b.isFeatured) || blogs[0] || null,
+    [blogs],
+  );
+
+  // Category pills are derived from the posts that actually exist.
+  const categories = useMemo(() => {
+    const set = new Set(blogs.map((b) => b.category).filter(Boolean));
+    return ['All', ...Array.from(set)];
+  }, [blogs]);
+
+  // Sidebar "popular reads" — most-viewed posts.
+  const popular = useMemo(
+    () => [...blogs].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 3),
+    [blogs],
+  );
+
+  const stats = useMemo(() => {
+    const reads = blogs.reduce((sum, b) => sum + (b.views || 0), 0);
+    return [
+      { to: blogs.length, suffix: '', label: 'Published posts' },
+      { to: reads, suffix: '', label: 'Total reads' },
+    ];
+  }, [blogs]);
+
   /* ---- Hero mouse spotlight + parallax ---- */
   const heroRef = useRef(null);
   const spotX = useMotionValue(0);
@@ -248,8 +255,10 @@ export default function BlogsPage() {
   /* ---- Category + search filtering ---- */
   const [activeCat, setActiveCat] = useState('All');
   const [query, setQuery] = useState('');
-  const filtered = articles.filter(
-    (a) => (activeCat === 'All' || a.category === activeCat) && a.title.toLowerCase().includes(query.trim().toLowerCase())
+  const filtered = blogs.filter(
+    (a) =>
+      (activeCat === 'All' || a.category === activeCat) &&
+      a.title.toLowerCase().includes(query.trim().toLowerCase()),
   );
 
   return (
@@ -292,9 +301,9 @@ export default function BlogsPage() {
 
             <div className="grid max-w-lg gap-4 sm:grid-cols-3">
               {[
-                { k: 'Latest', v: 'Stay current' },
+                { k: 'Latest', v: featured ? formatDate(featured.createdAt) : 'Stay current' },
                 { k: 'Read time', v: '5 min avg' },
-                { k: 'Topics', v: 'Design · Dev · Career' },
+                { k: 'Topics', v: `${Math.max(0, categories.length - 1)} categories` },
               ].map((s) => (
                 <div key={s.k} className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
                   <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{s.k}</p>
@@ -309,19 +318,25 @@ export default function BlogsPage() {
             <Tilt3D>
               <SpotlightCard className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/50 backdrop-blur-xl">
                 <div className="relative overflow-hidden rounded-[1.4rem] border border-white/10">
-                  <img src={featured.img} alt={featured.title} className="h-56 w-full object-cover sm:h-64" />
+                  <img src={featured?.coverImage || FALLBACK_IMG} alt={featured?.title || 'Featured post'} className="h-56 w-full object-cover sm:h-64" />
                   <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent" />
-                  <span className="absolute left-4 top-4 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">Featured · {featured.category}</span>
+                  <span className="absolute left-4 top-4 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">
+                    Featured{featured?.category ? ` · ${featured.category}` : ''}
+                  </span>
                 </div>
                 <div className="px-2 pb-2 pt-5">
-                  <h2 className="text-2xl font-semibold leading-snug text-white">{featured.title}</h2>
-                  <p className="mt-3 leading-7 text-slate-400">{featured.excerpt}</p>
+                  <h2 className="text-2xl font-semibold leading-snug text-white">
+                    {featured?.title || (blogsLoading ? 'Loading latest stories…' : 'No posts yet')}
+                  </h2>
+                  <p className="mt-3 leading-7 text-slate-400 line-clamp-3">
+                    {featured?.excerpt || 'Fresh articles are on the way. Check back soon for guides, tutorials, and career stories.'}
+                  </p>
                   <div className="mt-5 flex items-center justify-between text-sm text-slate-400">
-                    <span className="flex items-center gap-2"><FiUser className="h-4 w-4" /> {featured.author}</span>
-                    <span className="flex items-center gap-2"><FiClock className="h-4 w-4" /> {featured.readTime}</span>
+                    <span className="flex items-center gap-2"><FiUser className="h-4 w-4" /> {featured?.author?.name || 'FLP Agency'}</span>
+                    <span className="flex items-center gap-2"><FiClock className="h-4 w-4" /> {readLabel(featured?.readTime)}</span>
                   </div>
                   <MagneticButton
-                    href="#articles"
+                    href={featured ? `/pages/blogs/${featured._id}` : '#articles'}
                     className="group mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25"
                   >
                     Read full story
@@ -357,78 +372,104 @@ export default function BlogsPage() {
                 </label>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-2.5">
-                {categories.map((cat) => {
-                  const active = activeCat === cat;
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => setActiveCat(cat)}
-                      className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                        active ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-600/20' : 'border border-white/10 bg-white/5 text-slate-300 hover:border-blue-500/30 hover:text-blue-200'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  );
-                })}
-              </div>
+              {categories.length > 1 && (
+                <div className="mt-6 flex flex-wrap gap-2.5">
+                  {categories.map((cat) => {
+                    const active = activeCat === cat;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setActiveCat(cat)}
+                        className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                          active ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-600/20' : 'border border-white/10 bg-white/5 text-slate-300 hover:border-blue-500/30 hover:text-blue-200'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </Reveal>
 
           <div className="mt-10 grid gap-10 xl:grid-cols-[1fr_320px]">
             {/* article grid */}
             <div>
-              <motion.div layout className="grid gap-6 sm:grid-cols-2">
-                <AnimatePresence mode="popLayout">
-                  {filtered.map((article, idx) => (
-                    <motion.div
-                      key={article.title}
-                      layout
-                      initial={{ opacity: 0, y: 24 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.96 }}
-                      transition={{ duration: 0.4, delay: reduce ? 0 : idx * 0.04, ease: easeOut }}
-                    >
-                      <motion.div whileHover={reduce ? undefined : { y: -8 }} transition={{ duration: 0.3 }} className="h-full">
-                        <SpotlightCard className="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-950/60 shadow-xl shadow-black/20">
-                          <div className="relative overflow-hidden rounded-t-3xl">
-                            <img src={article.img} alt={article.title} className="h-44 w-full object-cover transition-transform duration-500 hover:scale-105" />
-                            <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-                            <span className="absolute left-3 top-3 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">{article.category}</span>
-                          </div>
-                          <div className="flex flex-1 flex-col p-6">
-                            <h3 className="text-xl font-semibold leading-snug text-white">{article.title}</h3>
-                            <p className="mt-3 flex-1 leading-7 text-slate-400">{article.excerpt}</p>
-                            <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-4 text-xs text-slate-400">
-                              <span className="flex items-center gap-1.5"><FiUser className="h-3.5 w-3.5" /> {article.author}</span>
-                              <span className="flex items-center gap-1.5"><FiClock className="h-3.5 w-3.5" /> {article.readTime}</span>
-                            </div>
-                            <a href="#" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-300 transition-colors hover:text-blue-200">
-                              Read article <FiArrowUpRight />
-                            </a>
-                          </div>
-                        </SpotlightCard>
-                      </motion.div>
-                    </motion.div>
+              {/* loading skeletons */}
+              {blogsLoading && blogs.length === 0 ? (
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60">
+                      <div className="h-44 w-full animate-pulse bg-white/5" />
+                      <div className="space-y-3 p-6">
+                        <div className="h-5 w-3/4 animate-pulse rounded bg-white/10" />
+                        <div className="h-4 w-full animate-pulse rounded bg-white/5" />
+                        <div className="h-4 w-2/3 animate-pulse rounded bg-white/5" />
+                      </div>
+                    </div>
                   ))}
-                </AnimatePresence>
-              </motion.div>
+                </div>
+              ) : (
+                <motion.div layout className="grid gap-6 sm:grid-cols-2">
+                  <AnimatePresence mode="popLayout">
+                    {filtered.map((article, idx) => (
+                      <motion.div
+                        key={article._id}
+                        layout
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.96 }}
+                        transition={{ duration: 0.4, delay: reduce ? 0 : idx * 0.04, ease: easeOut }}
+                      >
+                        <motion.div whileHover={reduce ? undefined : { y: -8 }} transition={{ duration: 0.3 }} className="h-full">
+                          <SpotlightCard className="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-950/60 shadow-xl shadow-black/20">
+                            <Link href={`/pages/blogs/${article._id}`} className="relative block overflow-hidden rounded-t-3xl">
+                              <img src={article.coverImage || FALLBACK_IMG} alt={article.title} className="h-44 w-full object-cover transition-transform duration-500 hover:scale-105" />
+                              <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+                              <span className="absolute left-3 top-3 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">{article.category}</span>
+                            </Link>
+                            <div className="flex flex-1 flex-col p-6">
+                              <Link href={`/pages/blogs/${article._id}`}>
+                                <h3 className="text-xl font-semibold leading-snug text-white transition-colors hover:text-blue-200">{article.title}</h3>
+                              </Link>
+                              <p className="mt-3 flex-1 leading-7 text-slate-400 line-clamp-3">{article.excerpt}</p>
+                              <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-4 text-xs text-slate-400">
+                                <span className="flex items-center gap-1.5"><FiUser className="h-3.5 w-3.5" /> {article.author?.name || 'FLP Agency'}</span>
+                                <span className="flex items-center gap-1.5"><FiClock className="h-3.5 w-3.5" /> {readLabel(article.readTime)}</span>
+                              </div>
+                              <Link href={`/pages/blogs/${article._id}`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-300 transition-colors hover:text-blue-200">
+                                Read article <FiArrowUpRight />
+                              </Link>
+                            </div>
+                          </SpotlightCard>
+                        </motion.div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              )}
 
-              {filtered.length === 0 && (
+              {!blogsLoading && filtered.length === 0 && (
                 <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-12 text-center">
                   <FiBookOpen className="mx-auto h-10 w-10 text-slate-600" />
-                  <p className="mt-4 text-lg font-semibold text-white">No articles found</p>
-                  <p className="mt-1 text-slate-400">Try a different topic or clear your search.</p>
-                  <button
-                    onClick={() => {
-                      setActiveCat('All');
-                      setQuery('');
-                    }}
-                    className="mt-6 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
-                  >
-                    Reset filters
-                  </button>
+                  <p className="mt-4 text-lg font-semibold text-white">
+                    {blogs.length === 0 ? 'No posts published yet' : 'No articles found'}
+                  </p>
+                  <p className="mt-1 text-slate-400">
+                    {blogs.length === 0 ? 'Check back soon — new stories are on the way.' : 'Try a different topic or clear your search.'}
+                  </p>
+                  {blogs.length > 0 && (
+                    <button
+                      onClick={() => {
+                        setActiveCat('All');
+                        setQuery('');
+                      }}
+                      className="mt-6 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+                    >
+                      Reset filters
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -436,24 +477,26 @@ export default function BlogsPage() {
             {/* sidebar */}
             <aside className="space-y-6">
               {/* popular reads */}
-              <Reveal>
-                <SpotlightCard className="rounded-3xl border border-white/10 bg-slate-950/60 p-7">
-                  <p className="flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-blue-300">
-                    <FiTrendingUp className="h-4 w-4" /> Popular reads
-                  </p>
-                  <div className="mt-6 space-y-3">
-                    {popular.map((item, i) => (
-                      <a key={item.title} href="#" className="flex items-start gap-4 rounded-2xl border border-white/10 bg-black/40 p-4 transition-colors hover:border-blue-500/30">
-                        <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-2xl font-bold text-transparent">{String(i + 1).padStart(2, '0')}</span>
-                        <div>
-                          <p className="text-sm font-medium leading-snug text-slate-200">{item.title}</p>
-                          <p className="mt-1 text-xs text-slate-500">{item.reads} reads</p>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </SpotlightCard>
-              </Reveal>
+              {popular.length > 0 && (
+                <Reveal>
+                  <SpotlightCard className="rounded-3xl border border-white/10 bg-slate-950/60 p-7">
+                    <p className="flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-blue-300">
+                      <FiTrendingUp className="h-4 w-4" /> Popular reads
+                    </p>
+                    <div className="mt-6 space-y-3">
+                      {popular.map((item, i) => (
+                        <Link key={item._id} href={`/pages/blogs/${item._id}`} className="flex items-start gap-4 rounded-2xl border border-white/10 bg-black/40 p-4 transition-colors hover:border-blue-500/30">
+                          <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-2xl font-bold text-transparent">{String(i + 1).padStart(2, '0')}</span>
+                          <div>
+                            <p className="text-sm font-medium leading-snug text-slate-200 line-clamp-2">{item.title}</p>
+                            <p className="mt-1 text-xs text-slate-500">{(item.views || 0).toLocaleString()} reads</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </SpotlightCard>
+                </Reveal>
+              )}
 
               {/* quick stats */}
               <Reveal delay={0.05}>
@@ -470,31 +513,6 @@ export default function BlogsPage() {
                       </div>
                     ))}
                   </div>
-                </SpotlightCard>
-              </Reveal>
-
-              {/* newsletter */}
-              <Reveal delay={0.1}>
-                <SpotlightCard glow="rgba(168,85,247,0.18)" className="rounded-3xl border border-white/10 bg-linear-to-br from-purple-600/10 to-slate-950/60 p-7">
-                  <p className="flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-blue-300">
-                    <FiMail className="h-4 w-4" /> Subscribe
-                  </p>
-                  <h3 className="mt-3 text-2xl font-bold text-white">Never miss a post</h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-400">Fresh articles and updates in your inbox every week.</p>
-                  <form className="mt-5 space-y-3" onSubmit={(e) => e.preventDefault()}>
-                    <input
-                      type="email"
-                      placeholder="you@email.com"
-                      className="w-full rounded-full border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
-                    />
-                    <MagneticButton
-                      as="button"
-                      type="submit"
-                      className="w-full rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25"
-                    >
-                      Subscribe
-                    </MagneticButton>
-                  </form>
                 </SpotlightCard>
               </Reveal>
             </aside>
