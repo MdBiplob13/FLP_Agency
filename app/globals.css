@@ -24,3 +24,29 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Volume slider in the custom course player (CoursePlayer.jsx). The track fill
+   is driven inline; here we slim the track and give it a white round thumb. */
+.volume-range {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 9999px;
+  outline: none;
+}
+.volume-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 12px;
+  width: 12px;
+  border-radius: 9999px;
+  background: #ffffff;
+  cursor: pointer;
+}
+.volume-range::-moz-range-thumb {
+  height: 12px;
+  width: 12px;
+  border: none;
+  border-radius: 9999px;
+  background: #ffffff;
+  cursor: pointer;
+}

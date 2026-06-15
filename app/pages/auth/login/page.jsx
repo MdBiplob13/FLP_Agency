@@ -64,9 +64,11 @@ export default function LoginPage() {
             toast.success(data?.message || "Logged in successfully.");
             setForm({ email: "", password: "" });
 
-            // Honor a ?redirect=… target (e.g. buy flow on a course page),
-            // falling back home. Only allow same-origin relative paths.
-            let dest = "/";
+            // Honor a ?redirect=… target (e.g. buy flow on a course page).
+            // Otherwise send staff (admin/superadmin/teacher) to the dashboard
+            // and everyone else home. Only allow same-origin relative paths.
+            const isStaff = ["admin", "superadmin", "teacher"].includes(data?.user?.role);
+            let dest = isStaff ? "/pages/dashboard/admin" : "/";
             if (typeof window !== "undefined") {
                 const param = new URLSearchParams(window.location.search).get("redirect");
                 if (param && param.startsWith("/")) dest = param;

@@ -87,10 +87,24 @@ export async function PATCH(request, { params }) {
     const updatable = [
       "title", "description", "category", "priceTier", "price", "discountPrice",
       "level", "language", "tags", "thumbnail", "curriculum", "schedule",
-      "currentBatch", "status", "isBestseller", "isFeatured",
+      "currentBatch", "enrollStartDate", "enrollEndDate", "courseStartDate",
+      "status", "isBestseller", "isFeatured", "isHidden",
     ];
     for (const key of updatable) {
       if (key in body) course[key] = body[key];
+    }
+
+    // Invariant: a hidden course can't simultaneously be a bestseller or pinned
+    // to the homepage. Check the resulting state so it holds no matter which
+    // flag the request flipped (hide a featured course, or feature a hidden one).
+    if (course.isHidden && (course.isBestseller || course.isFeatured)) {
+      return Response.json(
+        {
+          success: false,
+          message: "A bestseller or homepage course can't be hidden. Remove those flags first.",
+        },
+        { status: 409 }
+      );
     }
 
     // `teachers` is a relation, so it's handled explicitly instead of via the

@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/userModel";
+import { notifyAdmins } from "@/lib/notifications";
 
 export async function POST(request) {
   try {
@@ -53,6 +54,15 @@ export async function POST(request) {
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
+
+    // Let admins know a new account registered (best-effort).
+    await notifyAdmins({
+      type: "signup",
+      title: "New user signed up",
+      body: `${user.name} (${user.email}) just created an account.`,
+      link: "/pages/dashboard/admin/users",
+      actor: user._id,
+    });
 
     // Never return the password hash to the client
     const safeUser = {

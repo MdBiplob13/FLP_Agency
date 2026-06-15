@@ -3,6 +3,7 @@ import dbConnect from "@/lib/dbConnect";
 import Course from "@/models/courseModel";
 import User from "@/models/userModel";
 import { getAuthUser } from "@/lib/auth";
+import { notifyAdmins, notifyUsers } from "@/lib/notifications";
 
 // POST /api/courses/[id]/enroll — enroll the current user in a course
 export async function POST(request, { params }) {
@@ -15,6 +16,15 @@ export async function POST(request, { params }) {
     const auth = await getAuthUser(request);
     if (auth.error) {
       return Response.json({ success: false, message: auth.error }, { status: auth.status });
+    }
+
+    // Staff accounts manage courses; they can't buy/enroll in them. Only regular
+    // student accounts may enroll.
+    if (["teacher", "admin", "superadmin"].includes(auth.user.role)) {
+      return Response.json(
+        { success: false, message: "Staff accounts can't enroll in courses." },
+        { status: 403 }
+      );
     }
 
     await dbConnect();
@@ -32,6 +42,16 @@ export async function POST(request, { params }) {
       );
     }
 
+    // A course that's hidden or not published is closed to new enrollments. The
+    // public catalogue already filters these out, but block direct calls too so
+    // an admin can stop selling a course while existing students keep access.
+    if (course.isHidden || course.status !== "published") {
+      return Response.json(
+        { success: false, message: "This course is not open for enrollment." },
+        { status: 403 }
+      );
+    }
+
     // Keep both sides of the relation in sync
     course.studentsEnrolled.push(userId);
     if (course.currentBatch && typeof course.currentBatch.enrolledCount === "number") {
@@ -40,6 +60,23 @@ export async function POST(request, { params }) {
     await course.save();
 
     await User.findByIdAndUpdate(userId, { $addToSet: { courses: course._id } });
+
+    // Notify admins of the new enrollment, and welcome the student (best-effort).
+    await notifyAdmins({
+      type: "enrollment",
+      title: "New course enrollment",
+      body: `${auth.user.name} enrolled in "${course.title}".`,
+      link: `/pages/dashboard/admin/courses/${course._id}`,
+      course: course._id,
+      actor: userId,
+    });
+    await notifyUsers([userId], {
+      type: "welcome",
+      title: `You're enrolled in ${course.title}`,
+      body: "Welcome aboard! You can start learning from My Courses.",
+      link: `/pages/dashboard/user/learn/${course._id}`,
+      course: course._id,
+    });
 
     return Response.json(
       { success: true, message: "Enrolled successfully.", courseId: course._id },

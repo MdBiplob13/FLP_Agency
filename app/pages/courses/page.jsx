@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   motion,
   animate,
@@ -22,10 +23,18 @@ import {
   FiX,
   FiPlay,
   FiAward,
+  FiCheck,
+  FiHeart,
 } from "react-icons/fi";
+import toast from "react-hot-toast";
 import Footer from "../../components/footer/page.jsx";
 import Navbar from "@/app/components/navbar/page.jsx";
+import CourseCountdown from "@/app/components/course/CourseCountdown.jsx";
 import useCourses from "@/hooks/course/courseHook";
+import useMyCourses from "@/hooks/course/myCoursesHook";
+import useWishlist from "@/hooks/course/wishlistHook";
+import { getCourseTiming } from "@/lib/courseTiming";
+import { authHeaders } from "@/lib/clientAuth";
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                              */
@@ -84,6 +93,9 @@ function normalizeCourse(c) {
     isFree,
     badge,
     img: c.thumbnail || FALLBACK_IMG,
+    enrollStartDate: c.enrollStartDate || null,
+    enrollEndDate: c.enrollEndDate || null,
+    courseStartDate: c.courseStartDate || null,
   };
 }
 
@@ -271,6 +283,7 @@ function Stars({ n = 5 }) {
 
 export default function CoursesPage() {
   const reduce = useReducedMotion();
+  const router = useRouter();
 
   /* ---- Hero spotlight + parallax ---- */
   const heroRef = useRef(null);
@@ -314,6 +327,41 @@ export default function CoursesPage() {
     [rawCourses],
   );
 
+  // Courses the logged-in user has already bought, so cards can swap the
+  // "Enrol now" CTA for an "Already bought" badge. Empty when logged out.
+  const { courses: myCourses } = useMyCourses();
+  const enrolledIds = useMemo(
+    () => new Set((myCourses || []).map((c) => String(c._id))),
+    [myCourses],
+  );
+
+  // Courses the user has wishlisted, so the heart on each card renders filled.
+  // `toggle` flips a course in/out and refetches; empty when logged out.
+  const { courses: wishlistCourses, toggle: toggleWishlist } = useWishlist();
+  const wishlistedIds = useMemo(
+    () => new Set((wishlistCourses || []).map((c) => String(c._id))),
+    [wishlistCourses],
+  );
+  // The course id whose heart is mid-request, so we can show a pending state.
+  const [wishlistBusyId, setWishlistBusyId] = useState(null);
+
+  async function handleToggleWishlist(courseId) {
+    // Wishlisting requires a login — bounce to login (and back) if there's no token.
+    const hasToken = Boolean(authHeaders().Authorization);
+    if (!hasToken) {
+      router.push(
+        `/pages/auth/login?redirect=${encodeURIComponent("/pages/courses")}`,
+      );
+      return;
+    }
+    setWishlistBusyId(courseId);
+    const result = await toggleWishlist(courseId);
+    setWishlistBusyId(null);
+    if (result === true) toast.success("Added to wishlist.");
+    else if (result === false) toast.success("Removed from wishlist.");
+    else toast.error("Could not update your wishlist.");
+  }
+
   // Build the category list dynamically from whatever courses exist
   const categories = useMemo(() => {
     const seen = new Set();
@@ -322,6 +370,16 @@ export default function CoursesPage() {
     }
     return ["All", ...Array.from(seen).sort()];
   }, [courses]);
+
+  // Tick once a second so cards hide/show the "Enrol now" button in lockstep
+  // with the countdown. `now` starts null so SSR and the first client render
+  // agree (both treat courses as enrollable) — avoids a hydration mismatch.
+  const [now, setNow] = useState(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   /* ---- Filtering ---- */
   const [searchTerm, setSearchTerm] = useState("");
@@ -688,6 +746,31 @@ export default function CoursesPage() {
                                   className="h-60 w-full object-cover transition-transform duration-500 hover:scale-105 sm:h-64"
                                 />
                                 <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
+                                <CourseCountdown
+                                  course={course}
+                                  variant="compact"
+                                  className="absolute bottom-3 left-3"
+                                />
+                                {/* Wishlist toggle */}
+                                <button
+                                  onClick={() => handleToggleWishlist(course.id)}
+                                  disabled={wishlistBusyId === course.id}
+                                  aria-label={
+                                    wishlistedIds.has(course.id)
+                                      ? "Remove from wishlist"
+                                      : "Add to wishlist"
+                                  }
+                                  aria-pressed={wishlistedIds.has(course.id)}
+                                  className={`absolute right-3 top-3 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur transition-colors disabled:opacity-50 ${
+                                    wishlistedIds.has(course.id)
+                                      ? "border-rose-400/40 bg-rose-500/20 text-rose-300 hover:bg-rose-500/30"
+                                      : "border-white/15 bg-black/40 text-white hover:bg-black/60"
+                                  }`}
+                                >
+                                  <FiHeart
+                                    className={`h-4.5 w-4.5 ${wishlistedIds.has(course.id) ? "fill-rose-400" : ""}`}
+                                  />
+                                </button>
                               </div>
 
                               {/* Title + price + actions only */}
@@ -722,13 +805,24 @@ export default function CoursesPage() {
                                   >
                                     View course
                                   </Link>
-                                  <Link
-                                    href={`/pages/courses/${course.id}`}
-                                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
-                                  >
-                                    Enrol now{" "}
-                                    <FiArrowRight className="h-4 w-4" />
-                                  </Link>
+                                  {enrolledIds.has(course.id) ? (
+                                    /* Already purchased — show status, not a buy CTA */
+                                    <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-semibold text-emerald-200">
+                                      <FiCheck className="h-4 w-4" />
+                                      Already bought
+                                    </span>
+                                  ) : (
+                                    /* Only offer "Enrol now" while enrollment is actually open */
+                                    (now === null || getCourseTiming(course, now).canEnroll) && (
+                                      <Link
+                                        href={`/pages/courses/${course.id}`}
+                                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
+                                      >
+                                        Enrol now{" "}
+                                        <FiArrowRight className="h-4 w-4" />
+                                      </Link>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             </SpotlightCard>

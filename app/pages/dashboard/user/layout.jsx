@@ -6,12 +6,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import {
-  FiGrid,
-  FiUsers,
   FiBookOpen,
-  FiFileText,
-  FiUserCheck,
-  FiTag,
+  FiHeart,
   FiUser,
   FiLogOut,
   FiMenu,
@@ -24,52 +20,32 @@ import {
 import useUser from '@/hooks/user/userHook';
 import NotificationBell from '@/app/components/notification/NotificationBell';
 
-// Notifications are an admin/superadmin feature — hidden for teachers. The nav
-// is built per-role from this list (see `navItems` below).
-const baseNavItems = [
-  { name: 'Dashboard', href: '/pages/dashboard/admin', icon: FiGrid, exact: true },
-  { name: 'Users', href: '/pages/dashboard/admin/users', icon: FiUsers },
-  { name: 'Courses', href: '/pages/dashboard/admin/courses', icon: FiBookOpen },
-  { name: 'Categories', href: '/pages/dashboard/admin/categories', icon: FiTag },
-  { name: 'Blogs', href: '/pages/dashboard/admin/blogs', icon: FiFileText },
-  { name: 'Our Teachers', href: '/pages/dashboard/admin/teachers', icon: FiUserCheck },
-  { name: 'My Profile', href: '/pages/dashboard/admin/profile', icon: FiUser },
+const FALLBACK_AVATAR =
+  'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+
+const NOTIFICATIONS_HREF = '/pages/dashboard/user/notifications';
+
+const navItems = [
+  { name: 'My Courses', href: '/pages/dashboard/user', icon: FiBookOpen, exact: true },
+  { name: 'My Wishlist', href: '/pages/dashboard/user/wishlist', icon: FiHeart },
+  { name: 'Notifications', href: NOTIFICATIONS_HREF, icon: FiBell },
+  { name: 'My Profile', href: '/pages/dashboard/user/profile', icon: FiUser },
 ];
 
-const NOTIFICATIONS_ITEM = {
-  name: 'Notifications',
-  href: '/pages/dashboard/admin/notifications',
-  icon: FiBell,
-};
-
-export default function AdminLayout({ children }) {
+export default function UserLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, userLoading, setUser, setUserRefresh } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Teachers share the admin panel for now, so staff = admin/superadmin/teacher.
-  const isStaff = user && ['admin', 'superadmin', 'teacher'].includes(user.role);
-
-  // Only admins/superadmins get the notifications feed — teachers don't.
-  const canSeeNotifications = user && ['admin', 'superadmin'].includes(user.role);
-
-  // Insert the Notifications item (before My Profile) for admins only.
-  const navItems = canSeeNotifications
-    ? [...baseNavItems.slice(0, -1), NOTIFICATIONS_ITEM, baseNavItems[baseNavItems.length - 1]]
-    : baseNavItems;
-
-  // Auth guard — redirect once auth state resolves
+  // Auth guard — any logged-in user may access their own dashboard
   useEffect(() => {
     if (userLoading) return;
     if (!user) {
       toast.error('Please log in to continue.');
       router.replace('/pages/auth/login');
-    } else if (!isStaff) {
-      toast.error('Staff access only.');
-      router.replace('/');
     }
-  }, [userLoading, user, isStaff, router]);
+  }, [userLoading, user, router]);
 
   // Close the mobile drawer on navigation
   useEffect(() => {
@@ -89,8 +65,8 @@ export default function AdminLayout({ children }) {
   const isActive = (item) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
 
-  // Block render until we know the user is staff
-  if (userLoading || !isStaff) {
+  // Block render until we know the user is authenticated
+  if (userLoading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#020205] text-slate-300">
         <FiLoader className="h-6 w-6 animate-spin" />
@@ -106,8 +82,24 @@ export default function AdminLayout({ children }) {
           <FiZap className="h-5 w-5" />
         </span>
         <span className="text-lg font-bold tracking-tight text-white">
-          FLP <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Admin</span>
+          FLP <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Learner</span>
         </span>
+      </div>
+
+      {/* Identity */}
+      <div className="mx-3 mb-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+        <img
+          src={user.photo || FALLBACK_AVATAR}
+          alt={user.name || 'Avatar'}
+          className="h-10 w-10 flex-none rounded-full object-cover ring-2 ring-blue-500/20"
+          onError={(e) => {
+            e.currentTarget.src = FALLBACK_AVATAR;
+          }}
+        />
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-white">{user.name || 'Learner'}</p>
+          <p className="truncate text-xs text-slate-400">{user.email}</p>
+        </div>
       </div>
 
       {/* Nav */}
@@ -188,21 +180,17 @@ export default function AdminLayout({ children }) {
             <FiMenu className="h-5 w-5" />
           </button>
           <span className="text-base font-bold text-white">
-            FLP <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Admin</span>
+            FLP <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Learner</span>
           </span>
-          {canSeeNotifications && (
-            <div className="ml-auto">
-              <NotificationBell href={NOTIFICATIONS_ITEM.href} />
-            </div>
-          )}
+          <div className="ml-auto">
+            <NotificationBell href={NOTIFICATIONS_HREF} />
+          </div>
         </header>
 
-        {/* Desktop top bar — holds the notification bell for admins */}
-        {canSeeNotifications && (
-          <header className="sticky top-0 z-30 hidden items-center justify-end border-b border-white/10 bg-[#020205]/80 px-8 py-3 backdrop-blur-xl lg:flex lg:px-10">
-            <NotificationBell href={NOTIFICATIONS_ITEM.href} />
-          </header>
-        )}
+        {/* Desktop top bar — holds the notification bell */}
+        <header className="sticky top-0 z-30 hidden items-center justify-end border-b border-white/10 bg-[#020205]/80 px-8 py-3 backdrop-blur-xl lg:flex lg:px-10">
+          <NotificationBell href={NOTIFICATIONS_HREF} />
+        </header>
 
         <main className="px-5 py-8 sm:px-8 lg:px-10">{children}</main>
       </div>

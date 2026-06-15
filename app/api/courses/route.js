@@ -31,7 +31,9 @@ export async function GET(request) {
     if (isManager) {
       if (status && status !== "all") query.status = status;
     } else {
+      // Public catalogue: only published courses, and never hidden ones.
       query.status = "published";
+      query.isHidden = { $ne: true };
     }
 
     if (category && category !== "All") query.category = category;
@@ -126,6 +128,18 @@ export async function POST(request) {
       }
     }
 
+    // A hidden course can't also be a bestseller or pinned to the homepage.
+    const wantHidden = body.isHidden === true;
+    if (wantHidden && (body.isBestseller === true || wantFeatured)) {
+      return Response.json(
+        {
+          success: false,
+          message: "A bestseller or homepage course can't be hidden. Remove those flags first.",
+        },
+        { status: 409 }
+      );
+    }
+
     const course = await Course.create({
       title,
       description,
@@ -140,9 +154,13 @@ export async function POST(request) {
       curriculum: body.curriculum,
       schedule: body.schedule,
       currentBatch: body.currentBatch,
+      enrollStartDate: body.enrollStartDate,
+      enrollEndDate: body.enrollEndDate,
+      courseStartDate: body.courseStartDate,
       status: body.status,
       isBestseller: body.isBestseller === true,
       isFeatured: wantFeatured,
+      isHidden: wantHidden,
       teachers,
     });
 

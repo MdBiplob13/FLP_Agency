@@ -35,7 +35,10 @@ import {
   FiLayers,
 } from 'react-icons/fi';
 import Footer from '../../components/footer/page.jsx';
+import CourseCountdown from '@/app/components/course/CourseCountdown.jsx';
 import useCourses from '@/hooks/course/courseHook';
+import useMyCourses from '@/hooks/course/myCoursesHook';
+import { getCourseTiming } from '@/lib/courseTiming';
 
 const FALLBACK_IMG = '/image1.jpg';
 
@@ -323,6 +326,14 @@ export default function Home() {
 
   /* ---- Popular courses: 1 bestseller + the first 2 featured ---- */
   const { courses: allCourses, coursesLoading } = useCourses({ limit: 50 });
+
+  // Courses the logged-in user already bought, so popular cards can swap the
+  // "Enrol now" CTA for an "Already bought" badge. Empty when logged out.
+  const { courses: myCourses } = useMyCourses();
+  const enrolledIds = useMemo(
+    () => new Set((myCourses || []).map((c) => String(c._id))),
+    [myCourses],
+  );
   const popularCourses = useMemo(() => {
     const bestseller = allCourses.find((c) => c.isBestseller);
     const featured = allCourses
@@ -342,6 +353,42 @@ export default function Home() {
     }
     return picked.slice(0, 3);
   }, [allCourses]);
+
+  /* ---- Hero showcase card: the real bestseller (or first popular course) ---- */
+  const heroCourse = useMemo(() => {
+    const c = allCourses.find((x) => x.isBestseller) || popularCourses[0];
+    if (!c) return null;
+
+    // Lessons + total minutes come from the nested curriculum
+    let lessons = 0;
+    let minutes = 0;
+    for (const section of c.curriculum || []) {
+      for (const lesson of section.lessons || []) {
+        lessons += 1;
+        minutes += lesson.duration || 0;
+      }
+    }
+
+    return {
+      id: c._id,
+      title: c.title,
+      category: c.category,
+      img: c.thumbnail || FALLBACK_IMG,
+      price: coursePrice(c),
+      badge: c.isBestseller ? 'Bestseller' : c.isFeatured ? 'Featured' : null,
+      lessons,
+      hours: Math.round(minutes / 60),
+    };
+  }, [allCourses, popularCourses]);
+
+  // Tick each second so popular cards hide/show "Enrol now" alongside their
+  // countdown. `now` starts null so SSR and first client render agree.
+  const [now, setNow] = useState(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   return (
     <div className="bg-[#020205] text-slate-100 font-sans antialiased">
@@ -422,36 +469,65 @@ export default function Home() {
             style={{ rotateX: cardRX, rotateY: cardRY, transformPerspective: 1000 }}
             className="relative [transform-style:preserve-3d]"
           >
-            <div className="relative rounded-[2rem] border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/50 backdrop-blur-xl">
+            <Link
+              href={heroCourse ? `/pages/courses/${heroCourse.id}` : '#courses'}
+              className="block rounded-[2rem] border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/50 backdrop-blur-xl"
+            >
               <div className="relative overflow-hidden rounded-[1.4rem] border border-white/10">
-                <img src="/image1.jpg" alt="Preview of a featured course lesson" className="h-64 w-full object-cover sm:h-72" />
+                <img
+                  src={heroCourse?.img || '/image1.jpg'}
+                  alt={heroCourse ? heroCourse.title : 'Preview of a featured course lesson'}
+                  className="h-64 w-full object-cover sm:h-72"
+                />
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
-                <button className="absolute inset-0 flex items-center justify-center" aria-label="Play course preview">
+                <span className="absolute inset-0 flex items-center justify-center" aria-hidden>
                   <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 backdrop-blur ring-1 ring-white/30 transition hover:scale-105 hover:bg-white/25">
                     <FiPlay className="ml-1 h-7 w-7 text-white" />
                   </span>
-                </button>
+                </span>
                 <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                  <span className="rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">Bestseller</span>
-                  <span className="rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur">38h • 142 lessons</span>
+                  {heroCourse?.badge ? (
+                    <span className="rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">{heroCourse.badge}</span>
+                  ) : (
+                    <span />
+                  )}
+                  {heroCourse && (heroCourse.hours > 0 || heroCourse.lessons > 0) && (
+                    <span className="rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+                      {heroCourse.hours}h • {heroCourse.lessons} lessons
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div className="px-2 pb-1 pt-4">
-                <p className="text-xs uppercase tracking-[0.3em] text-blue-300">Top course</p>
-                <h3 className="mt-2 text-xl font-semibold text-white">Full-Stack Web Development</h3>
+                <p className="text-xs uppercase tracking-[0.3em] text-blue-300">
+                  {heroCourse ? heroCourse.category : 'Top course'}
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-white">
+                  {heroCourse ? heroCourse.title : 'Discover your next course'}
+                </h3>
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-slate-400">
                     <Stars n={5} />
                     <span className="text-slate-300">4.9</span>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold text-white">৳49</span>
-                    <span className="text-sm text-slate-500 line-through">৳199</span>
-                  </div>
+                  {heroCourse && (
+                    <div className="flex items-baseline gap-2">
+                      {heroCourse.price.isFree ? (
+                        <span className="text-2xl font-bold text-emerald-300">Free</span>
+                      ) : (
+                        <>
+                          <span className="text-2xl font-bold text-white">৳{heroCourse.price.price}</span>
+                          {heroCourse.price.oldPrice ? (
+                            <span className="text-sm text-slate-500 line-through">৳{heroCourse.price.oldPrice}</span>
+                          ) : null}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            </Link>
 
             <motion.div
               animate={reduce ? undefined : { y: [0, -10, 0] }}
@@ -560,6 +636,7 @@ export default function Home() {
                           {badge && (
                             <span className="absolute left-4 top-4 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">{badge}</span>
                           )}
+                          <CourseCountdown course={course} variant="compact" className="absolute bottom-4 left-4" />
                         </div>
                         <div className="flex flex-1 flex-col items-center p-7">
                           <h3 className="text-xl font-semibold leading-snug text-white">{course.title}</h3>
@@ -574,12 +651,22 @@ export default function Home() {
                             )}
                           </div>
                           <div className="mt-auto flex w-full items-center justify-center gap-3 pt-6">
-                            <Link
-                              href={`/pages/courses/${course._id}`}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
-                            >
-                              Enrol now <FiArrowRight className="h-4 w-4" />
-                            </Link>
+                            {enrolledIds.has(String(course._id)) ? (
+                              /* Already purchased — show status, not a buy CTA */
+                              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-6 py-2.5 text-sm font-semibold text-emerald-200">
+                                <FiCheck className="h-4 w-4" /> Already bought
+                              </span>
+                            ) : (
+                              /* Only offer "Enrol now" while enrollment is actually open */
+                              (now === null || getCourseTiming(course, now).canEnroll) && (
+                                <Link
+                                  href={`/pages/courses/${course._id}`}
+                                  className="inline-flex items-center gap-1.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
+                                >
+                                  Enrol now <FiArrowRight className="h-4 w-4" />
+                                </Link>
+                              )
+                            )}
                             <Link
                               href={`/pages/courses/${course._id}`}
                               className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-blue-200"

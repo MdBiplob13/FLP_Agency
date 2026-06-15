@@ -1,0 +1,16 @@
+
+> flp@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.154:3000
+- Environments: .env
+✓ Ready in 481ms
+
+ GET /pages/courses 200 in 2.0s (next.js: 1397ms, application-code: 630ms)
+ GET /api/auth/getUser 200 in 1670ms (next.js: 1621ms, application-code: 49ms)
+ GET /api/users/me/wishlist 200 in 1662ms (next.js: 1542ms, application-code: 120ms)
+ GET /api/courses?limit=50 200 in 1670ms (next.js: 1579ms, application-code: 90ms)
+ GET /api/users/me/courses 200 in 1677ms (next.js: 1486ms, application-code: 191ms)
+ GET / 200 in 164ms (next.js: 50ms, application-code: 114ms)

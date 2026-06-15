@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useMemo, useRef, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
@@ -25,26 +25,29 @@ import {
   FiCheck,
   FiLock,
   FiShoppingCart,
+  FiHeart,
   FiX,
 } from "react-icons/fi";
 import Footer from "../../../components/footer/page.jsx";
 import Navbar from "@/app/components/navbar/page.jsx";
+import CourseCountdown from "@/app/components/course/CourseCountdown.jsx";
 import useCourse from "@/hooks/course/singleCourseHook";
 import useCourses from "@/hooks/course/courseHook";
+import useMyCourses from "@/hooks/course/myCoursesHook";
+import useWishlist from "@/hooks/course/wishlistHook";
+import useUser from "@/hooks/user/userHook";
+import { getCourseTiming } from "@/lib/courseTiming";
+import { authHeaders } from "@/lib/clientAuth";
 
 const FALLBACK_IMG = "/image1.jpg";
 const cap = (s = "") => s.charAt(0).toUpperCase() + s.slice(1);
 const easeOut = [0.22, 1, 0.36, 1];
 
-const DAY_LABELS = {
-  sun: "Sunday",
-  mon: "Monday",
-  tue: "Tuesday",
-  wed: "Wednesday",
-  thu: "Thursday",
-  fri: "Friday",
-  sat: "Saturday",
-};
+// Format a schedule session's date + time for display.
+const fmtClassDate = (v) =>
+  v
+    ? new Date(v).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
+    : "";
 
 /* ------------------------------------------------------------------ */
 /*  Map a raw API course doc to the shape this page renders            */
@@ -80,6 +83,8 @@ function normalizeCourse(c) {
     id: c._id,
     title: c.title,
     description: c.description,
+    isHidden: !!c.isHidden,
+    status: c.status,
     category: c.category,
     level: cap(c.level || "beginner"),
     language: c.language,
@@ -88,6 +93,9 @@ function normalizeCourse(c) {
     curriculum: c.curriculum || [],
     schedule: c.schedule || [],
     currentBatch: c.currentBatch || null,
+    enrollStartDate: c.enrollStartDate || null,
+    enrollEndDate: c.enrollEndDate || null,
+    courseStartDate: c.courseStartDate || null,
     studentsCount: (c.studentsEnrolled || []).length,
     lessons,
     minutes,
@@ -218,6 +226,10 @@ export default function CourseDetailPage({ params }) {
   const { course: raw, courseLoading, courseError } = useCourse(id);
   const course = useMemo(() => (raw ? normalizeCourse(raw) : null), [raw]);
 
+  // Staff accounts (teacher/admin/superadmin) manage courses; they can't buy them.
+  const { user } = useUser();
+  const isStaff = ["teacher", "admin", "superadmin"].includes(user?.role);
+
   // Catalogue feed that powers the right-hand bestseller / featured rail
   const { courses: rawCatalogue } = useCourses({ limit: 50 });
   const catalogue = useMemo(
@@ -236,10 +248,85 @@ export default function CourseDetailPage({ params }) {
 
   /* ---- Buy / enrol flow ---- */
   const [buying, setBuying] = useState(false);
+  const [enrolled, setEnrolled] = useState(false); // flipped true right after a successful buy
   const [toast, setToast] = useState(null); // { type: "success" | "error", text }
+
+  // Is the logged-in user already enrolled in this course? Detected on load so
+  // the card shows "already bought" without needing a click.
+  const { courses: myCourses } = useMyCourses();
+  const alreadyEnrolled = useMemo(
+    () => (myCourses || []).some((c) => c._id === id),
+    [myCourses, id],
+  );
+  const isEnrolled = enrolled || alreadyEnrolled;
+
+  // Wishlist state for this course (heart toggle on the buy card).
+  const { courses: wishlistCourses, toggle: toggleWishlist } = useWishlist();
+  const isWishlisted = useMemo(
+    () => (wishlistCourses || []).some((c) => String(c._id) === String(id)),
+    [wishlistCourses, id],
+  );
+  const [wishlistBusy, setWishlistBusy] = useState(false);
+
+  async function handleToggleWishlist() {
+    // Wishlisting requires a login — bounce to login (and back) if no token.
+    if (!authHeaders().Authorization) {
+      router.push(
+        `/pages/auth/login?redirect=${encodeURIComponent(`/pages/courses/${id}`)}`,
+      );
+      return;
+    }
+    setWishlistBusy(true);
+    const result = await toggleWishlist(id);
+    setWishlistBusy(false);
+    if (result === true) setToast({ type: "success", text: "Added to your wishlist." });
+    else if (result === false) setToast({ type: "success", text: "Removed from your wishlist." });
+    else setToast({ type: "error", text: "Could not update your wishlist." });
+  }
+
+  // Tick once a second so the buy button enables/disables in lockstep with the
+  // countdown as the enrollment window opens or closes. `tick` starts null so
+  // the first client render matches the server (avoids hydration mismatch).
+  const [tick, setTick] = useState(null);
+  useEffect(() => {
+    setTick(Date.now());
+    const t = setInterval(() => setTick(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Enrollment phase. Before mount (tick === null) fall back to "open" so the
+  // button isn't disabled during SSR; once mounted it reflects real timing.
+  const timing = useMemo(
+    () => (course ? getCourseTiming(course, tick ?? 0) : null),
+    [course, tick],
+  );
+  const canEnroll = !timing || tick === null || timing.canEnroll;
+
+  // Label shown when enrollment is not currently open.
+  const blockedLabel =
+    timing?.phase === "before-enroll"
+      ? "Enrollment not open yet"
+      : timing?.phase === "enroll-closed"
+        ? "Enrollment closed"
+        : timing?.phase === "started"
+          ? "Course in progress"
+          : null;
 
   async function handleBuy() {
     if (buying) return;
+
+    // Staff accounts manage courses and can't enroll — block before any request.
+    if (isStaff) {
+      setToast({ type: "error", text: "Staff accounts can't enroll in courses." });
+      return;
+    }
+
+    // Re-check against the live clock so a click at the boundary can't slip
+    // through after the window has actually closed/not-yet-opened.
+    if (course && !getCourseTiming(course).canEnroll) {
+      setToast({ type: "error", text: "Enrollment is not open for this course right now." });
+      return;
+    }
 
     const token =
       Cookies.get("flp_token") ||
@@ -262,7 +349,12 @@ export default function CourseDetailPage({ params }) {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setToast({ type: "success", text: "You're enrolled! Check your dashboard." });
+        setEnrolled(true);
+        setToast({ type: "success", text: "You're enrolled! It's now in My Courses." });
+      } else if (res.status === 409) {
+        // Already enrolled — treat as success so the CTA reflects reality.
+        setEnrolled(true);
+        setToast({ type: "success", text: "You're already enrolled in this course." });
       } else {
         setToast({ type: "error", text: data.message || "Could not complete enrolment." });
       }
@@ -275,6 +367,10 @@ export default function CourseDetailPage({ params }) {
   }
 
   const totalLessons = course?.lessons ?? 0;
+
+  // A hidden or unpublished course is closed to new students. Already-enrolled
+  // users still get the full "go to my courses" treatment below.
+  const unavailable = !!course && (course.isHidden || course.status !== "published");
 
   return (
     <div className="min-h-screen bg-[#020205] font-sans text-slate-100 antialiased">
@@ -485,19 +581,21 @@ export default function CourseDetailPage({ params }) {
                     <FiCalendar className="h-5 w-5 text-blue-300" /> Class schedule
                   </h2>
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    {course.schedule.map((slot, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/60 px-5 py-4"
-                      >
-                        <span className="font-semibold text-white">
-                          {DAY_LABELS[slot.day] || cap(slot.day)}
-                        </span>
-                        <span className="text-sm text-slate-300">
-                          {slot.startTime} – {slot.endTime}
-                        </span>
-                      </div>
-                    ))}
+                    {[...course.schedule]
+                      .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+                      .map((slot, i) => (
+                        <div
+                          key={slot._id || i}
+                          className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-5 py-4"
+                        >
+                          <span className="min-w-0 truncate font-semibold text-white">
+                            {slot.title || "Class"}
+                          </span>
+                          <span className="flex-none text-sm text-slate-300">
+                            {fmtClassDate(slot.startDate)}
+                          </span>
+                        </div>
+                      ))}
                   </div>
                 </section>
               )}
@@ -550,19 +648,64 @@ export default function CourseDetailPage({ params }) {
                     )}
                   </div>
 
+                  {/* Live enrollment / start countdown */}
+                  <CourseCountdown course={course} variant="full" className="mt-6" />
+
+                  {isEnrolled ? (
+                    <div className="mt-4 space-y-3">
+                      <div className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-6 py-3 text-base font-semibold text-emerald-200">
+                        <FiCheck className="h-5 w-5" /> Already bought
+                      </div>
+                      <Link
+                        href="/pages/dashboard/user"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-600/25 transition hover:brightness-110"
+                      >
+                        Go to My Courses <FiArrowRight className="h-5 w-5" />
+                      </Link>
+                    </div>
+                  ) : isStaff ? (
+                    <div className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-base font-semibold text-slate-300">
+                      <FiLock className="h-5 w-5" /> Staff can’t enrol
+                    </div>
+                  ) : unavailable ? (
+                    <div className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-base font-semibold text-slate-300">
+                      <FiLock className="h-5 w-5" /> Not available
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleBuy}
+                      disabled={buying || !canEnroll}
+                      className="group mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {buying ? (
+                        "Processing…"
+                      ) : !canEnroll && blockedLabel ? (
+                        <>
+                          <FiLock className="h-5 w-5" />
+                          {blockedLabel}
+                        </>
+                      ) : (
+                        <>
+                          <FiShoppingCart className="h-5 w-5" />
+                          {course.isFree ? "Enrol for free" : "Buy this course"}
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Wishlist toggle */}
                   <button
-                    onClick={handleBuy}
-                    disabled={buying}
-                    className="group mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                    onClick={handleToggleWishlist}
+                    disabled={wishlistBusy}
+                    aria-pressed={isWishlisted}
+                    className={`mt-3 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                      isWishlisted
+                        ? "border-rose-400/40 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20"
+                        : "border-white/10 bg-white/5 text-slate-200 hover:border-rose-400/40 hover:text-rose-200"
+                    }`}
                   >
-                    {buying ? (
-                      "Processing…"
-                    ) : (
-                      <>
-                        <FiShoppingCart className="h-5 w-5" />
-                        {course.isFree ? "Enrol for free" : "Buy this course"}
-                      </>
-                    )}
+                    <FiHeart className={`h-4 w-4 ${isWishlisted ? "fill-rose-400" : ""}`} />
+                    {isWishlisted ? "Wishlisted" : "Add to wishlist"}
                   </button>
 
                   <Link
