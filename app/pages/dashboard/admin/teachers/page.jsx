@@ -18,9 +18,9 @@ import {
 import { authHeaders } from '@/lib/clientAuth';
 
 const statusStyles = {
-  active: 'text-emerald-300 bg-emerald-500/10 ring-emerald-500/20',
-  inactive: 'text-amber-300 bg-amber-500/10 ring-amber-500/20',
-  blocked: 'text-red-300 bg-red-500/10 ring-red-500/20',
+  active: 'text-success bg-success/10 ring-emerald-500/20',
+  inactive: 'text-warning bg-warning/10 ring-amber-500/20',
+  blocked: 'text-danger bg-danger/10 ring-red-500/20',
 };
 
 function formatDate(value) {
@@ -133,11 +133,11 @@ export default function AdminTeachersPage() {
     <div>
       {/* Header */}
       <div>
-        <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Our Teachers</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">Teacher management</h1>
-        <p className="mt-2 text-slate-400">
+        <p className="text-sm uppercase tracking-[0.35em] text-primary">Our Teachers</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-text">Teacher management</h1>
+        <p className="mt-2 text-text-muted">
           View every instructor and choose the one featured across the site.
-          <span className="ml-1 text-slate-500">Only one teacher can be featured at a time.</span>
+          <span className="ml-1 text-text-subtle">Only one teacher can be featured at a time.</span>
         </p>
       </div>
 
@@ -146,14 +146,14 @@ export default function AdminTeachersPage() {
         {stats.map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
+            <div key={s.label} className="rounded-3xl border border-border bg-surface p-6">
               <div className="flex items-center justify-between">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-border">
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className="text-3xl font-bold text-white">{s.value}</span>
+                <span className="text-3xl font-bold text-text">{s.value}</span>
               </div>
-              <p className="mt-4 text-sm uppercase tracking-[0.2em] text-slate-400">{s.label}</p>
+              <p className="mt-4 text-sm uppercase tracking-[0.2em] text-text-muted">{s.label}</p>
             </div>
           );
         })}
@@ -162,12 +162,12 @@ export default function AdminTeachersPage() {
       {/* Search */}
       <div className="mt-10">
         <label className="relative block w-full sm:max-w-xs">
-          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-subtle" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search teachers…"
-            className="w-full rounded-full border border-white/10 bg-slate-900/80 py-3 pl-12 pr-4 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+            className="w-full rounded-full border border-border bg-surface-elevated/80 py-3 pl-12 pr-4 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
           />
         </label>
       </div>
@@ -175,14 +175,14 @@ export default function AdminTeachersPage() {
       {/* Teacher cards */}
       <div className="mt-6">
         {loading ? (
-          <div className="flex items-center justify-center gap-3 rounded-3xl border border-white/10 bg-slate-950/60 py-20 text-slate-400">
+          <div className="flex items-center justify-center gap-3 rounded-3xl border border-border bg-surface py-20 text-text-muted">
             <FiLoader className="h-5 w-5 animate-spin" /> Loading teachers…
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-slate-950/60 py-20 text-center">
-            <FiUserCheck className="mx-auto h-10 w-10 text-slate-600" />
-            <p className="mt-4 text-lg font-semibold text-white">No teachers found</p>
-            <p className="mt-1 text-slate-400">
+          <div className="rounded-3xl border border-border bg-surface py-20 text-center">
+            <FiUserCheck className="mx-auto h-10 w-10 text-text-subtle" />
+            <p className="mt-4 text-lg font-semibold text-text">No teachers found</p>
+            <p className="mt-1 text-text-muted">
               {teachers.length === 0
                 ? 'Promote a user to teacher from the Users page to get started.'
                 : 'Try another search term.'}
@@ -197,15 +197,15 @@ export default function AdminTeachersPage() {
               return (
                 <div
                   key={t._id}
-                  className={`group relative flex flex-col rounded-3xl border bg-slate-950/60 p-6 transition-colors ${
+                  className={`group relative flex flex-col rounded-3xl border bg-surface p-6 transition-colors ${
                     t.isFeatured
                       ? 'border-amber-400/40 ring-1 ring-amber-400/20'
-                      : 'border-white/10 hover:border-white/20'
+                      : 'border-border hover:border-border-strong'
                   }`}
                 >
                   {/* Featured ribbon */}
                   {t.isFeatured && (
-                    <span className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-300 ring-1 ring-amber-400/30">
+                    <span className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-1 text-[11px] font-semibold text-warning ring-1 ring-amber-400/30">
                       <FiStar className="h-3 w-3 fill-amber-300" /> Featured
                     </span>
                   )}
@@ -216,10 +216,10 @@ export default function AdminTeachersPage() {
                     <img
                       src={t.photo}
                       alt={t.name}
-                      className="h-16 w-16 flex-none rounded-full object-cover ring-2 ring-white/10"
+                      className="h-16 w-16 flex-none rounded-full object-cover ring-2 ring-border"
                     />
                     <div className="min-w-0">
-                      <p className="truncate text-lg font-semibold text-white">{t.name}</p>
+                      <p className="truncate text-lg font-semibold text-text">{t.name}</p>
                       <span
                         className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ring-1 ${statusStyles[t.status] || statusStyles.active}`}
                       >
@@ -229,17 +229,17 @@ export default function AdminTeachersPage() {
                   </div>
 
                   {/* Details */}
-                  <div className="mt-5 space-y-2 text-sm text-slate-300">
+                  <div className="mt-5 space-y-2 text-sm text-text-muted">
                     <p className="flex items-center gap-2.5">
-                      <FiMail className="h-4 w-4 flex-none text-slate-500" />
+                      <FiMail className="h-4 w-4 flex-none text-text-subtle" />
                       <span className="truncate">{t.email}</span>
                     </p>
                     <p className="flex items-center gap-2.5">
-                      <FiMapPin className="h-4 w-4 flex-none text-slate-500" />
+                      <FiMapPin className="h-4 w-4 flex-none text-text-subtle" />
                       <span className="truncate">{t.address || '—'}</span>
                     </p>
                     <p className="flex items-center gap-2.5">
-                      <FiCalendar className="h-4 w-4 flex-none text-slate-500" />
+                      <FiCalendar className="h-4 w-4 flex-none text-text-subtle" />
                       <span>Joined {formatDate(t.createdAt)}</span>
                     </p>
                   </div>
@@ -254,7 +254,7 @@ export default function AdminTeachersPage() {
                             href={links[key]}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition-colors hover:border-blue-500/40 hover:text-blue-200"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface-muted text-text-muted transition-colors hover:border-primary/40 hover:text-primary"
                             aria-label={key}
                           >
                             <Icon className="h-4 w-4" />
@@ -265,14 +265,14 @@ export default function AdminTeachersPage() {
                   )}
 
                   {/* Feature toggle */}
-                  <div className="mt-6 border-t border-white/5 pt-5">
+                  <div className="mt-6 border-t border-border pt-5">
                     <button
                       onClick={() => toggleFeatured(t)}
                       disabled={toggling}
                       className={`inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                         t.isFeatured
-                          ? 'border border-amber-400/30 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25'
-                          : 'border border-white/10 bg-white/5 text-slate-200 hover:border-amber-400/30 hover:text-amber-200'
+                          ? 'border border-amber-400/30 bg-warning/15 text-warning hover:bg-amber-500/25'
+                          : 'border border-border bg-surface-muted text-text hover:border-amber-400/30 hover:text-amber-200'
                       }`}
                     >
                       {toggling ? (

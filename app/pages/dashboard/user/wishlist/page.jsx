@@ -63,10 +63,10 @@ function normalize(c) {
 
 function WishlistCard({ course, onRemove, removing }) {
   return (
-    <div className="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60 transition-colors hover:border-white/20">
+    <div className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-surface transition-colors hover:border-border-strong">
       {/* Thumbnail */}
       <div className="relative h-40 w-full overflow-hidden">
-        <Link href={`/pages/courses/${course.id}`}>
+        <Link href={`/pages/courses/${course.slug || course.id}`}>
           <img
             src={course.img}
             alt={course.title}
@@ -82,7 +82,7 @@ function WishlistCard({ course, onRemove, removing }) {
           onClick={() => onRemove(course)}
           disabled={removing}
           aria-label="Remove from wishlist"
-          className="absolute right-3 top-3 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-rose-400/30 bg-black/50 text-rose-300 backdrop-blur transition-colors hover:bg-rose-500/20 hover:text-rose-200 disabled:opacity-50"
+          className="absolute right-3 top-3 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-rose-400/30 bg-black/50 text-danger backdrop-blur transition-colors hover:bg-rose-500/20 hover:text-rose-200 disabled:opacity-50"
         >
           {removing ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiHeart className="h-4 w-4 fill-rose-400" />}
         </button>
@@ -90,42 +90,42 @@ function WishlistCard({ course, onRemove, removing }) {
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-5">
-        <Link href={`/pages/courses/${course.id}`}>
-          <h3 className="line-clamp-2 text-base font-semibold leading-snug text-white transition-colors group-hover:text-blue-200">
+        <Link href={`/pages/courses/${course.slug || course.id}`}>
+          <h3 className="line-clamp-2 text-base font-semibold leading-snug text-text transition-colors group-hover:text-primary">
             {course.title}
           </h3>
         </Link>
-        {course.instructor && <p className="mt-1 text-xs text-slate-400">by {course.instructor}</p>}
+        {course.instructor && <p className="mt-1 text-xs text-text-muted">by {course.instructor}</p>}
 
         {/* Meta */}
-        <div className="mt-4 flex items-center gap-4 text-xs text-slate-400">
+        <div className="mt-4 flex items-center gap-4 text-xs text-text-muted">
           <span className="flex items-center gap-1.5">
-            <FiLayers className="h-3.5 w-3.5 text-blue-300" /> {course.lessons} lessons
+            <FiLayers className="h-3.5 w-3.5 text-primary" /> {course.lessons} lessons
           </span>
           <span className="flex items-center gap-1.5">
-            <FiClock className="h-3.5 w-3.5 text-blue-300" /> {course.hours}h
+            <FiClock className="h-3.5 w-3.5 text-primary" /> {course.hours}h
           </span>
         </div>
 
         {/* Price */}
         <div className="mt-4 flex items-baseline gap-2">
           {course.isFree ? (
-            <span className="text-xl font-bold text-emerald-300">Free</span>
+            <span className="text-xl font-bold text-success">Free</span>
           ) : (
             <>
-              <span className="text-xl font-bold text-white">৳{course.price}</span>
+              <span className="text-xl font-bold text-text">৳{course.price}</span>
               {course.oldPrice ? (
-                <span className="text-sm text-slate-500 line-through">৳{course.oldPrice}</span>
+                <span className="text-sm text-text-subtle line-through">৳{course.oldPrice}</span>
               ) : null}
             </>
           )}
         </div>
 
         {/* Action */}
-        <div className="mt-5 border-t border-white/5 pt-4">
+        <div className="mt-5 border-t border-border pt-4">
           <Link
-            href={`/pages/courses/${course.id}`}
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
+            href={`/pages/courses/${course.slug || course.id}`}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-linear-to-r from-primary to-accent px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:brightness-110"
           >
             View course <FiArrowRight className="h-4 w-4" />
           </Link>
@@ -166,20 +166,20 @@ export default function WishlistPage() {
     <div>
       {/* Header */}
       <div>
-        <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Saved for later</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">My wishlist</h1>
-        <p className="mt-2 text-slate-400">Courses you’ve saved to come back to.</p>
+        <p className="text-sm uppercase tracking-[0.35em] text-primary">Saved for later</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-text">My wishlist</h1>
+        <p className="mt-2 text-text-muted">Courses you’ve saved to come back to.</p>
       </div>
 
       {/* Search */}
       <div className="mt-8">
         <label className="relative block w-full sm:max-w-xs">
-          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-subtle" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search my wishlist…"
-            className="w-full rounded-full border border-white/10 bg-slate-900/80 py-3 pl-12 pr-4 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+            className="w-full rounded-full border border-border bg-surface-elevated/80 py-3 pl-12 pr-4 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
           />
         </label>
       </div>
@@ -187,27 +187,27 @@ export default function WishlistPage() {
       {/* Grid / states */}
       <div className="mt-6">
         {coursesLoading ? (
-          <div className="flex items-center justify-center gap-3 rounded-3xl border border-white/10 bg-slate-950/60 py-20 text-slate-400">
+          <div className="flex items-center justify-center gap-3 rounded-3xl border border-border bg-surface py-20 text-text-muted">
             <FiLoader className="h-5 w-5 animate-spin" /> Loading your wishlist…
           </div>
         ) : coursesError ? (
           <div className="rounded-3xl border border-rose-400/20 bg-rose-500/5 py-16 text-center">
-            <FiAlertTriangle className="mx-auto h-10 w-10 text-rose-400" />
-            <p className="mt-4 text-lg font-semibold text-white">Couldn’t load your wishlist</p>
-            <p className="mt-1 text-slate-400">{coursesError}</p>
+            <FiAlertTriangle className="mx-auto h-10 w-10 text-danger" />
+            <p className="mt-4 text-lg font-semibold text-text">Couldn’t load your wishlist</p>
+            <p className="mt-1 text-text-muted">{coursesError}</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-slate-950/60 py-20 text-center">
-            <FiHeart className="mx-auto h-10 w-10 text-slate-600" />
-            <p className="mt-4 text-lg font-semibold text-white">Your wishlist is empty</p>
-            <p className="mt-1 text-slate-400">
+          <div className="rounded-3xl border border-border bg-surface py-20 text-center">
+            <FiHeart className="mx-auto h-10 w-10 text-text-subtle" />
+            <p className="mt-4 text-lg font-semibold text-text">Your wishlist is empty</p>
+            <p className="mt-1 text-text-muted">
               {courses.length === 0
                 ? 'Save courses you’re interested in to find them here later.'
                 : 'Try a different search term.'}
             </p>
             <Link
               href="/pages/courses"
-              className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+              className="mt-6 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary"
             >
               Browse courses <FiArrowRight className="h-4 w-4" />
             </Link>

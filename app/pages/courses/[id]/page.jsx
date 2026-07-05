@@ -81,6 +81,7 @@ function normalizeCourse(c) {
 
   return {
     id: c._id,
+    slug: c.slug || "",
     title: c.title,
     description: c.description,
     isHidden: !!c.isHidden,
@@ -163,7 +164,7 @@ function Stars({ n = 5 }) {
 function Price({ course, size = "lg" }) {
   if (course.isFree) {
     return (
-      <span className={`font-bold text-emerald-300 ${size === "lg" ? "text-4xl" : "text-xl"}`}>
+      <span className={`font-bold text-success ${size === "lg" ? "text-4xl" : "text-xl"}`}>
         Free
       </span>
     );
@@ -174,7 +175,7 @@ function Price({ course, size = "lg" }) {
         ৳{course.price}
       </span>
       {course.oldPrice ? (
-        <span className={`text-slate-500 line-through ${size === "lg" ? "text-lg" : "text-sm"}`}>
+        <span className={`text-text-subtle line-through ${size === "lg" ? "text-lg" : "text-sm"}`}>
           ৳{course.oldPrice}
         </span>
       ) : null}
@@ -188,8 +189,8 @@ function Price({ course, size = "lg" }) {
 
 function RailCard({ course }) {
   return (
-    <Link href={`/pages/courses/${course.id}`} className="group block">
-      <SpotlightCard className="flex gap-4 rounded-2xl border border-white/10 bg-slate-950/60 p-3 transition-colors hover:border-blue-500/30">
+    <Link href={`/pages/courses/${course.slug || course.id}`} className="group block">
+      <SpotlightCard className="flex gap-4 rounded-2xl border border-border bg-surface p-3 transition-colors hover:border-primary/30">
         <div className="relative h-20 w-24 flex-none overflow-hidden rounded-xl">
           <img
             src={course.img}
@@ -198,13 +199,13 @@ function RailCard({ course }) {
           />
         </div>
         <div className="flex min-w-0 flex-col justify-between py-0.5">
-          <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-white group-hover:text-blue-200">
+          <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-white group-hover:text-primary">
             {course.title}
           </h4>
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-slate-400">{course.category}</span>
+            <span className="text-xs text-text-muted">{course.category}</span>
             {course.isFree ? (
-              <span className="text-sm font-bold text-emerald-300">Free</span>
+              <span className="text-sm font-bold text-success">Free</span>
             ) : (
               <span className="text-sm font-bold text-white">৳{course.price}</span>
             )}
@@ -225,6 +226,7 @@ export default function CourseDetailPage({ params }) {
 
   const { course: raw, courseLoading, courseError } = useCourse(id);
   const course = useMemo(() => (raw ? normalizeCourse(raw) : null), [raw]);
+  const courseId = course?.id || id;
 
   // Staff accounts (teacher/admin/superadmin) manage courses; they can't buy them.
   const { user } = useUser();
@@ -238,12 +240,12 @@ export default function CourseDetailPage({ params }) {
   );
 
   const bestsellers = useMemo(
-    () => catalogue.filter((c) => c.badge === "Bestseller" && c.id !== id).slice(0, 3),
-    [catalogue, id],
+    () => catalogue.filter((c) => c.badge === "Bestseller" && c.id !== courseId).slice(0, 3),
+    [catalogue, courseId],
   );
   const featured = useMemo(
-    () => catalogue.filter((c) => c.badge === "Featured" && c.id !== id).slice(0, 3),
-    [catalogue, id],
+    () => catalogue.filter((c) => c.badge === "Featured" && c.id !== courseId).slice(0, 3),
+    [catalogue, courseId],
   );
 
   /* ---- Buy / enrol flow ---- */
@@ -255,16 +257,16 @@ export default function CourseDetailPage({ params }) {
   // the card shows "already bought" without needing a click.
   const { courses: myCourses } = useMyCourses();
   const alreadyEnrolled = useMemo(
-    () => (myCourses || []).some((c) => c._id === id),
-    [myCourses, id],
+    () => (myCourses || []).some((c) => String(c._id) === String(courseId)),
+    [myCourses, courseId],
   );
   const isEnrolled = enrolled || alreadyEnrolled;
 
   // Wishlist state for this course (heart toggle on the buy card).
   const { courses: wishlistCourses, toggle: toggleWishlist } = useWishlist();
   const isWishlisted = useMemo(
-    () => (wishlistCourses || []).some((c) => String(c._id) === String(id)),
-    [wishlistCourses, id],
+    () => (wishlistCourses || []).some((c) => String(c._id) === String(courseId)),
+    [wishlistCourses, courseId],
   );
   const [wishlistBusy, setWishlistBusy] = useState(false);
 
@@ -277,7 +279,7 @@ export default function CourseDetailPage({ params }) {
       return;
     }
     setWishlistBusy(true);
-    const result = await toggleWishlist(id);
+    const result = await toggleWishlist(courseId);
     setWishlistBusy(false);
     if (result === true) setToast({ type: "success", text: "Added to your wishlist." });
     else if (result === false) setToast({ type: "success", text: "Removed from your wishlist." });
@@ -335,7 +337,7 @@ export default function CourseDetailPage({ params }) {
     // Not logged in → send to login, then bounce back to this course
     if (!token) {
       router.push(
-        `/pages/auth/login?redirect=${encodeURIComponent(`/pages/courses/${id}`)}`,
+        `/pages/auth/login?redirect=${encodeURIComponent(`/pages/courses/${course?.slug || id}`)}`,
       );
       return;
     }
@@ -343,7 +345,7 @@ export default function CourseDetailPage({ params }) {
     setBuying(true);
     setToast(null);
     try {
-      const res = await fetch(`/api/courses/${id}/enroll`, {
+      const res = await fetch(`/api/courses/${courseId}/enroll`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -373,7 +375,7 @@ export default function CourseDetailPage({ params }) {
   const unavailable = !!course && (course.isHidden || course.status !== "published");
 
   return (
-    <div className="min-h-screen bg-[#020205] font-sans text-slate-100 antialiased">
+    <div className="min-h-screen bg-background font-sans text-text antialiased">
       <Navbar />
 
       {/* Ambient background */}
@@ -386,7 +388,7 @@ export default function CourseDetailPage({ params }) {
         <div className="mb-8 flex items-center justify-between gap-4">
           <button
             onClick={() => router.push("/pages/courses")}
-            className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white cursor-pointer"
+            className="group inline-flex items-center gap-2 rounded-full border border-border bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-white cursor-pointer"
           >
             <FiArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Back to courses
@@ -397,28 +399,28 @@ export default function CourseDetailPage({ params }) {
         {courseLoading ? (
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div className="space-y-6">
-              <div className="h-72 animate-pulse rounded-3xl border border-white/10 bg-slate-950/60 sm:h-96" />
+              <div className="h-72 animate-pulse rounded-3xl border border-border bg-surface sm:h-96" />
               <div className="space-y-3">
-                <div className="h-8 w-2/3 animate-pulse rounded bg-white/10" />
-                <div className="h-4 w-full animate-pulse rounded bg-white/5" />
-                <div className="h-4 w-4/5 animate-pulse rounded bg-white/5" />
+                <div className="h-8 w-2/3 animate-pulse rounded bg-surface-muted" />
+                <div className="h-4 w-full animate-pulse rounded bg-surface-muted" />
+                <div className="h-4 w-4/5 animate-pulse rounded bg-surface-muted" />
               </div>
             </div>
-            <div className="h-80 animate-pulse rounded-3xl border border-white/10 bg-slate-950/60" />
+            <div className="h-80 animate-pulse rounded-3xl border border-border bg-surface" />
           </div>
         ) : courseError || !course ? (
           /* ---- Error / not found ---- */
           <div className="rounded-3xl border border-rose-400/20 bg-rose-500/5 p-12 text-center">
-            <FiX className="mx-auto h-10 w-10 text-rose-400" />
+            <FiX className="mx-auto h-10 w-10 text-danger" />
             <p className="mt-4 text-lg font-semibold text-white">
               {courseError || "Course not found"}
             </p>
-            <p className="mt-1 text-slate-400">
+            <p className="mt-1 text-text-muted">
               The course you’re looking for may have been moved or unpublished.
             </p>
             <Link
               href="/pages/courses"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-3 text-sm font-semibold text-white"
             >
               Browse all courses <FiArrowRight className="h-4 w-4" />
             </Link>
@@ -434,7 +436,7 @@ export default function CourseDetailPage({ params }) {
               className="space-y-10"
             >
               {/* Hero media */}
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/40">
+              <div className="relative overflow-hidden rounded-3xl border border-border shadow-2xl shadow-black/40">
                 <img
                   src={course.img}
                   alt={course.title}
@@ -447,23 +449,23 @@ export default function CourseDetailPage({ params }) {
                   </span>
                 )}
                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-                  <p className="text-xs uppercase tracking-[0.3em] text-blue-300">
+                  <p className="text-xs uppercase tracking-[0.3em] text-primary">
                     {course.category}
                   </p>
                   <h1 className="mt-3 max-w-3xl text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl">
                     {course.title}
                   </h1>
-                  <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-300">
+                  <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-text-muted">
                     <span className="flex items-center gap-1.5">
                       <Stars n={5} />
                       <span className="font-semibold text-white">4.9</span>
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <FiUsers className="h-4 w-4 text-blue-300" />
+                      <FiUsers className="h-4 w-4 text-primary" />
                       {course.studentsCount.toLocaleString()} enrolled
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <FiBarChart2 className="h-4 w-4 text-blue-300" />
+                      <FiBarChart2 className="h-4 w-4 text-primary" />
                       {course.level}
                     </span>
                   </div>
@@ -480,11 +482,11 @@ export default function CourseDetailPage({ params }) {
                 ].map((f) => (
                   <SpotlightCard
                     key={f.label}
-                    className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-center"
+                    className="rounded-2xl border border-border bg-surface p-4 text-center"
                   >
-                    <f.icon className="mx-auto h-5 w-5 text-blue-300" />
+                    <f.icon className="mx-auto h-5 w-5 text-primary" />
                     <p className="mt-2 text-lg font-bold text-white">{f.value}</p>
-                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                    <p className="text-xs uppercase tracking-[0.18em] text-text-subtle">
                       {f.label}
                     </p>
                   </SpotlightCard>
@@ -494,9 +496,9 @@ export default function CourseDetailPage({ params }) {
               {/* About */}
               <section>
                 <h2 className="flex items-center gap-2 text-xl font-bold text-white">
-                  <FiBookOpen className="h-5 w-5 text-blue-300" /> About this course
+                  <FiBookOpen className="h-5 w-5 text-primary" /> About this course
                 </h2>
-                <p className="mt-4 whitespace-pre-line text-base leading-8 text-slate-300">
+                <p className="mt-4 whitespace-pre-line text-base leading-8 text-text-muted">
                   {course.description}
                 </p>
                 {course.tags.length > 0 && (
@@ -504,7 +506,7 @@ export default function CourseDetailPage({ params }) {
                     {course.tags.map((t) => (
                       <span
                         key={t}
-                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300"
+                        className="rounded-full border border-border bg-surface-muted px-3 py-1 text-xs text-text-muted"
                       >
                         #{t}
                       </span>
@@ -518,7 +520,7 @@ export default function CourseDetailPage({ params }) {
                 <section>
                   <div className="flex items-end justify-between gap-4">
                     <h2 className="text-xl font-bold text-white">Curriculum</h2>
-                    <span className="text-sm text-slate-400">
+                    <span className="text-sm text-text-muted">
                       {course.curriculum.length} sections · {totalLessons} lessons
                     </span>
                   </div>
@@ -526,20 +528,20 @@ export default function CourseDetailPage({ params }) {
                     {course.curriculum.map((section, si) => (
                       <div
                         key={section._id || si}
-                        className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950/60"
+                        className="overflow-hidden rounded-2xl border border-border bg-surface"
                       >
-                        <div className="flex items-center justify-between gap-3 border-b border-white/5 bg-white/5 px-5 py-4">
+                        <div className="flex items-center justify-between gap-3 border-b border-border bg-surface-muted px-5 py-4">
                           <h3 className="font-semibold text-white">
-                            <span className="text-blue-300">
+                            <span className="text-primary">
                               {String(si + 1).padStart(2, "0")}.
                             </span>{" "}
                             {section.title}
                           </h3>
-                          <span className="flex-none text-xs text-slate-400">
+                          <span className="flex-none text-xs text-text-muted">
                             {(section.lessons || []).length} lessons
                           </span>
                         </div>
-                        <ul className="divide-y divide-white/5">
+                        <ul className="divide-y divide-border">
                           {(section.lessons || []).map((lesson, li) => (
                             <li
                               key={lesson._id || li}
@@ -547,21 +549,21 @@ export default function CourseDetailPage({ params }) {
                             >
                               <div className="flex min-w-0 items-center gap-3">
                                 {lesson.isPreview ? (
-                                  <FiPlayCircle className="h-4 w-4 flex-none text-emerald-300" />
+                                  <FiPlayCircle className="h-4 w-4 flex-none text-success" />
                                 ) : (
-                                  <FiLock className="h-4 w-4 flex-none text-slate-500" />
+                                  <FiLock className="h-4 w-4 flex-none text-text-subtle" />
                                 )}
-                                <span className="truncate text-sm text-slate-300">
+                                <span className="truncate text-sm text-text-muted">
                                   {lesson.title}
                                 </span>
                                 {lesson.isPreview && (
-                                  <span className="flex-none rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                                  <span className="flex-none rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-success">
                                     Preview
                                   </span>
                                 )}
                               </div>
                               {lesson.duration ? (
-                                <span className="flex-none text-xs text-slate-500">
+                                <span className="flex-none text-xs text-text-subtle">
                                   {lesson.duration} min
                                 </span>
                               ) : null}
@@ -578,7 +580,7 @@ export default function CourseDetailPage({ params }) {
               {course.schedule.length > 0 && (
                 <section>
                   <h2 className="flex items-center gap-2 text-xl font-bold text-white">
-                    <FiCalendar className="h-5 w-5 text-blue-300" /> Class schedule
+                    <FiCalendar className="h-5 w-5 text-primary" /> Class schedule
                   </h2>
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     {[...course.schedule]
@@ -586,12 +588,12 @@ export default function CourseDetailPage({ params }) {
                       .map((slot, i) => (
                         <div
                           key={slot._id || i}
-                          className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-5 py-4"
+                          className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface px-5 py-4"
                         >
                           <span className="min-w-0 truncate font-semibold text-white">
                             {slot.title || "Class"}
                           </span>
-                          <span className="flex-none text-sm text-slate-300">
+                          <span className="flex-none text-sm text-text-muted">
                             {fmtClassDate(slot.startDate)}
                           </span>
                         </div>
@@ -608,7 +610,7 @@ export default function CourseDetailPage({ params }) {
                     {course.teachers.map((t) => (
                       <div
                         key={t._id}
-                        className="flex items-center gap-4 rounded-2xl border border-white/10 bg-slate-950/60 p-4"
+                        className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4"
                       >
                         <img
                           src={t.photo || FALLBACK_IMG}
@@ -617,7 +619,7 @@ export default function CourseDetailPage({ params }) {
                         />
                         <div className="min-w-0">
                           <p className="truncate font-semibold text-white">{t.name}</p>
-                          <p className="text-sm capitalize text-slate-400">{t.role || "Instructor"}</p>
+                          <p className="text-sm capitalize text-text-muted">{t.role || "Instructor"}</p>
                         </div>
                       </div>
                     ))}
@@ -637,12 +639,12 @@ export default function CourseDetailPage({ params }) {
                 {/* Buy card */}
                 <SpotlightCard
                   glow="rgba(99,102,241,0.25)"
-                  className="rounded-3xl border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl"
+                  className="rounded-3xl border border-border bg-surface-elevated p-6 shadow-2xl shadow-black/40 backdrop-blur-xl"
                 >
                   <div className="flex items-end justify-between gap-3">
                     <Price course={course} size="lg" />
                     {course.oldPrice && (
-                      <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                      <span className="rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success">
                         {Math.round((1 - course.price / course.oldPrice) * 100)}% off
                       </span>
                     )}
@@ -653,7 +655,7 @@ export default function CourseDetailPage({ params }) {
 
                   {isEnrolled ? (
                     <div className="mt-4 space-y-3">
-                      <div className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-6 py-3 text-base font-semibold text-emerald-200">
+                      <div className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-success/30 bg-success/10 px-6 py-3 text-base font-semibold text-emerald-200">
                         <FiCheck className="h-5 w-5" /> Already bought
                       </div>
                       <Link
@@ -664,18 +666,18 @@ export default function CourseDetailPage({ params }) {
                       </Link>
                     </div>
                   ) : isStaff ? (
-                    <div className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-base font-semibold text-slate-300">
+                    <div className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-surface-muted px-6 py-3.5 text-base font-semibold text-text-muted">
                       <FiLock className="h-5 w-5" /> Staff can’t enrol
                     </div>
                   ) : unavailable ? (
-                    <div className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-base font-semibold text-slate-300">
+                    <div className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-surface-muted px-6 py-3.5 text-base font-semibold text-text-muted">
                       <FiLock className="h-5 w-5" /> Not available
                     </div>
                   ) : (
                     <button
                       onClick={handleBuy}
                       disabled={buying || !canEnroll}
-                      className="group mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="group mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {buying ? (
                         "Processing…"
@@ -700,8 +702,8 @@ export default function CourseDetailPage({ params }) {
                     aria-pressed={isWishlisted}
                     className={`mt-3 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                       isWishlisted
-                        ? "border-rose-400/40 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20"
-                        : "border-white/10 bg-white/5 text-slate-200 hover:border-rose-400/40 hover:text-rose-200"
+                        ? "border-rose-400/40 bg-danger/10 text-rose-200 hover:bg-rose-500/20"
+                        : "border-border bg-surface-muted text-text hover:border-rose-400/40 hover:text-rose-200"
                     }`}
                   >
                     <FiHeart className={`h-4 w-4 ${isWishlisted ? "fill-rose-400" : ""}`} />
@@ -710,7 +712,7 @@ export default function CourseDetailPage({ params }) {
 
                   <Link
                     href="/pages/courses"
-                    className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white cursor-pointer"
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-surface-muted px-6 py-3 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-white cursor-pointer"
                   >
                     <FiArrowLeft className="h-4 w-4" /> Back to courses
                   </Link>
@@ -721,8 +723,8 @@ export default function CourseDetailPage({ params }) {
                       animate={{ opacity: 1, y: 0 }}
                       className={`mt-4 flex items-start gap-2 rounded-xl border px-4 py-3 text-sm ${
                         toast.type === "success"
-                          ? "border-emerald-400/20 bg-emerald-500/10 text-emerald-200"
-                          : "border-rose-400/20 bg-rose-500/10 text-rose-200"
+                          ? "border-success/20 bg-success/10 text-emerald-200"
+                          : "border-rose-400/20 bg-danger/10 text-rose-200"
                       }`}
                     >
                       {toast.type === "success" ? (
@@ -735,7 +737,7 @@ export default function CourseDetailPage({ params }) {
                   )}
 
                   {/* This course includes */}
-                  <ul className="mt-6 space-y-3 border-t border-white/5 pt-6 text-sm text-slate-300">
+                  <ul className="mt-6 space-y-3 border-t border-border pt-6 text-sm text-text-muted">
                     {[
                       `${totalLessons} on-demand lessons`,
                       `${course.hours} hours of content`,
@@ -744,7 +746,7 @@ export default function CourseDetailPage({ params }) {
                       "Lifetime access",
                     ].map((item) => (
                       <li key={item} className="flex items-center gap-3">
-                        <FiCheck className="h-4 w-4 flex-none text-emerald-300" />
+                        <FiCheck className="h-4 w-4 flex-none text-success" />
                         {item}
                       </li>
                     ))}
@@ -754,7 +756,7 @@ export default function CourseDetailPage({ params }) {
                 {/* Bestseller rail */}
                 {bestsellers.length > 0 && (
                   <div>
-                    <h3 className="mb-3 flex items-center gap-2 px-1 text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">
+                    <h3 className="mb-3 flex items-center gap-2 px-1 text-sm font-semibold uppercase tracking-[0.2em] text-primary">
                       <FiAward className="h-4 w-4" /> Bestsellers
                     </h3>
                     <div className="space-y-3">

@@ -41,12 +41,12 @@ export const EMPTY_FORM = {
 };
 
 export const inputClass =
-  'mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
+  'mt-2 w-full rounded-2xl border border-border bg-surface-elevated/80 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
 
 export function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="text-sm font-medium text-slate-300">{label}</span>
+      <span className="text-sm font-medium text-text-muted">{label}</span>
       {children}
     </label>
   );
@@ -95,7 +95,7 @@ export default function CourseForm({
       <div className="grid gap-5 sm:grid-cols-3">
         <Field label="Price tier">
           <select name="priceTier" value={form.priceTier} onChange={onField} className={inputClass}>
-            {PRICE_TIERS.map((t) => <option key={t} value={t} className="bg-slate-900 capitalize">{t}</option>)}
+            {PRICE_TIERS.map((t) => <option key={t} value={t} className="bg-surface-elevated capitalize">{t}</option>)}
           </select>
         </Field>
         <Field label="Price (৳)">
@@ -109,12 +109,12 @@ export default function CourseForm({
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Level">
           <select name="level" value={form.level} onChange={onField} className={inputClass}>
-            {LEVELS.map((l) => <option key={l} value={l} className="bg-slate-900 capitalize">{l}</option>)}
+            {LEVELS.map((l) => <option key={l} value={l} className="bg-surface-elevated capitalize">{l}</option>)}
           </select>
         </Field>
         <Field label="Status">
           <select name="status" value={form.status} onChange={onField} className={inputClass}>
-            {STATUSES.map((s) => <option key={s} value={s} className="bg-slate-900 capitalize">{s}</option>)}
+            {STATUSES.map((s) => <option key={s} value={s} className="bg-surface-elevated capitalize">{s}</option>)}
           </select>
         </Field>
       </div>
@@ -130,8 +130,8 @@ export default function CourseForm({
       {/* Enrollment window + class start — drive the public countdowns.
           Leave blank for an always-open course with no countdown. */}
       <div>
-        <p className="text-sm font-medium text-slate-300">Enrollment &amp; start dates</p>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="text-sm font-medium text-text-muted">Enrollment &amp; start dates</p>
+        <p className="mt-1 text-xs text-text-subtle">
           Optional. Powers the countdowns; leave empty to keep a course always open.
         </p>
         <div className="mt-3 grid gap-5 sm:grid-cols-3">
@@ -149,7 +149,7 @@ export default function CourseForm({
 
       {/* Marketing flags */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3.5 transition-colors hover:border-amber-400/30">
+        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5 transition-colors hover:border-amber-400/30">
           <input
             type="checkbox"
             checked={form.isBestseller}
@@ -158,17 +158,17 @@ export default function CourseForm({
           />
           <span>
             <span className="flex items-center gap-1.5 text-sm font-semibold text-white">
-              <FiAward className="h-4 w-4 text-amber-300" /> Bestseller
+              <FiAward className="h-4 w-4 text-warning" /> Bestseller
             </span>
-            <span className="mt-0.5 block text-xs text-slate-400">Show a bestseller badge on this course.</span>
+            <span className="mt-0.5 block text-xs text-text-muted">Show a bestseller badge on this course.</span>
           </span>
         </label>
 
         <label
           className={`flex items-start gap-3 rounded-2xl border px-4 py-3.5 transition-colors ${
             homepageFull
-              ? 'cursor-not-allowed border-white/5 bg-white/[0.02] opacity-60'
-              : 'cursor-pointer border-white/10 bg-slate-900/60 hover:border-blue-400/30'
+              ? 'cursor-not-allowed border-border bg-white/[0.02] opacity-60'
+              : 'cursor-pointer border-border bg-surface hover:border-blue-400/30'
           }`}
         >
           <input
@@ -180,9 +180,9 @@ export default function CourseForm({
           />
           <span>
             <span className="flex items-center gap-1.5 text-sm font-semibold text-white">
-              <FiHome className="h-4 w-4 text-blue-300" /> Show on homepage
+              <FiHome className="h-4 w-4 text-primary" /> Show on homepage
             </span>
-            <span className="mt-0.5 block text-xs text-slate-400">
+            <span className="mt-0.5 block text-xs text-text-muted">
               Feature on the homepage ({featuredCount}/{MAX_FEATURED_COURSES} used).
             </span>
           </span>

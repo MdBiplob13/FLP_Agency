@@ -142,6 +142,7 @@ export async function POST(request) {
 
     const course = await Course.create({
       title,
+      slug: body.slug || undefined,
       description,
       category: categoryName,
       priceTier: body.priceTier,

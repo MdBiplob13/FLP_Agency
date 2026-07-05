@@ -7,19 +7,19 @@ import { getCourseTiming, formatRemaining } from "@/lib/courseTiming";
 // Visual accent per phase so the urgency reads at a glance.
 const ACCENTS = {
   "before-enroll": {
-    text: "text-blue-200",
-    box: "border-blue-400/20 bg-blue-500/10 text-blue-100",
-    dot: "text-blue-300",
+    text: "text-primary",
+    box: "border-blue-400/20 bg-primary/10 text-blue-100",
+    dot: "text-primary",
   },
   "enroll-open": {
     text: "text-emerald-200",
-    box: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
-    dot: "text-emerald-300",
+    box: "border-success/20 bg-success/10 text-emerald-100",
+    dot: "text-success",
   },
   "enroll-closed": {
     text: "text-amber-200",
-    box: "border-amber-400/20 bg-amber-500/10 text-amber-100",
-    dot: "text-amber-300",
+    box: "border-amber-400/20 bg-warning/10 text-amber-100",
+    dot: "text-warning",
   },
 };
 
@@ -79,7 +79,7 @@ export default function CourseCountdown({ course, variant = "full", className = 
 
   return (
     <div
-      className={`rounded-2xl border border-white/10 bg-slate-900/50 p-4 ${className}`}
+      className={`rounded-2xl border border-border bg-surface p-4 ${className}`}
     >
       <p className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] ${accent.text}`}>
         <FiClock className={`h-4 w-4 ${accent.dot}`} /> {timing.label}

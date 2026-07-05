@@ -4,9 +4,36 @@ import Course, { MAX_FEATURED_COURSES } from "@/models/courseModel";
 import User from "@/models/userModel";
 import { requireRole } from "@/lib/auth";
 import { ensureCategory } from "@/lib/categories";
+import { slugify } from "@/lib/slug";
 
 function isValidId(id) {
   return mongoose.Types.ObjectId.isValid(id);
+}
+
+async function findCourseByIdentifier(identifier) {
+  if (!identifier) return null;
+
+  await dbConnect();
+
+  const query = isValidId(identifier)
+    ? { _id: identifier }
+    : { slug: identifier };
+
+  const course = await Course.findOne(query)
+    .populate("teachers", "name photo role socialLinks")
+    .lean();
+
+  if (course?.slug) return course;
+
+  if (course && !course.slug) {
+    const generatedSlug = slugify(course.title || "");
+    if (generatedSlug) {
+      await Course.updateOne({ _id: course._id }, { $set: { slug: generatedSlug } });
+      course.slug = generatedSlug;
+    }
+  }
+
+  return course;
 }
 
 // GET /api/courses/[id] — public single course
@@ -14,14 +41,11 @@ export async function GET(request, { params }) {
   try {
     // In this Next.js version, params is a Promise and must be awaited
     const { id } = await params;
-    if (!isValidId(id)) {
+    if (!id?.trim()) {
       return Response.json({ success: false, message: "Invalid course id." }, { status: 400 });
     }
 
-    await dbConnect();
-    const course = await Course.findById(id)
-      .populate("teachers", "name photo role socialLinks")
-      .lean();
+    const course = await findCourseByIdentifier(id);
 
     if (!course) {
       return Response.json({ success: false, message: "Course not found." }, { status: 404 });
@@ -110,6 +134,10 @@ export async function PATCH(request, { params }) {
     // `teachers` is a relation, so it's handled explicitly instead of via the
     // blind whitelist above: accept an array of user ids, keep only the ones
     // that are real teachers, and store them as the course's instructor set.
+    if ("slug" in body && body.slug?.trim()) {
+      course.slug = body.slug.trim().toLowerCase();
+    }
+
     if ("teachers" in body) {
       if (!Array.isArray(body.teachers)) {
         return Response.json(

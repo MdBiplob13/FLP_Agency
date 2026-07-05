@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FiPlusCircle, FiTag } from 'react-icons/fi';
 
 const inputClass =
-  'mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
+  'mt-2 w-full rounded-2xl border border-border bg-surface-elevated/80 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
 
 /**
  * Category text input with a live suggestion dropdown.
@@ -50,7 +50,7 @@ export default function CategoryInput({ value, onChange, categories = [] }) {
 
   return (
     <label className="relative block" ref={wrapRef}>
-      <span className="text-sm font-medium text-slate-300">Category</span>
+      <span className="text-sm font-medium text-text-muted">Category</span>
       <input
         value={value}
         onChange={(e) => {
@@ -65,25 +65,25 @@ export default function CategoryInput({ value, onChange, categories = [] }) {
 
       {/* "Will be created" hint */}
       {isNew && !open && (
-        <span className="mt-2 inline-flex items-center gap-1.5 text-xs text-emerald-300">
+        <span className="mt-2 inline-flex items-center gap-1.5 text-xs text-success">
           <FiPlusCircle className="h-3.5 w-3.5" /> New category — will be added
         </span>
       )}
 
       {/* Suggestion dropdown */}
       {open && (matches.length > 0 || isNew) && (
-        <div className="absolute z-20 mt-2 max-h-60 w-full overflow-y-auto rounded-2xl border border-white/10 bg-[#0a0a12] py-1.5 shadow-2xl shadow-black/50">
+        <div className="absolute z-20 mt-2 max-h-60 w-full overflow-y-auto rounded-2xl border border-border bg-surface-elevated py-1.5 shadow-2xl shadow-black/50">
           {matches.map((c) => (
             <button
               key={c._id || c.name}
               type="button"
               onClick={() => pick(c.name)}
-              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-left text-sm text-slate-200 transition-colors hover:bg-white/5"
+              className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-left text-sm text-text transition-colors hover:bg-surface-muted"
             >
-              <FiTag className="h-4 w-4 text-blue-300" />
+              <FiTag className="h-4 w-4 text-primary" />
               <span className="flex-1 truncate">{c.name}</span>
               {typeof c.courseCount === 'number' && (
-                <span className="text-xs text-slate-500">{c.courseCount}</span>
+                <span className="text-xs text-text-subtle">{c.courseCount}</span>
               )}
             </button>
           ))}
@@ -92,11 +92,11 @@ export default function CategoryInput({ value, onChange, categories = [] }) {
             <button
               type="button"
               onClick={() => pick(value.trim())}
-              className="flex w-full cursor-pointer items-center gap-2.5 border-t border-white/10 px-4 py-2.5 text-left text-sm text-emerald-300 transition-colors hover:bg-emerald-500/10"
+              className="flex w-full cursor-pointer items-center gap-2.5 border-t border-border px-4 py-2.5 text-left text-sm text-success transition-colors hover:bg-success/10"
             >
               <FiPlusCircle className="h-4 w-4" />
               <span className="flex-1 truncate">Create “{value.trim()}”</span>
-              <span className="text-xs text-emerald-400/70">new</span>
+              <span className="text-xs text-success/70">new</span>
             </button>
           )}
         </div>

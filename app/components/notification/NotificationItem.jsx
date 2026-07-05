@@ -11,17 +11,15 @@ import {
   FiTrash2,
 } from 'react-icons/fi';
 
-// Map each notification type to an icon + accent colour.
 const TYPE_META = {
-  signup: { icon: FiUserPlus, accent: 'bg-blue-500/15 text-blue-300' },
-  enrollment: { icon: FiShoppingBag, accent: 'bg-emerald-500/15 text-emerald-300' },
-  wishlist: { icon: FiHeart, accent: 'bg-rose-500/15 text-rose-300' },
-  announcement: { icon: FiBell, accent: 'bg-purple-500/15 text-purple-300' },
-  schedule: { icon: FiCalendar, accent: 'bg-amber-500/15 text-amber-300' },
-  welcome: { icon: FiCheckCircle, accent: 'bg-emerald-500/15 text-emerald-300' },
+  signup: { icon: FiUserPlus, accent: 'bg-primary/15 text-primary' },
+  enrollment: { icon: FiShoppingBag, accent: 'bg-success/15 text-success' },
+  wishlist: { icon: FiHeart, accent: 'bg-danger/15 text-danger' },
+  announcement: { icon: FiBell, accent: 'bg-accent/15 text-accent' },
+  schedule: { icon: FiCalendar, accent: 'bg-warning/15 text-warning' },
+  welcome: { icon: FiCheckCircle, accent: 'bg-success/15 text-success' },
 };
 
-// Relative "time ago" formatting for the timestamp.
 function timeAgo(value) {
   if (!value) return '';
   const diff = Date.now() - new Date(value).getTime();
@@ -36,12 +34,8 @@ function timeAgo(value) {
   return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-/**
- * A single notification row. Clicking it marks it read (and follows `link` if
- * present). `compact` trims padding for the bell dropdown.
- */
 export default function NotificationItem({ notification, onRead, onRemove, compact = false }) {
-  const meta = TYPE_META[notification.type] || { icon: FiBell, accent: 'bg-white/10 text-slate-300' };
+  const meta = TYPE_META[notification.type] || { icon: FiBell, accent: 'bg-surface-muted text-text-muted' };
   const Icon = meta.icon;
 
   const handleClick = () => {
@@ -50,22 +44,22 @@ export default function NotificationItem({ notification, onRead, onRemove, compa
 
   const inner = (
     <div className={`flex items-start gap-3 ${compact ? 'px-4 py-3' : 'px-5 py-4'}`}>
-      <span className={`mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-full ring-1 ring-white/10 ${meta.accent}`}>
+      <span className={`mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-full ring-1 ring-border ${meta.accent}`}>
         <Icon className="h-4 w-4" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className={`font-semibold text-white ${compact ? 'text-sm' : 'text-sm'} ${notification.read ? '' : 'pr-2'}`}>
+        <p className={`font-semibold text-text ${compact ? 'text-sm' : 'text-sm'} ${notification.read ? '' : 'pr-2'}`}>
           {notification.title}
         </p>
         {notification.body && (
-          <p className={`mt-0.5 text-slate-400 ${compact ? 'line-clamp-2 text-xs' : 'text-sm'}`}>
+          <p className={`mt-0.5 text-text-muted ${compact ? 'line-clamp-2 text-xs' : 'text-sm'}`}>
             {notification.body}
           </p>
         )}
-        <p className="mt-1 text-xs text-slate-500">{timeAgo(notification.createdAt)}</p>
+        <p className="mt-1 text-xs text-text-subtle">{timeAgo(notification.createdAt)}</p>
       </div>
       {!notification.read && (
-        <span className="mt-1.5 h-2 w-2 flex-none rounded-full bg-blue-400" aria-label="Unread" />
+        <span className="mt-1.5 h-2 w-2 flex-none rounded-full bg-primary" aria-label="Unread" />
       )}
       {onRemove && !compact && (
         <button
@@ -74,7 +68,7 @@ export default function NotificationItem({ notification, onRead, onRemove, compa
             e.stopPropagation();
             onRemove(notification._id);
           }}
-          className="ml-1 inline-flex h-7 w-7 flex-none cursor-pointer items-center justify-center rounded-lg border border-white/5 bg-white/5 text-slate-400 transition-colors hover:text-red-300"
+          className="ml-1 inline-flex h-7 w-7 flex-none cursor-pointer items-center justify-center rounded-lg border border-border bg-surface-muted text-text-muted transition-colors hover:text-danger"
           aria-label="Delete notification"
         >
           <FiTrash2 className="h-3.5 w-3.5" />
@@ -83,8 +77,8 @@ export default function NotificationItem({ notification, onRead, onRemove, compa
     </div>
   );
 
-  const base = `block w-full text-left transition-colors hover:bg-white/5 ${
-    notification.read ? '' : 'bg-blue-500/[0.04]'
+  const base = `block w-full text-left transition-colors hover:bg-surface-muted ${
+    notification.read ? '' : 'bg-primary/[0.04]'
   }`;
 
   if (notification.link) {

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { slugify } from "@/lib/slug";
 
 // A single lesson inside a curriculum section
 const lessonSchema = new mongoose.Schema(
@@ -69,6 +70,13 @@ const courseSchema = new mongoose.Schema({
     trim: true,
     minlength: 3,
     maxlength: 100,
+  },
+  slug: {
+    type: String,
+    trim: true,
+    lowercase: true,
+    unique: true,
+    sparse: true,
   },
   description: {
     type: String,
@@ -205,6 +213,14 @@ export const MAX_FEATURED_COURSES = 3;
 // function with no args instead of calling next().
 courseSchema.pre("save", function () {
   this.updatedAt = Date.now();
+
+  if (this.isModified("title") && !this.slug) {
+    this.slug = slugify(this.title);
+  }
+
+  if (this.isModified("title") && this.slug) {
+    this.slug = slugify(this.title);
+  }
 });
 
 // Reuse the compiled model across hot reloads to avoid OverwriteModelError

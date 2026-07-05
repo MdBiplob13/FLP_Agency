@@ -16,7 +16,7 @@ import {
 import { authHeaders } from '@/lib/clientAuth';
 
 const inputClass =
-  'mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
+  'mt-2 w-full rounded-2xl border border-border bg-surface-elevated/80 px-4 py-3 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState([]);
@@ -137,13 +137,13 @@ export default function AdminCategoriesPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Categories</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">Category management</h1>
-          <p className="mt-2 text-slate-400">Add, rename, and remove course categories.</p>
+          <p className="text-sm uppercase tracking-[0.35em] text-primary">Categories</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-text">Category management</h1>
+          <p className="mt-2 text-text-muted">Add, rename, and remove course categories.</p>
         </div>
         <button
           onClick={openCreate}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
+          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:brightness-110"
         >
           <FiPlus className="h-4 w-4" /> New category
         </button>
@@ -152,30 +152,30 @@ export default function AdminCategoriesPage() {
       {/* Search */}
       <div className="mt-10">
         <label className="relative block w-full sm:max-w-xs">
-          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-subtle" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search categories…"
-            className="w-full rounded-full border border-white/10 bg-slate-900/80 py-3 pl-12 pr-4 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+            className="w-full rounded-full border border-border bg-surface-elevated/80 py-3 pl-12 pr-4 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
           />
         </label>
       </div>
 
       {/* Table */}
-      <div className="mt-6 overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60">
+      <div className="mt-6 overflow-hidden rounded-3xl border border-border bg-surface">
         {loading ? (
-          <div className="flex items-center justify-center gap-3 py-20 text-slate-400">
+          <div className="flex items-center justify-center gap-3 py-20 text-text-muted">
             <FiLoader className="h-5 w-5 animate-spin" /> Loading categories…
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-20 text-center">
-            <FiTag className="mx-auto h-10 w-10 text-slate-600" />
-            <p className="mt-4 text-lg font-semibold text-white">No categories yet</p>
-            <p className="mt-1 text-slate-400">Create one, or add a course with a new category.</p>
+            <FiTag className="mx-auto h-10 w-10 text-text-subtle" />
+            <p className="mt-4 text-lg font-semibold text-text">No categories yet</p>
+            <p className="mt-1 text-text-muted">Create one, or add a course with a new category.</p>
             <button
               onClick={openCreate}
-              className="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+              className="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary"
             >
               <FiPlus className="h-4 w-4" /> New category
             </button>
@@ -183,7 +183,7 @@ export default function AdminCategoriesPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="border-b border-white/10 text-xs uppercase tracking-wider text-slate-400">
+              <thead className="border-b border-border text-xs uppercase tracking-wider text-text-muted">
                 <tr>
                   <th className="px-6 py-4 font-medium">Category</th>
                   <th className="px-6 py-4 font-medium">Description</th>
@@ -191,32 +191,32 @@ export default function AdminCategoriesPage() {
                   <th className="px-6 py-4 text-right font-medium">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border">
                 {filtered.map((c) => {
                   const locked = lockedFromDelete(c);
                   return (
                     <tr key={c._id} className="transition-colors hover:bg-white/[0.02]">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+                          <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-border">
                             <FiTag className="h-4 w-4" />
                           </span>
-                          <span className="font-semibold text-white">{c.name}</span>
+                          <span className="font-semibold text-text">{c.name}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-slate-400">
+                      <td className="px-6 py-4 text-text-muted">
                         {c.description ? (
                           <span className="line-clamp-1">{c.description}</span>
                         ) : (
-                          <span className="text-slate-600">—</span>
+                          <span className="text-text-subtle">—</span>
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center gap-1.5 text-slate-300">
-                          <FiBookOpen className="h-3.5 w-3.5 text-slate-500" />
+                        <span className="inline-flex items-center gap-1.5 text-text-muted">
+                          <FiBookOpen className="h-3.5 w-3.5 text-text-subtle" />
                           {c.courseCount || 0}
                           {c.publishedCount > 0 && (
-                            <span className="ml-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300 ring-1 ring-emerald-500/20">
+                            <span className="ml-1 rounded-full bg-success/10 px-2 py-0.5 text-xs text-success ring-1 ring-emerald-500/20">
                               {c.publishedCount} live
                             </span>
                           )}
@@ -226,7 +226,7 @@ export default function AdminCategoriesPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openEdit(c)}
-                            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition-colors hover:border-blue-500/40 hover:text-blue-200"
+                            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border bg-surface-muted text-text-muted transition-colors hover:border-primary/40 hover:text-primary"
                             aria-label="Edit category"
                           >
                             <FiEdit2 className="h-4 w-4" />
@@ -237,8 +237,8 @@ export default function AdminCategoriesPage() {
                             title={locked ? 'Has published courses — cannot delete' : 'Delete category'}
                             className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
                               locked
-                                ? 'cursor-not-allowed border-white/5 bg-white/[0.02] text-slate-600'
-                                : 'cursor-pointer border-red-400/20 bg-red-500/10 text-red-300 hover:bg-red-500/20'
+                                ? 'cursor-not-allowed border-border bg-white/[0.02] text-text-subtle'
+                                : 'cursor-pointer border-danger/20 bg-danger/10 text-danger hover:bg-danger/20'
                             }`}
                             aria-label="Delete category"
                           >
@@ -258,14 +258,14 @@ export default function AdminCategoriesPage() {
       {/* ---- Create / Edit modal ---- */}
       {modalOpen && (
         <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:p-8">
-          <div className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-[#0a0a12] shadow-2xl shadow-black/50">
-            <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
-              <h2 className="text-lg font-semibold text-white">
+          <div className="relative w-full max-w-lg rounded-3xl border border-border bg-surface-elevated shadow-2xl shadow-black/50">
+            <div className="flex items-center justify-between border-b border-border px-6 py-5">
+              <h2 className="text-lg font-semibold text-text">
                 {editingId ? 'Edit category' : 'Create category'}
               </h2>
               <button
                 onClick={() => setModalOpen(false)}
-                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white/5 text-slate-300 transition-colors hover:text-white"
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-surface-muted text-text-muted transition-colors hover:text-text"
                 aria-label="Close"
               >
                 <FiX className="h-5 w-5" />
@@ -274,7 +274,7 @@ export default function AdminCategoriesPage() {
 
             <form onSubmit={handleSave} className="space-y-5 px-6 py-6">
               <label className="block">
-                <span className="text-sm font-medium text-slate-300">Name</span>
+                <span className="text-sm font-medium text-text-muted">Name</span>
                 <input
                   value={form.name}
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
@@ -283,7 +283,7 @@ export default function AdminCategoriesPage() {
                 />
               </label>
               <label className="block">
-                <span className="text-sm font-medium text-slate-300">Description (optional)</span>
+                <span className="text-sm font-medium text-text-muted">Description (optional)</span>
                 <textarea
                   rows={3}
                   value={form.description}
@@ -294,23 +294,23 @@ export default function AdminCategoriesPage() {
               </label>
 
               {editingId && (
-                <p className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-xs leading-5 text-amber-200">
+                <p className="rounded-2xl border border-amber-400/20 bg-warning/10 px-4 py-3 text-xs leading-5 text-amber-200">
                   Renaming updates this category on every course currently using it.
                 </p>
               )}
 
-              <div className="flex items-center justify-end gap-3 border-t border-white/10 pt-5">
+              <div className="flex items-center justify-end gap-3 border-t border-border pt-5">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="cursor-pointer rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:text-blue-200"
+                  className="cursor-pointer rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:text-primary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {saving && <FiLoader className="h-4 w-4 animate-spin" />}
                   {saving ? 'Saving…' : editingId ? 'Update category' : 'Create category'}
@@ -324,14 +324,14 @@ export default function AdminCategoriesPage() {
       {/* ---- Delete confirmation ---- */}
       {deleteTarget && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0a0a12] p-7 shadow-2xl shadow-black/50">
+          <div className="w-full max-w-md rounded-3xl border border-border bg-surface-elevated p-7 shadow-2xl shadow-black/50">
             <div className="flex items-start gap-4">
-              <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-red-500/15 text-red-300 ring-1 ring-red-400/20">
+              <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-red-500/15 text-danger ring-1 ring-red-400/20">
                 <FiAlertTriangle className="h-6 w-6" />
               </span>
               <div>
-                <h3 className="text-lg font-semibold text-white">Delete category?</h3>
-                <p className="mt-1 text-sm leading-6 text-slate-400">
+                <h3 className="text-lg font-semibold text-text">Delete category?</h3>
+                <p className="mt-1 text-sm leading-6 text-text-muted">
                   “{deleteTarget.name}” will be removed. Courses keep their category text but it will
                   no longer appear in suggestions.
                 </p>
@@ -340,7 +340,7 @@ export default function AdminCategoriesPage() {
             <div className="mt-6 flex items-center justify-end gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="cursor-pointer rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:text-blue-200"
+                className="cursor-pointer rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:text-primary"
               >
                 Cancel
               </button>

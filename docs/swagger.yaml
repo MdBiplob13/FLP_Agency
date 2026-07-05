@@ -1,0 +1,1823 @@
+openapi: 3.0.3
+info:
+  title: FLP Agency API
+  version: 1.0.0
+  description: >
+    Backend REST API for the FLP Agency learning platform (Next.js App Router +
+    MongoDB/Mongoose). Covers authentication, courses (with nested curriculum,
+    schedule, batch & announcements), blogs, categories, teachers, users,
+    notifications, contact messages and the admin dashboard stats.
+
+
+    ## Authentication
+
+    Protected endpoints use a **JWT bearer token**, issued by `/api/auth/login`
+    and `/api/auth/signup` (valid for 7 days). Send it as:
+
+    `Authorization: Bearer <token>`
+
+
+    ## Roles
+
+    - `user` — student (default on signup)
+
+    - `teacher` — can create/manage their own courses
+
+    - `admin` — manages all content & users
+
+    - `superadmin` — seeded; can additionally grant the `admin` role
+
+
+    ## Response envelope
+
+    Every response is JSON shaped as `{ "success": boolean, ... }`. Failures add
+    a `"message"` string. Successful payloads carry the resource(s) under a named
+    key (e.g. `course`, `courses`, `user`).
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: https://your-app.vercel.app
+    description: Production (Vercel)
+
+tags:
+  - name: Auth
+    description: Signup, login and token verification
+  - name: Courses
+    description: Course catalogue & management
+  - name: Course Content
+    description: Curriculum sections, lessons, schedule, batch & announcements
+  - name: Enrollment & Wishlist
+    description: Student enrollment and wishlisting
+  - name: Blogs
+    description: Blog posts
+  - name: Categories
+    description: Content categories
+  - name: Teachers
+    description: Public teacher profiles & featured flag
+  - name: Users
+    description: User administration & self-service profile
+  - name: Notifications
+    description: Per-user in-app notification feed
+  - name: Contact
+    description: Public contact form & admin inbox
+  - name: Admin
+    description: Dashboard statistics
+
+paths:
+  ############################################################
+  # AUTH
+  ############################################################
+  /api/auth/signup:
+    post:
+      tags: [Auth]
+      summary: Register a new account
+      description: Creates a `user` account, returns a JWT, and notifies admins.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, phone, password]
+              properties:
+                name: { type: string, minLength: 3, maxLength: 50, example: Jane Doe }
+                email: { type: string, format: email, example: jane@example.com }
+                phone: { type: string, example: "+8801712345678" }
+                password: { type: string, format: password, minLength: 8, example: secret123 }
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in
+      description: Verifies credentials and returns a JWT valid for 7 days.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, example: jane@example.com }
+                password: { type: string, format: password, example: secret123 }
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401":
+          description: Invalid email or password
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Account is not active (inactive/blocked)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/auth/getUser:
+    get:
+      tags: [Auth]
+      summary: Get the current user from a token
+      description: Verifies the bearer token and returns the matching user.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: The authenticated user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  status: { type: string, example: success }
+                  user: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # COURSES
+  ############################################################
+  /api/courses:
+    get:
+      tags: [Courses]
+      summary: List courses (public catalogue)
+      description: >
+        Public callers see only published, non-hidden courses. Managers
+        (teacher/admin/superadmin) sending a valid token plus `status` may list
+        drafts/archived/all.
+      parameters:
+        - { name: category, in: query, schema: { type: string }, description: "Filter by category name ('All' = no filter)" }
+        - { name: level, in: query, schema: { type: string, enum: [beginner, intermediate, advanced] } }
+        - { name: priceTier, in: query, schema: { type: string, enum: [free, paid, discounted] } }
+        - { name: status, in: query, schema: { type: string, enum: [draft, published, archived, all] }, description: "Manager-only; ignored for public callers" }
+        - { name: featured, in: query, schema: { type: string, enum: ["true"] } }
+        - { name: bestseller, in: query, schema: { type: string, enum: ["true"] } }
+        - { name: search, in: query, schema: { type: string }, description: "Matches title, description, category or tags" }
+        - { name: page, in: query, schema: { type: integer, default: 1, minimum: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 12, minimum: 1, maximum: 50 } }
+      security:
+        - bearerAuth: []
+        - {}
+      responses:
+        "200":
+          description: A paginated list of courses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  courses:
+                    type: array
+                    items: { $ref: "#/components/schemas/Course" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    post:
+      tags: [Courses]
+      summary: Create a course
+      description: Teachers & admins only. The creator is attached as a teacher by default. Unknown categories are auto-registered.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CourseInput" }
+      responses:
+        "201":
+          description: Course created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  course: { $ref: "#/components/schemas/Course" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409":
+          description: Featured-course cap reached, or hidden+featured/bestseller conflict
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/courses/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+    get:
+      tags: [Courses]
+      summary: Get a single course
+      responses:
+        "200":
+          description: The course
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  course: { $ref: "#/components/schemas/Course" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    patch:
+      tags: [Courses]
+      summary: Update a course
+      description: Admins may edit any course; teachers only their own. `teachers` accepts an array of teacher user ids (non-teachers are dropped).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CourseInput" }
+      responses:
+        "200":
+          description: Course updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  course: { $ref: "#/components/schemas/Course" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Featured-course cap reached, or hidden+featured/bestseller conflict
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete:
+      tags: [Courses]
+      summary: Delete a course
+      description: Admins may delete any course; teachers only their own.
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { $ref: "#/components/responses/Deleted" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # ENROLLMENT & WISHLIST
+  ############################################################
+  /api/courses/{id}/enroll:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+    post:
+      tags: [Enrollment & Wishlist]
+      summary: Enroll the current user
+      description: Students only — staff accounts cannot enroll. The course must be published and not hidden.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Enrolled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  courseId: { type: string }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Staff account, or course not open for enrollment
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Already enrolled
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete:
+      tags: [Enrollment & Wishlist]
+      summary: Un-enroll the current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Un-enrolled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  courseId: { type: string }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Not enrolled
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/courses/{id}/wishlist:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+    get:
+      tags: [Enrollment & Wishlist]
+      summary: List users who wishlisted this course
+      description: Manager-only (admin/superadmin or owning teacher).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Wishlist users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  count: { type: integer }
+                  users:
+                    type: array
+                    items: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    post:
+      tags: [Enrollment & Wishlist]
+      summary: Toggle this course in the current user's wishlist
+      description: Adds if absent, removes if present. Any logged-in user.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Wishlist toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  wishlisted: { type: boolean, description: "true if now in wishlist, false if removed" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # COURSE CONTENT — SECTIONS
+  ############################################################
+  /api/courses/{id}/sections:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+    post:
+      tags: [Course Content]
+      summary: Add a curriculum section
+      description: Course manager only.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string, example: "Module 1: Getting Started" }
+      responses:
+        "201":
+          description: Section added (returns the updated course and new section)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/courses/{id}/sections/{sectionId}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+      - { name: sectionId, in: path, required: true, schema: { type: string }, description: Section subdocument ObjectId }
+    patch:
+      tags: [Course Content]
+      summary: Rename / update a section
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+      responses:
+        "200":
+          description: Section updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete:
+      tags: [Course Content]
+      summary: Delete a section (and its lessons)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Section deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # COURSE CONTENT — LESSONS
+  ############################################################
+  /api/courses/{id}/sections/{sectionId}/lessons:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+      - { name: sectionId, in: path, required: true, schema: { type: string }, description: Section subdocument ObjectId }
+    post:
+      tags: [Course Content]
+      summary: Add a lesson to a section
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string, example: "Welcome & setup" }
+                videoUrl: { type: string, example: "https://youtu.be/xyz" }
+                duration: { type: number, description: Minutes, example: 12 }
+                isPreview: { type: boolean, default: false }
+      responses:
+        "201":
+          description: Lesson added
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/courses/{id}/sections/{sectionId}/lessons/{lessonId}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+      - { name: sectionId, in: path, required: true, schema: { type: string }, description: Section subdocument ObjectId }
+      - { name: lessonId, in: path, required: true, schema: { type: string }, description: Lesson subdocument ObjectId }
+    patch:
+      tags: [Course Content]
+      summary: Update a lesson
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                videoUrl: { type: string }
+                duration: { type: number }
+                isPreview: { type: boolean }
+      responses:
+        "200":
+          description: Lesson updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete:
+      tags: [Course Content]
+      summary: Delete a lesson
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lesson deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # COURSE CONTENT — SCHEDULE
+  ############################################################
+  /api/courses/{id}/schedule:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+    post:
+      tags: [Course Content]
+      summary: Schedule a class session
+      description: Manager only. Notifies enrolled students.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [startDate]
+              properties:
+                title: { type: string, example: "Live Q&A" }
+                startDate: { type: string, format: date-time, description: Class date + time }
+      responses:
+        "201":
+          description: Class scheduled
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/courses/{id}/schedule/{slotId}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+      - { name: slotId, in: path, required: true, schema: { type: string }, description: Schedule slot subdocument ObjectId }
+    patch:
+      tags: [Course Content]
+      summary: Update a scheduled class
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                startDate: { type: string, format: date-time }
+      responses:
+        "200":
+          description: Class updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete:
+      tags: [Course Content]
+      summary: Remove a scheduled class
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Class removed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # COURSE CONTENT — BATCH
+  ############################################################
+  /api/courses/{id}/batch:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+    put:
+      tags: [Course Content]
+      summary: Set / merge the current batch
+      description: Manager only. `enrolledCount` is maintained by enroll endpoints and cannot be set here.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, example: "Batch 7" }
+                seatCapacity: { type: integer, example: 40 }
+                status: { type: string, enum: [upcoming, ongoing, completed] }
+                startDate: { type: string, format: date-time, nullable: true }
+                endDate: { type: string, format: date-time, nullable: true }
+      responses:
+        "200":
+          description: Batch saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete:
+      tags: [Course Content]
+      summary: Clear the current batch
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Batch cleared
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseContentResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # COURSE CONTENT — ANNOUNCEMENTS
+  ############################################################
+  /api/courses/{id}/announce:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Course ObjectId }
+    get:
+      tags: [Course Content]
+      summary: Announcement history for a course
+      description: Admin / superadmin only.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Announcements (newest first)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  announcements:
+                    type: array
+                    items: { $ref: "#/components/schemas/Announcement" }
+                  studentCount: { type: integer }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    post:
+      tags: [Course Content]
+      summary: Send an announcement to enrolled students
+      description: Admin / superadmin only. Stores it on the course and fans out a notification to each enrolled student.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string, example: "Class rescheduled" }
+                body: { type: string, example: "Tomorrow's class moves to 8pm." }
+      responses:
+        "201":
+          description: Announcement sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  announcement: { $ref: "#/components/schemas/Announcement" }
+                  recipientCount: { type: integer }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # BLOGS
+  ############################################################
+  /api/blogs:
+    get:
+      tags: [Blogs]
+      summary: List blog posts
+      description: Public callers see published posts only. Admins with a token + `status` may list drafts/archived/all. List view omits the full `content`.
+      parameters:
+        - { name: category, in: query, schema: { type: string } }
+        - { name: tag, in: query, schema: { type: string } }
+        - { name: featured, in: query, schema: { type: string, enum: ["true"] } }
+        - { name: status, in: query, schema: { type: string, enum: [draft, published, archived, all] }, description: Admin-only }
+        - { name: search, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 12, maximum: 50 } }
+      security:
+        - bearerAuth: []
+        - {}
+      responses:
+        "200":
+          description: Paginated posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  blogs:
+                    type: array
+                    items: { $ref: "#/components/schemas/Blog" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    post:
+      tags: [Blogs]
+      summary: Create a blog post
+      description: Admins only. Featuring a post clears the featured flag on all others.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BlogInput" }
+      responses:
+        "201":
+          description: Blog created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  blog: { $ref: "#/components/schemas/Blog" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/blogs/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Blog ObjectId }
+    get:
+      tags: [Blogs]
+      summary: Get a single post + related posts
+      description: Published posts are public (each view increments `views`). Drafts/archived are visible to admins only.
+      security:
+        - bearerAuth: []
+        - {}
+      responses:
+        "200":
+          description: The post and up to 3 related posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  blog: { $ref: "#/components/schemas/Blog" }
+                  related:
+                    type: array
+                    items: { $ref: "#/components/schemas/Blog" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    patch:
+      tags: [Blogs]
+      summary: Update a post
+      description: Admins only.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BlogInput" }
+      responses:
+        "200":
+          description: Blog updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  blog: { $ref: "#/components/schemas/Blog" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete:
+      tags: [Blogs]
+      summary: Delete a post
+      description: Admins only.
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { $ref: "#/components/responses/Deleted" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # CATEGORIES
+  ############################################################
+  /api/categories:
+    get:
+      tags: [Categories]
+      summary: List categories
+      parameters:
+        - { name: search, in: query, schema: { type: string } }
+        - { name: withCounts, in: query, schema: { type: boolean }, description: When true, adds courseCount & publishedCount per category }
+      responses:
+        "200":
+          description: Categories (alphabetical)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  categories:
+                    type: array
+                    items: { $ref: "#/components/schemas/Category" }
+                  count: { type: integer }
+        "500": { $ref: "#/components/responses/ServerError" }
+    post:
+      tags: [Categories]
+      summary: Create a category
+      description: Admins only.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, minLength: 2, maxLength: 60, example: Web Development }
+                description: { type: string, maxLength: 300 }
+      responses:
+        "201":
+          description: Category created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  category: { $ref: "#/components/schemas/Category" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409":
+          description: Category name already exists
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/categories/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Category ObjectId }
+    patch:
+      tags: [Categories]
+      summary: Rename / edit a category
+      description: Admins only. Renaming cascades the new name to all courses using the old one.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+      responses:
+        "200":
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  category: { $ref: "#/components/schemas/Category" }
+                  updatedCourses: { type: integer, description: Courses re-pointed to the new name }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Another category with this name exists
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete:
+      tags: [Categories]
+      summary: Delete a category
+      description: Admins only. Blocked when a published course still uses it.
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { $ref: "#/components/responses/Deleted" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Published courses still use this category
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # TEACHERS
+  ############################################################
+  /api/teachers:
+    get:
+      tags: [Teachers]
+      summary: List active teachers (public)
+      parameters:
+        - { name: search, in: query, schema: { type: string }, description: Matches name or address }
+        - { name: featured, in: query, schema: { type: string, enum: ["true"] } }
+        - { name: limit, in: query, schema: { type: integer, default: 50, maximum: 100 } }
+      responses:
+        "200":
+          description: Teachers (featured first)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  teachers:
+                    type: array
+                    items: { $ref: "#/components/schemas/User" }
+                  count: { type: integer }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/teachers/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Teacher (User) ObjectId }
+    get:
+      tags: [Teachers]
+      summary: Get a teacher profile + their published courses
+      responses:
+        "200":
+          description: Teacher and courses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  teacher: { $ref: "#/components/schemas/User" }
+                  courses:
+                    type: array
+                    items: { $ref: "#/components/schemas/Course" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    patch:
+      tags: [Teachers]
+      summary: Set the featured teacher
+      description: Admins only. At most one teacher is featured platform-wide; setting it clears the flag on every other teacher.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isFeatured]
+              properties:
+                isFeatured: { type: boolean }
+      responses:
+        "200":
+          description: Featured flag updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  teacher: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # USERS
+  ############################################################
+  /api/users:
+    get:
+      tags: [Users]
+      summary: List users
+      description: Admins & superadmins only. Returns role counts over the whole collection plus a paginated filtered list.
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: search, in: query, schema: { type: string }, description: Matches name, email or phone }
+        - { name: role, in: query, schema: { type: string, enum: [user, teacher, admin, superadmin, all] } }
+        - { name: status, in: query, schema: { type: string, enum: [active, inactive, blocked, all] } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 50, maximum: 100 } }
+      responses:
+        "200":
+          description: Users with pagination and role counts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  users:
+                    type: array
+                    items: { $ref: "#/components/schemas/User" }
+                  roleCounts:
+                    type: object
+                    additionalProperties: { type: integer }
+                    example: { user: 120, teacher: 8, admin: 2 }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/users/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: User ObjectId }
+    patch:
+      tags: [Users]
+      summary: Change a user's role and/or status
+      description: >
+        Admins may toggle between `user`/`teacher` and manage non-elevated
+        accounts' status. Granting/removing `admin`, or touching an admin/
+        superadmin account, requires superadmin. You cannot edit your own
+        role/status.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role: { type: string, enum: [user, teacher, admin] }
+                status: { type: string, enum: [active, inactive, blocked] }
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  user: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Insufficient privileges, or attempting to edit yourself
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/users/me:
+    get:
+      tags: [Users]
+      summary: Current user's profile
+      description: Returns the profile with populated `courses` and `wishlist`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: The profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  user: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    patch:
+      tags: [Users]
+      summary: Update own profile
+      description: Only name, phone, photo, address and socialLinks may be changed. Email/role/status are not editable here.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                phone: { type: string }
+                photo: { type: string }
+                address: { type: string }
+                socialLinks: { $ref: "#/components/schemas/SocialLinks" }
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string }
+                  user: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/users/me/password:
+    patch:
+      tags: [Users]
+      summary: Change own password
+      description: Requires the current password. New password must be ≥8 chars and different from the current.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string, format: password }
+                newPassword: { type: string, format: password, minLength: 8 }
+      responses:
+        "200":
+          description: Password updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/users/me/courses:
+    get:
+      tags: [Users]
+      summary: Current user's enrolled courses
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Enrolled courses (fully populated)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  courses:
+                    type: array
+                    items: { $ref: "#/components/schemas/Course" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/users/me/wishlist:
+    get:
+      tags: [Users]
+      summary: Current user's wishlisted courses
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Wishlisted courses (fully populated)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  courses:
+                    type: array
+                    items: { $ref: "#/components/schemas/Course" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # NOTIFICATIONS
+  ############################################################
+  /api/notifications:
+    get:
+      tags: [Notifications]
+      summary: Current user's notifications + unread count
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, default: 20, minimum: 1, maximum: 50 } }
+        - { name: unread, in: query, schema: { type: boolean }, description: When true, only unread notifications }
+      responses:
+        "200":
+          description: Notifications (newest first)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  notifications:
+                    type: array
+                    items: { $ref: "#/components/schemas/Notification" }
+                  unreadCount: { type: integer }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    patch:
+      tags: [Notifications]
+      summary: Mark all notifications read
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: All marked read
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Success" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /api/notifications/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: Notification ObjectId }
+    patch:
+      tags: [Notifications]
+      summary: Mark one notification read/unread
+      description: 'Defaults to read. Pass { "read": false } to mark unread. Users may only touch their own notifications.'
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                read: { type: boolean, default: true }
+      responses:
+        "200":
+          description: Notification updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  notification: { $ref: "#/components/schemas/Notification" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete:
+      tags: [Notifications]
+      summary: Delete one of your notifications
+      security:
+        - bearerAuth: []
+      responses:
+        "200": { $ref: "#/components/responses/Deleted" }
+        "400": { $ref: "#/components/responses/InvalidId" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # CONTACT
+  ############################################################
+  /api/contact:
+    post:
+      tags: [Contact]
+      summary: Submit the contact form (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, message]
+              properties:
+                name: { type: string, minLength: 2, maxLength: 100 }
+                email: { type: string, format: email }
+                subject: { type: string, maxLength: 200 }
+                message: { type: string, minLength: 5, maxLength: 2000 }
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    get:
+      tags: [Contact]
+      summary: List contact submissions
+      description: Admins only.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Messages (newest first)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  messages:
+                    type: array
+                    items: { $ref: "#/components/schemas/ContactMessage" }
+                  count: { type: integer }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  ############################################################
+  # ADMIN
+  ############################################################
+  /api/admin/stats:
+    get:
+      tags: [Admin]
+      summary: Dashboard statistics
+      description: Admins & superadmins only. One-shot platform overview (totals, distributions, 6-month growth, top courses, recent activity).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Aggregated stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  stats: { $ref: "#/components/schemas/AdminStats" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+############################################################
+# COMPONENTS
+############################################################
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "JWT issued by /api/auth/login or /api/auth/signup. Send as: Authorization: Bearer <token>"
+
+  responses:
+    BadRequest:
+      description: Validation error / bad input
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    InvalidId:
+      description: Malformed ObjectId in the path
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Missing, invalid or expired token
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Authenticated but lacking the required role/permission
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ServerError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Deleted:
+      description: Resource deleted
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Success" }
+
+  schemas:
+    Success:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: Done. }
+
+    Error:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string, example: Something went wrong. }
+
+    Pagination:
+      type: object
+      properties:
+        page: { type: integer, example: 1 }
+        limit: { type: integer, example: 12 }
+        total: { type: integer, example: 57 }
+        totalPages: { type: integer, example: 5 }
+
+    SocialLinks:
+      type: object
+      properties:
+        facebook: { type: string, example: "" }
+        instagram: { type: string, example: "" }
+        linkedin: { type: string, example: "" }
+
+    AuthResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string }
+        token: { type: string, description: JWT (valid 7 days), example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+        user: { $ref: "#/components/schemas/User" }
+
+    User:
+      type: object
+      description: Password is never returned.
+      properties:
+        _id: { type: string, example: "665f1a2b3c4d5e6f7a8b9c0d" }
+        name: { type: string, example: Jane Doe }
+        email: { type: string, format: email }
+        phone: { type: string }
+        photo: { type: string, format: uri }
+        status: { type: string, enum: [active, inactive, blocked] }
+        address: { type: string }
+        role: { type: string, enum: [user, teacher, admin, superadmin] }
+        courses:
+          type: array
+          description: Enrolled course ids or populated course summaries
+          items: { type: string }
+        wishlist:
+          type: array
+          items: { type: string }
+        socialLinks: { $ref: "#/components/schemas/SocialLinks" }
+        isFeatured: { type: boolean, description: Teacher marketing flag }
+        createdAt: { type: string, format: date-time }
+
+    Lesson:
+      type: object
+      properties:
+        _id: { type: string }
+        title: { type: string }
+        videoUrl: { type: string }
+        duration: { type: number, description: Minutes }
+        isPreview: { type: boolean }
+
+    Section:
+      type: object
+      properties:
+        _id: { type: string }
+        title: { type: string }
+        lessons:
+          type: array
+          items: { $ref: "#/components/schemas/Lesson" }
+
+    ScheduleSlot:
+      type: object
+      properties:
+        _id: { type: string }
+        title: { type: string }
+        startDate: { type: string, format: date-time }
+
+    Batch:
+      type: object
+      nullable: true
+      properties:
+        name: { type: string }
+        startDate: { type: string, format: date-time, nullable: true }
+        endDate: { type: string, format: date-time, nullable: true }
+        seatCapacity: { type: integer }
+        enrolledCount: { type: integer, description: Maintained by enroll endpoints }
+        status: { type: string, enum: [upcoming, ongoing, completed] }
+
+    Announcement:
+      type: object
+      properties:
+        _id: { type: string }
+        title: { type: string }
+        body: { type: string }
+        sentBy: { type: string, description: Admin user id or populated name and photo }
+        recipientCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    Course:
+      type: object
+      properties:
+        _id: { type: string }
+        title: { type: string, minLength: 3, maxLength: 100 }
+        description: { type: string, minLength: 10, maxLength: 1000 }
+        priceTier: { type: string, enum: [free, paid, discounted] }
+        price: { type: number, minimum: 0 }
+        discountPrice: { type: number, minimum: 0 }
+        category: { type: string }
+        level: { type: string, enum: [beginner, intermediate, advanced] }
+        language: { type: string, example: Bangla }
+        tags:
+          type: array
+          items: { type: string }
+        thumbnail: { type: string }
+        teachers:
+          type: array
+          description: Teacher user ids or populated summaries
+          items: { type: string }
+        studentsEnrolled:
+          type: array
+          items: { type: string }
+        inWishlistOf:
+          type: array
+          items: { type: string }
+        curriculum:
+          type: array
+          items: { $ref: "#/components/schemas/Section" }
+        schedule:
+          type: array
+          items: { $ref: "#/components/schemas/ScheduleSlot" }
+        announcements:
+          type: array
+          items: { $ref: "#/components/schemas/Announcement" }
+        currentBatch: { $ref: "#/components/schemas/Batch" }
+        enrollStartDate: { type: string, format: date-time, nullable: true }
+        enrollEndDate: { type: string, format: date-time, nullable: true }
+        courseStartDate: { type: string, format: date-time, nullable: true }
+        status: { type: string, enum: [draft, published, archived] }
+        isBestseller: { type: boolean }
+        isFeatured: { type: boolean }
+        isHidden: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    CourseInput:
+      type: object
+      description: Fields accepted on create/update. Only title, description & category are required on create.
+      required: [title, description, category]
+      properties:
+        title: { type: string, minLength: 3, maxLength: 100 }
+        description: { type: string, minLength: 10, maxLength: 1000 }
+        category: { type: string, description: Auto-registered if new }
+        priceTier: { type: string, enum: [free, paid, discounted] }
+        price: { type: number, minimum: 0 }
+        discountPrice: { type: number, minimum: 0 }
+        level: { type: string, enum: [beginner, intermediate, advanced] }
+        language: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        thumbnail: { type: string }
+        teachers:
+          type: array
+          description: Teacher user ids (non-teachers are ignored)
+          items: { type: string }
+        enrollStartDate: { type: string, format: date-time, nullable: true }
+        enrollEndDate: { type: string, format: date-time, nullable: true }
+        courseStartDate: { type: string, format: date-time, nullable: true }
+        status: { type: string, enum: [draft, published, archived] }
+        isBestseller: { type: boolean }
+        isFeatured: { type: boolean }
+        isHidden: { type: boolean }
+
+    Blog:
+      type: object
+      properties:
+        _id: { type: string }
+        title: { type: string, minLength: 3, maxLength: 200 }
+        excerpt: { type: string, maxLength: 400, description: Auto-derived from content when blank }
+        content: { type: string, minLength: 20, description: Omitted from list responses }
+        category: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        coverImage: { type: string }
+        author: { type: string, description: Admin user id or populated summary }
+        status: { type: string, enum: [draft, published, archived] }
+        isFeatured: { type: boolean }
+        views: { type: integer }
+        readTime: { type: integer, description: Estimated minutes }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    BlogInput:
+      type: object
+      required: [title, content, category]
+      properties:
+        title: { type: string, minLength: 3, maxLength: 200 }
+        content: { type: string, minLength: 20 }
+        category: { type: string, description: Auto-registered if new }
+        excerpt: { type: string, maxLength: 400 }
+        tags:
+          type: array
+          items: { type: string }
+        coverImage: { type: string }
+        status: { type: string, enum: [draft, published, archived] }
+        isFeatured: { type: boolean }
+
+    Category:
+      type: object
+      properties:
+        _id: { type: string }
+        name: { type: string, minLength: 2, maxLength: 60 }
+        slug: { type: string, description: Lowercased name }
+        description: { type: string, maxLength: 300 }
+        createdAt: { type: string, format: date-time }
+        courseCount: { type: integer, description: Only present when withCounts=true }
+        publishedCount: { type: integer, description: Only present when withCounts=true }
+
+    ContactMessage:
+      type: object
+      properties:
+        _id: { type: string }
+        name: { type: string }
+        email: { type: string, format: email }
+        subject: { type: string }
+        message: { type: string }
+        status: { type: string, enum: [new, read, responded, archived] }
+        createdAt: { type: string, format: date-time }
+
+    Notification:
+      type: object
+      properties:
+        _id: { type: string }
+        recipient: { type: string }
+        type: { type: string, enum: [enrollment, signup, wishlist, announcement, schedule, welcome] }
+        title: { type: string }
+        body: { type: string }
+        link: { type: string, description: Optional deep link }
+        course: { type: string, nullable: true, description: Related course id or populated title and thumbnail }
+        actor: { type: string, nullable: true, description: Triggering user id or populated name and photo }
+        read: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    CourseContentResponse:
+      type: object
+      description: Shared shape for section/lesson/schedule/batch mutations. Returns the full updated course plus the affected subdocument.
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string }
+        course: { $ref: "#/components/schemas/Course" }
+        section: { $ref: "#/components/schemas/Section" }
+        lesson: { $ref: "#/components/schemas/Lesson" }
+        slot: { $ref: "#/components/schemas/ScheduleSlot" }
+        batch: { $ref: "#/components/schemas/Batch" }
+
+    NameValue:
+      type: object
+      properties:
+        name: { type: string }
+        value: { type: number }
+
+    AdminStats:
+      type: object
+      properties:
+        totals:
+          type: object
+          properties:
+            users: { type: integer }
+            students: { type: integer }
+            teachers: { type: integer }
+            admins: { type: integer }
+            activeUsers: { type: integer }
+            courses: { type: integer }
+            publishedCourses: { type: integer }
+            blogs: { type: integer }
+            publishedBlogs: { type: integer }
+            categories: { type: integer }
+            enrollments: { type: integer }
+            wishlists: { type: integer }
+            revenue: { type: number }
+            blogViews: { type: integer }
+        usersByRole:
+          type: array
+          items: { $ref: "#/components/schemas/NameValue" }
+        coursesByStatus:
+          type: array
+          items: { $ref: "#/components/schemas/NameValue" }
+        blogsByStatus:
+          type: array
+          items: { $ref: "#/components/schemas/NameValue" }
+        growth:
+          type: array
+          description: 6-month time series
+          items:
+            type: object
+            properties:
+              label: { type: string, example: Jun }
+              users: { type: integer }
+              courses: { type: integer }
+              blogs: { type: integer }
+        topCourses:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              title: { type: string }
+              students: { type: integer }
+              revenue: { type: number }
+        coursesByCategory:
+          type: array
+          items: { $ref: "#/components/schemas/NameValue" }
+        recentUsers:
+          type: array
+          items: { $ref: "#/components/schemas/User" }
+        recentCourses:
+          type: array
+          items: { $ref: "#/components/schemas/Course" }
+        recentBlogs:
+          type: array
+          items: { $ref: "#/components/schemas/Blog" }

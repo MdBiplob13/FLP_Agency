@@ -43,10 +43,10 @@ function VideoSurface({ lesson, poster }) {
 
   if (video.kind === 'none') {
     return (
-      <div className="flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-3xl border border-white/10 bg-black text-center">
-        <FiVideoOff className="h-10 w-10 text-slate-600" />
+      <div className="flex aspect-video w-full flex-col items-center justify-center gap-3 rounded-3xl border border-border bg-black text-center">
+        <FiVideoOff className="h-10 w-10 text-text-subtle" />
         <p className="text-sm font-semibold text-white">No video for this lesson yet</p>
-        <p className="max-w-xs text-xs text-slate-500">
+        <p className="max-w-xs text-xs text-text-subtle">
           The instructor hasn’t uploaded a video for “{lesson?.title}”. Check another lesson.
         </p>
       </div>
@@ -68,27 +68,27 @@ function LessonRow({ lesson, active, done, playable, onSelect }) {
       type="button"
       onClick={() => onSelect?.(lesson)}
       className={`flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors ${
-        active ? 'bg-linear-to-r from-blue-600/20 to-purple-600/10' : 'hover:bg-white/5'
+        active ? 'bg-linear-to-r from-blue-600/20 to-purple-600/10' : 'hover:bg-surface-muted'
       }`}
     >
       <Icon
         className={`h-4 w-4 flex-none ${
-          done ? 'text-emerald-400' : active ? 'text-blue-300' : 'text-slate-500'
+          done ? 'text-success' : active ? 'text-primary' : 'text-text-subtle'
         }`}
       />
       <span
         className={`min-w-0 flex-1 truncate text-sm ${
-          active ? 'font-semibold text-white' : 'text-slate-300'
+          active ? 'font-semibold text-text' : 'text-text-muted'
         }`}
       >
         {lesson.title}
       </span>
       {lesson.isPreview && (
-        <span className="flex-none rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-emerald-300">
+        <span className="flex-none rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-success">
           Preview
         </span>
       )}
-      <span className="flex-none text-xs text-slate-500">{fmtMin(lesson.duration)}</span>
+      <span className="flex-none text-xs text-text-subtle">{fmtMin(lesson.duration)}</span>
     </button>
   );
 }
@@ -100,27 +100,27 @@ function Section({ section, index, openByDefault, activeId, completed, onSelect 
   const done = lessons.filter((l) => completed.has(l._id)).length;
 
   return (
-    <div className="border-b border-white/5 last:border-b-0">
+    <div className="border-b border-border last:border-b-0">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full cursor-pointer items-center justify-between gap-3 bg-white/[0.02] px-4 py-3.5 text-left transition-colors hover:bg-white/5"
+        className="flex w-full cursor-pointer items-center justify-between gap-3 bg-white/[0.02] px-4 py-3.5 text-left transition-colors hover:bg-surface-muted"
       >
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">
-            <span className="text-blue-300">{String(index + 1).padStart(2, '0')}.</span>{' '}
+          <p className="truncate text-sm font-semibold text-text">
+            <span className="text-primary">{String(index + 1).padStart(2, '0')}.</span>{' '}
             {section.title}
           </p>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-0.5 text-xs text-text-subtle">
             {done}/{total} lessons
           </p>
         </div>
         <FiChevronDown
-          className={`h-4 w-4 flex-none text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 flex-none text-text-muted transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
       {open && (
-        <div className="divide-y divide-white/5">
+        <div className="divide-y divide-border">
           {lessons.map((lesson) => (
             <LessonRow
               key={lesson._id}
@@ -197,7 +197,7 @@ export default function LearnPage() {
   /* ---- Loading ---- */
   if (coursesLoading) {
     return (
-      <div className="flex items-center justify-center gap-3 rounded-3xl border border-white/10 bg-slate-950/60 py-24 text-slate-400">
+      <div className="flex items-center justify-center gap-3 rounded-3xl border border-border bg-surface py-24 text-text-muted">
         <FiLoader className="h-5 w-5 animate-spin" /> Loading your course…
       </div>
     );
@@ -206,17 +206,17 @@ export default function LearnPage() {
   /* ---- No access / not found ---- */
   if (coursesError || !course) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-slate-950/60 py-20 text-center">
-        <FiLock className="mx-auto h-10 w-10 text-slate-600" />
-        <p className="mt-4 text-lg font-semibold text-white">
+      <div className="rounded-3xl border border-border bg-surface py-20 text-center">
+        <FiLock className="mx-auto h-10 w-10 text-text-subtle" />
+        <p className="mt-4 text-lg font-semibold text-text">
           {coursesError ? 'Couldn’t load this course' : 'You don’t have access to this course'}
         </p>
-        <p className="mt-1 text-slate-400">
+        <p className="mt-1 text-text-muted">
           {coursesError || 'Enroll in the course to start watching its lessons.'}
         </p>
         <Link
           href="/pages/dashboard/user"
-          className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+          className="mt-6 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary"
         >
           <FiArrowLeft className="h-4 w-4" /> Back to My Courses
         </Link>
@@ -233,7 +233,7 @@ export default function LearnPage() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <Link
           href="/pages/dashboard/user"
-          className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white"
+          className="group inline-flex items-center gap-2 rounded-full border border-border bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-text"
         >
           <FiArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back to My Courses
@@ -241,8 +241,8 @@ export default function LearnPage() {
 
         <div className="flex items-center gap-3">
           <div className="hidden text-right sm:block">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Progress</p>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-xs uppercase tracking-[0.2em] text-text-subtle">Progress</p>
+            <p className="text-sm font-semibold text-text">
               {doneCount}/{totalLessons} lessons · {progress}%
             </p>
           </div>
@@ -266,7 +266,7 @@ export default function LearnPage() {
                 </linearGradient>
               </defs>
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">
+            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-text">
               {progress}%
             </span>
           </div>
@@ -280,22 +280,22 @@ export default function LearnPage() {
 
           {/* Lesson heading */}
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-blue-300">{course.category}</p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-primary">{course.category}</p>
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-text sm:text-3xl">
               {active?.title || course.title}
             </h1>
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-slate-400">
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-text-muted">
               <span className="flex items-center gap-1.5">
-                <FiBookOpen className="h-4 w-4 text-blue-300" /> {course.title}
+                <FiBookOpen className="h-4 w-4 text-primary" /> {course.title}
               </span>
               {active?.duration ? (
                 <span className="flex items-center gap-1.5">
-                  <FiClock className="h-4 w-4 text-blue-300" /> {fmtMin(active.duration)}
+                  <FiClock className="h-4 w-4 text-primary" /> {fmtMin(active.duration)}
                 </span>
               ) : null}
               {instructor && (
                 <span className="flex items-center gap-1.5">
-                  <FiAward className="h-4 w-4 text-blue-300" /> by {instructor}
+                  <FiAward className="h-4 w-4 text-primary" /> by {instructor}
                 </span>
               )}
             </div>
@@ -303,13 +303,13 @@ export default function LearnPage() {
 
           {/* Prev / next + mark complete */}
           {totalLessons > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-y border-white/5 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-y border-border py-4">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   disabled={!prev}
                   onClick={() => prev && selectLesson(prev)}
-                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-surface-muted px-4 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-text disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <FiArrowLeft className="h-4 w-4" /> Previous
                 </button>
@@ -317,7 +317,7 @@ export default function LearnPage() {
                   type="button"
                   disabled={!next}
                   onClick={() => next && selectLesson(next)}
-                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-surface-muted px-4 py-2 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-text disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Next <FiArrowRight className="h-4 w-4" />
                 </button>
@@ -342,10 +342,10 @@ export default function LearnPage() {
           {/* About */}
           {course.description && (
             <section>
-              <h2 className="flex items-center gap-2 text-lg font-bold text-white">
-                <FiBookOpen className="h-5 w-5 text-blue-300" /> About this course
+              <h2 className="flex items-center gap-2 text-lg font-bold text-text">
+                <FiBookOpen className="h-5 w-5 text-primary" /> About this course
               </h2>
-              <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-300">
+              <p className="mt-3 whitespace-pre-line text-sm leading-7 text-text-muted">
                 {course.description}
               </p>
             </section>
@@ -354,17 +354,17 @@ export default function LearnPage() {
 
         {/* ============ RIGHT: curriculum ============ */}
         <aside className="xl:sticky xl:top-8 xl:h-fit">
-          <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60">
-            <div className="border-b border-white/10 px-5 py-4">
-              <h2 className="flex items-center gap-2 text-base font-bold text-white">
-                <FiLayers className="h-4.5 w-4.5 text-blue-300" /> Course content
+          <div className="overflow-hidden rounded-3xl border border-border bg-surface">
+            <div className="border-b border-border px-5 py-4">
+              <h2 className="flex items-center gap-2 text-base font-bold text-text">
+                <FiLayers className="h-4.5 w-4.5 text-primary" /> Course content
               </h2>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-text-muted">
                 {curriculum.length} sections · {totalLessons} lessons
               </p>
-              <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+              <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
                 <div
-                  className="h-full rounded-full bg-linear-to-r from-blue-500 to-purple-500 transition-all"
+                  className="h-full rounded-full bg-linear-to-r from-primary to-accent transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -372,7 +372,7 @@ export default function LearnPage() {
 
             <div className="max-h-[70vh] overflow-y-auto">
               {curriculum.length === 0 ? (
-                <p className="px-5 py-10 text-center text-sm text-slate-500">
+                <p className="px-5 py-10 text-center text-sm text-text-subtle">
                   No lessons have been added to this course yet.
                 </p>
               ) : (

@@ -96,7 +96,7 @@ function ControlBar({
         className="group/scrub relative h-1.5 w-full cursor-pointer rounded-full bg-white/20"
       >
         <div
-          className="absolute inset-y-0 left-0 rounded-full bg-linear-to-r from-blue-500 to-purple-500"
+          className="absolute inset-y-0 left-0 rounded-full bg-linear-to-r from-primary to-accent"
           style={{ width: `${pct}%` }}
         />
         <div
@@ -107,7 +107,7 @@ function ControlBar({
 
       {/* Buttons */}
       <div className="mt-2 flex items-center gap-4 text-white">
-        <button onClick={onToggle} aria-label={playing ? 'Pause' : 'Play'} className="cursor-pointer transition hover:text-blue-300">
+        <button onClick={onToggle} aria-label={playing ? 'Pause' : 'Play'} className="cursor-pointer transition hover:text-primary">
           {buffering ? (
             <FiLoader className="h-5 w-5 animate-spin" />
           ) : playing ? (
@@ -117,17 +117,17 @@ function ControlBar({
           )}
         </button>
 
-        <button onClick={() => onSkip(-10)} aria-label="Back 10 seconds" className="cursor-pointer transition hover:text-blue-300">
+        <button onClick={() => onSkip(-10)} aria-label="Back 10 seconds" className="cursor-pointer transition hover:text-primary">
           <FiRotateCcw className="h-4.5 w-4.5" />
         </button>
-        <button onClick={() => onSkip(10)} aria-label="Forward 10 seconds" className="cursor-pointer transition hover:text-blue-300">
+        <button onClick={() => onSkip(10)} aria-label="Forward 10 seconds" className="cursor-pointer transition hover:text-primary">
           <FiRotateCw className="h-4.5 w-4.5" />
         </button>
 
         {/* Volume — mute toggle + draggable level bar. The group reveals the
             slider on hover so it doesn't crowd the bar at rest. */}
         <div className="group/vol flex items-center gap-2">
-          <button onClick={onToggleMute} aria-label={muted ? 'Unmute' : 'Mute'} className="cursor-pointer transition hover:text-blue-300">
+          <button onClick={onToggleMute} aria-label={muted ? 'Unmute' : 'Mute'} className="cursor-pointer transition hover:text-primary">
             <VolIcon className="h-5 w-5" />
           </button>
           <input
@@ -144,14 +144,14 @@ function ControlBar({
           />
         </div>
 
-        <span className="text-xs font-medium tabular-nums text-slate-200">
+        <span className="text-xs font-medium tabular-nums text-text">
           {fmtTime(current)} / {fmtTime(duration)}
         </span>
 
         <button
           onClick={onFullscreen}
           aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-          className="ml-auto cursor-pointer transition hover:text-blue-300"
+          className="ml-auto cursor-pointer transition hover:text-primary"
         >
           {isFullscreen ? <FiMinimize className="h-5 w-5" /> : <FiMaximize className="h-5 w-5" />}
         </button>
@@ -316,7 +316,7 @@ function YouTubePlayer({ videoId }) {
   return (
     <div
       ref={wrapRef}
-      className="group relative aspect-video w-full overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl shadow-black/50"
+      className="group relative aspect-video w-full overflow-hidden rounded-3xl border border-border bg-black shadow-2xl shadow-black/50"
     >
       {/* The YouTube iframe. pointer-events-none so YouTube can't be clicked
           directly — all interaction goes through our overlay + control bar. */}
@@ -337,7 +337,7 @@ function YouTubePlayer({ videoId }) {
         }`}
       >
         {(!hasPlayed || (!playing && !buffering)) && (
-          <span className="flex h-20 w-20 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/25 backdrop-blur transition group-hover:scale-105 group-hover:bg-white/20">
+          <span className="flex h-20 w-20 items-center justify-center rounded-full bg-surface-muted ring-1 ring-white/25 backdrop-blur transition group-hover:scale-105 group-hover:bg-white/20">
             {buffering ? (
               <FiLoader className="h-8 w-8 animate-spin text-white" />
             ) : (
@@ -350,7 +350,7 @@ function YouTubePlayer({ videoId }) {
       {/* Loading shimmer before the API is ready */}
       {!ready && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
-          <FiLoader className="h-6 w-6 animate-spin text-slate-500" />
+          <FiLoader className="h-6 w-6 animate-spin text-text-subtle" />
         </div>
       )}
 
@@ -392,7 +392,7 @@ export default function CoursePlayer({ video, poster, title }) {
   if (video.kind === 'vimeo') {
     // Vimeo: hide its UI chrome as much as the embed allows.
     return (
-      <div className="aspect-video w-full overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl shadow-black/50">
+      <div className="aspect-video w-full overflow-hidden rounded-3xl border border-border bg-black shadow-2xl shadow-black/50">
         <iframe
           src={`${video.embedUrl}?title=0&byline=0&portrait=0&badge=0`}
           title={title}
@@ -413,7 +413,7 @@ export default function CoursePlayer({ video, poster, title }) {
       controlsList="nodownload"
       disablePictureInPicture
       onContextMenu={(e) => e.preventDefault()}
-      className="aspect-video w-full rounded-3xl border border-white/10 bg-black shadow-2xl shadow-black/50"
+      className="aspect-video w-full rounded-3xl border border-border bg-black shadow-2xl shadow-black/50"
     />
   );
 }

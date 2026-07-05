@@ -54,13 +54,13 @@ import {
 } from '@/app/components/dashboard/CourseContentModal';
 
 const statusStyles = {
-  draft: 'text-amber-300 bg-amber-500/10 ring-amber-500/20',
-  published: 'text-emerald-300 bg-emerald-500/10 ring-emerald-500/20',
-  archived: 'text-slate-400 bg-slate-500/10 ring-slate-500/20',
+  draft: 'text-warning bg-warning/10 ring-amber-500/20',
+  published: 'text-success bg-success/10 ring-emerald-500/20',
+  archived: 'text-text-muted bg-slate-500/10 ring-slate-500/20',
 };
 
 const inputClass =
-  'w-full rounded-xl border border-white/10 bg-slate-900/80 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
+  'w-full rounded-xl border border-border bg-surface-elevated/80 px-3.5 py-2.5 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
 
 const fmtDateTime = (v) =>
   v ? new Date(v).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—';
@@ -130,7 +130,7 @@ export default function CourseManagePage({ params }) {
   /* ---- Loading / error ---- */
   if (courseLoading) {
     return (
-      <div className="flex items-center justify-center gap-3 rounded-3xl border border-white/10 bg-slate-950/60 py-24 text-slate-400">
+      <div className="flex items-center justify-center gap-3 rounded-3xl border border-border bg-surface py-24 text-text-muted">
         <FiLoader className="h-5 w-5 animate-spin" /> Loading course…
       </div>
     );
@@ -138,11 +138,11 @@ export default function CourseManagePage({ params }) {
   if (courseError || !course) {
     return (
       <div className="rounded-3xl border border-rose-400/20 bg-rose-500/5 py-16 text-center">
-        <FiAlertTriangle className="mx-auto h-10 w-10 text-rose-400" />
-        <p className="mt-4 text-lg font-semibold text-white">{courseError || 'Course not found'}</p>
+        <FiAlertTriangle className="mx-auto h-10 w-10 text-danger" />
+        <p className="mt-4 text-lg font-semibold text-text">{courseError || 'Course not found'}</p>
         <Link
           href="/pages/dashboard/admin/courses"
-          className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+          className="mt-6 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary"
         >
           <FiArrowLeft className="h-4 w-4" /> Back to courses
         </Link>
@@ -157,30 +157,30 @@ export default function CourseManagePage({ params }) {
       {/* Top bar */}
       <button
         onClick={() => router.push('/pages/dashboard/admin/courses')}
-        className="group inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white"
+        className="group inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-text"
       >
         <FiArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" /> Back to courses
       </button>
 
       {/* Header */}
-      <div className="mt-6 flex flex-col gap-4 rounded-3xl border border-white/10 bg-slate-950/60 p-5 sm:flex-row sm:items-center">
-        <div className="h-28 w-full flex-none overflow-hidden rounded-2xl bg-white/5 sm:w-44">
+      <div className="mt-6 flex flex-col gap-4 rounded-3xl border border-border bg-surface p-5 sm:flex-row sm:items-center">
+        <div className="h-28 w-full flex-none overflow-hidden rounded-2xl bg-surface-muted sm:w-44">
           {course.thumbnail ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={course.thumbnail} alt={course.title} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <FiBookOpen className="h-8 w-8 text-slate-600" />
+              <FiBookOpen className="h-8 w-8 text-text-subtle" />
             </div>
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-xs text-text-muted">
             <span className="truncate">{course.category}</span>
-            <span className="text-slate-600">·</span>
+            <span className="text-text-subtle">·</span>
             <span className="capitalize">{course.level}</span>
           </div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-white">{course.title}</h1>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-text">{course.title}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span
               className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ring-1 ${statusStyles[course.status] || statusStyles.draft}`}
@@ -188,41 +188,41 @@ export default function CourseManagePage({ params }) {
               {course.status}
             </span>
             {price.isFree ? (
-              <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-200 ring-1 ring-emerald-400/30">Free</span>
+              <span className="rounded-full bg-success/15 px-3 py-1 text-xs font-bold text-emerald-200 ring-1 ring-emerald-400/30">Free</span>
             ) : (
-              <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-bold text-white ring-1 ring-white/10">
+              <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-bold text-text ring-1 ring-border">
                 ৳{price.price}
-                {price.oldPrice ? <span className="ml-1.5 text-slate-500 line-through">৳{price.oldPrice}</span> : null}
+                {price.oldPrice ? <span className="ml-1.5 text-text-subtle line-through">৳{price.oldPrice}</span> : null}
               </span>
             )}
             {course.isBestseller && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/30">
+              <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-3 py-1 text-xs font-semibold text-warning ring-1 ring-amber-400/30">
                 <FiAward className="h-3 w-3" /> Bestseller
               </span>
             )}
             {course.isFeatured && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/15 px-3 py-1 text-xs font-semibold text-blue-300 ring-1 ring-blue-400/30">
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary ring-1 ring-blue-400/30">
                 <FiHome className="h-3 w-3" /> Homepage
               </span>
             )}
             {course.isHidden && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/15 px-3 py-1 text-xs font-semibold text-slate-300 ring-1 ring-slate-400/30">
+              <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/15 px-3 py-1 text-xs font-semibold text-text-muted ring-1 ring-slate-400/30">
                 <FiEyeOff className="h-3 w-3" /> Hidden
               </span>
             )}
           </div>
         </div>
         <Link
-          href={`/pages/courses/${course._id}`}
+          href={`/pages/courses/${course.slug || course._id}`}
           target="_blank"
-          className="inline-flex flex-none cursor-pointer items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-blue-200"
+          className="inline-flex flex-none cursor-pointer items-center justify-center gap-2 rounded-full border border-border bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary"
         >
           <FiExternalLink className="h-4 w-4" /> View live
         </Link>
       </div>
 
       {/* Tab navbar — box buttons, active gets a thick bottom border */}
-      <div className="mt-8 flex gap-1 overflow-x-auto border-b border-white/10">
+      <div className="mt-8 flex gap-1 overflow-x-auto border-b border-border">
         {tabs.map((t) => {
           const Icon = t.icon;
           const active = tab === t.key;
@@ -232,8 +232,8 @@ export default function CourseManagePage({ params }) {
               onClick={() => setTab(t.key)}
               className={`inline-flex cursor-pointer items-center gap-2 whitespace-nowrap border-b-2 px-5 py-3.5 text-sm font-semibold transition-colors ${
                 active
-                  ? 'border-blue-500 text-white'
-                  : 'border-transparent text-slate-400 hover:text-white'
+                  ? 'border-blue-500 text-text'
+                  : 'border-transparent text-text-muted hover:text-text'
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -344,33 +344,33 @@ function DetailsTab({ course, setCourse, featuredCount, reloadFeaturedCount, onD
         {stats.map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="rounded-3xl border border-white/10 bg-slate-950/60 p-5">
+            <div key={s.label} className="rounded-3xl border border-border bg-surface p-5">
               <div className="flex items-center justify-between">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-border">
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className="text-2xl font-bold text-white">{s.value}</span>
+                <span className="text-2xl font-bold text-text">{s.value}</span>
               </div>
-              <p className="mt-3 text-xs uppercase tracking-[0.2em] text-slate-400">{s.label}</p>
+              <p className="mt-3 text-xs uppercase tracking-[0.2em] text-text-muted">{s.label}</p>
             </div>
           );
         })}
       </div>
 
       {/* Overview */}
-      <section className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-white">
-          <FiBookOpen className="h-5 w-5 text-blue-300" /> About
+      <section className="rounded-3xl border border-border bg-surface p-6">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-text">
+          <FiBookOpen className="h-5 w-5 text-primary" /> About
         </h2>
-        <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-300">{course.description}</p>
+        <p className="mt-3 whitespace-pre-line text-sm leading-7 text-text-muted">{course.description}</p>
         {(course.tags || []).length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             {course.tags.map((t) => (
-              <span key={t} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">#{t}</span>
+              <span key={t} className="rounded-full border border-border bg-surface-muted px-3 py-1 text-xs text-text-muted">#{t}</span>
             ))}
           </div>
         )}
-        <dl className="mt-6 grid gap-4 border-t border-white/5 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+        <dl className="mt-6 grid gap-4 border-t border-border pt-6 sm:grid-cols-2 lg:grid-cols-3">
           {[
             ['Language', course.language || '—'],
             ['Level', course.level],
@@ -379,18 +379,18 @@ function DetailsTab({ course, setCourse, featuredCount, reloadFeaturedCount, onD
             ['Course starts', fmtDateTime(course.courseStartDate)],
           ].map(([label, value]) => (
             <div key={label}>
-              <dt className="text-xs uppercase tracking-[0.18em] text-slate-500">{label}</dt>
-              <dd className="mt-1 text-sm capitalize text-slate-200">{value}</dd>
+              <dt className="text-xs uppercase tracking-[0.18em] text-text-subtle">{label}</dt>
+              <dd className="mt-1 text-sm capitalize text-text">{value}</dd>
             </div>
           ))}
         </dl>
       </section>
 
       {/* Marketing flags */}
-      <section className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
-        <h2 className="text-lg font-bold text-white">Marketing</h2>
-        <p className="mt-1 text-sm text-slate-400">
-          Homepage spots used: <span className="font-semibold text-slate-300">{featuredCount}/{MAX_FEATURED_COURSES}</span>
+      <section className="rounded-3xl border border-border bg-surface p-6">
+        <h2 className="text-lg font-bold text-text">Marketing</h2>
+        <p className="mt-1 text-sm text-text-muted">
+          Homepage spots used: <span className="font-semibold text-text-muted">{featuredCount}/{MAX_FEATURED_COURSES}</span>
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <button
@@ -398,8 +398,8 @@ function DetailsTab({ course, setCourse, featuredCount, reloadFeaturedCount, onD
             disabled={togglingField === 'isBestseller'}
             className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50 ${
               course.isBestseller
-                ? 'border-amber-400/30 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25'
-                : 'cursor-pointer border-white/10 bg-white/5 text-slate-300 hover:text-amber-200'
+                ? 'border-amber-400/30 bg-warning/15 text-warning hover:bg-amber-500/25'
+                : 'cursor-pointer border-border bg-surface-muted text-text-muted hover:text-amber-200'
             }`}
           >
             {togglingField === 'isBestseller' ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiAward className="h-4 w-4" />}
@@ -410,8 +410,8 @@ function DetailsTab({ course, setCourse, featuredCount, reloadFeaturedCount, onD
             disabled={togglingField === 'isFeatured' || (!course.isFeatured && featuredCount >= MAX_FEATURED_COURSES)}
             className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
               course.isFeatured
-                ? 'cursor-pointer border-blue-400/30 bg-blue-500/15 text-blue-300 hover:bg-blue-500/25'
-                : 'cursor-pointer border-white/10 bg-white/5 text-slate-300 hover:text-blue-200'
+                ? 'cursor-pointer border-blue-400/30 bg-primary/15 text-primary hover:bg-blue-500/25'
+                : 'cursor-pointer border-border bg-surface-muted text-text-muted hover:text-primary'
             }`}
           >
             {togglingField === 'isFeatured' ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiHome className="h-4 w-4" />}
@@ -421,12 +421,12 @@ function DetailsTab({ course, setCourse, featuredCount, reloadFeaturedCount, onD
       </section>
 
       {/* Visibility */}
-      <section className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-white">
-          {course.isHidden ? <FiEyeOff className="h-5 w-5 text-slate-300" /> : <FiEye className="h-5 w-5 text-emerald-300" />}
+      <section className="rounded-3xl border border-border bg-surface p-6">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-text">
+          {course.isHidden ? <FiEyeOff className="h-5 w-5 text-text-muted" /> : <FiEye className="h-5 w-5 text-success" />}
           Visibility
         </h2>
-        <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-400">
+        <p className="mt-1 max-w-2xl text-sm leading-6 text-text-muted">
           {course.isHidden
             ? 'This course is hidden from the public catalogue and homepage. Already-enrolled students and managers keep full access — you just can’t sell it to new students.'
             : 'This course is visible in the public catalogue and may appear on the homepage. Hide it to stop new enrollments while keeping access for students who already bought it.'}
@@ -441,8 +441,8 @@ function DetailsTab({ course, setCourse, featuredCount, reloadFeaturedCount, onD
           }
           className={`mt-4 inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
             course.isHidden
-              ? 'cursor-pointer border-emerald-400/30 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25'
-              : 'cursor-pointer border-white/10 bg-white/5 text-slate-300 hover:text-white'
+              ? 'cursor-pointer border-success/30 bg-success/15 text-success hover:bg-emerald-500/25'
+              : 'cursor-pointer border-border bg-surface-muted text-text-muted hover:text-text'
           }`}
         >
           {togglingField === 'isHidden' ? (
@@ -455,21 +455,21 @@ function DetailsTab({ course, setCourse, featuredCount, reloadFeaturedCount, onD
           {course.isHidden ? 'Make visible' : 'Hide from public'}
         </button>
         {!course.isHidden && (course.isBestseller || course.isFeatured) && (
-          <p className="mt-3 text-xs text-amber-300/80">
+          <p className="mt-3 text-xs text-warning/80">
             Remove the bestseller / homepage flags above before you can hide this course.
           </p>
         )}
       </section>
 
       {/* Danger zone */}
-      <section className="rounded-3xl border border-red-400/20 bg-red-500/5 p-6">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-white">
-          <FiAlertTriangle className="h-5 w-5 text-red-400" /> Danger zone
+      <section className="rounded-3xl border border-danger/20 bg-red-500/5 p-6">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-text">
+          <FiAlertTriangle className="h-5 w-5 text-danger" /> Danger zone
         </h2>
-        <p className="mt-1 text-sm text-slate-400">Deleting a course is permanent and cannot be undone.</p>
+        <p className="mt-1 text-sm text-text-muted">Deleting a course is permanent and cannot be undone.</p>
         <button
           onClick={() => setShowDelete(true)}
-          className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full border border-red-400/30 bg-red-500/10 px-5 py-2.5 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/20"
+          className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full border border-red-400/30 bg-danger/10 px-5 py-2.5 text-sm font-semibold text-danger transition-colors hover:bg-danger/20"
         >
           <FiTrash2 className="h-4 w-4" /> Delete course
         </button>
@@ -478,14 +478,14 @@ function DetailsTab({ course, setCourse, featuredCount, reloadFeaturedCount, onD
       {/* Delete confirmation */}
       {showDelete && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0a0a12] p-7 shadow-2xl shadow-black/50">
+          <div className="w-full max-w-md rounded-3xl border border-border bg-surface-elevated p-7 shadow-2xl shadow-black/50">
             <div className="flex items-start gap-4">
-              <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-red-500/15 text-red-300 ring-1 ring-red-400/20">
+              <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-red-500/15 text-danger ring-1 ring-red-400/20">
                 <FiAlertTriangle className="h-6 w-6" />
               </span>
               <div>
-                <h3 className="text-lg font-semibold text-white">Delete course?</h3>
-                <p className="mt-1 text-sm leading-6 text-slate-400">
+                <h3 className="text-lg font-semibold text-text">Delete course?</h3>
+                <p className="mt-1 text-sm leading-6 text-text-muted">
                   “{course.title}” will be permanently removed. This cannot be undone.
                 </p>
               </div>
@@ -493,7 +493,7 @@ function DetailsTab({ course, setCourse, featuredCount, reloadFeaturedCount, onD
             <div className="mt-6 flex items-center justify-end gap-3">
               <button
                 onClick={() => setShowDelete(false)}
-                className="cursor-pointer rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:text-blue-200"
+                className="cursor-pointer rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:text-primary"
               >
                 Cancel
               </button>
@@ -608,7 +608,7 @@ function EditTab({ course, setCourse, featuredCount, reloadFeaturedCount }) {
   }
 
   return (
-    <form onSubmit={handleSave} className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
+    <form onSubmit={handleSave} className="rounded-3xl border border-border bg-surface p-6">
       <CourseForm
         form={form}
         onField={handleField}
@@ -617,11 +617,11 @@ function EditTab({ course, setCourse, featuredCount, reloadFeaturedCount }) {
         featuredCount={featuredCount}
         editing
       />
-      <div className="mt-6 flex items-center justify-end border-t border-white/10 pt-5">
+      <div className="mt-6 flex items-center justify-end border-t border-border pt-5">
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {saving ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiCheck className="h-4 w-4" />}
           {saving ? 'Saving…' : 'Save changes'}
@@ -646,16 +646,16 @@ function ContentTab({ course, setCourse }) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
-        <h2 className="mb-5 flex items-center gap-2 text-lg font-bold text-white">
-          <FiLayers className="h-5 w-5 text-blue-300" /> Curriculum
+      <section className="rounded-3xl border border-border bg-surface p-6">
+        <h2 className="mb-5 flex items-center gap-2 text-lg font-bold text-text">
+          <FiLayers className="h-5 w-5 text-primary" /> Curriculum
         </h2>
         <CurriculumEditor courseId={course._id} sections={course.curriculum || []} apply={apply} lessonCount={lessonCount} />
       </section>
 
-      <section className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
-        <h2 className="mb-5 flex items-center gap-2 text-lg font-bold text-white">
-          <FiCalendar className="h-5 w-5 text-blue-300" /> Schedule
+      <section className="rounded-3xl border border-border bg-surface p-6">
+        <h2 className="mb-5 flex items-center gap-2 text-lg font-bold text-text">
+          <FiCalendar className="h-5 w-5 text-primary" /> Schedule
         </h2>
         <ScheduleEditor courseId={course._id} schedule={course.schedule || []} apply={apply} />
       </section>
@@ -674,10 +674,10 @@ function initials(name = '') {
 function Avatar({ person, className = '' }) {
   if (person.photo) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={person.photo} alt={person.name} className={`h-10 w-10 flex-none rounded-full object-cover ring-2 ring-white/10 ${className}`} />;
+    return <img src={person.photo} alt={person.name} className={`h-10 w-10 flex-none rounded-full object-cover ring-2 ring-border ${className}`} />;
   }
   return (
-    <span className={`flex h-10 w-10 flex-none items-center justify-center rounded-full bg-blue-500/15 text-xs font-semibold text-blue-200 ring-2 ring-white/10 ${className}`}>
+    <span className={`flex h-10 w-10 flex-none items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary ring-2 ring-border ${className}`}>
       {initials(person.name) || '?'}
     </span>
   );
@@ -749,30 +749,30 @@ function TeachersTab({ course, setCourse }) {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* Assigned */}
-      <section className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
-        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-          <FiUserCheck className="h-4 w-4 text-emerald-300" /> Assigned
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-slate-300">{assigned.length}</span>
+      <section className="rounded-3xl border border-border bg-surface p-6">
+        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">
+          <FiUserCheck className="h-4 w-4 text-success" /> Assigned
+          <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[11px] text-text-muted">{assigned.length}</span>
         </p>
         {assigned.length === 0 ? (
-          <p className="mt-4 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-8 text-center text-sm text-slate-500">
+          <p className="mt-4 rounded-2xl border border-dashed border-border bg-white/[0.02] px-4 py-8 text-center text-sm text-text-subtle">
             No teachers assigned yet.
           </p>
         ) : (
           <ul className="mt-4 space-y-2">
             {assigned.map((t) => (
-              <li key={t._id} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3">
+              <li key={t._id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface px-4 py-3">
                 <div className="flex min-w-0 items-center gap-3">
                   <Avatar person={t} />
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-white">{t.name}</p>
-                    <p className="truncate text-xs capitalize text-slate-500">{t.role || 'teacher'}</p>
+                    <p className="truncate text-sm font-semibold text-text">{t.name}</p>
+                    <p className="truncate text-xs capitalize text-text-subtle">{t.role || 'teacher'}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => remove(t)}
                   disabled={savingId === t._id}
-                  className="inline-flex flex-none cursor-pointer items-center gap-1.5 rounded-full border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-300 transition-colors hover:bg-red-500/20 disabled:opacity-60"
+                  className="inline-flex flex-none cursor-pointer items-center gap-1.5 rounded-full border border-danger/20 bg-danger/10 px-3 py-1.5 text-xs font-semibold text-danger transition-colors hover:bg-danger/20 disabled:opacity-60"
                 >
                   {savingId === t._id ? <FiLoader className="h-3.5 w-3.5 animate-spin" /> : <FiUserX className="h-3.5 w-3.5" />}
                   Remove
@@ -784,43 +784,43 @@ function TeachersTab({ course, setCourse }) {
       </section>
 
       {/* Add */}
-      <section className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
-        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-          <FiUserPlus className="h-4 w-4 text-blue-300" /> Add a teacher
+      <section className="rounded-3xl border border-border bg-surface p-6">
+        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">
+          <FiUserPlus className="h-4 w-4 text-primary" /> Add a teacher
         </p>
         <label className="relative mt-4 block">
-          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-subtle" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search teachers…"
-            className="w-full rounded-full border border-white/10 bg-slate-900/80 py-2.5 pl-11 pr-4 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+            className="w-full rounded-full border border-border bg-surface-elevated/80 py-2.5 pl-11 pr-4 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
           />
         </label>
         <div className="mt-4">
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-8 text-sm text-slate-400">
+            <div className="flex items-center justify-center gap-2 py-8 text-sm text-text-muted">
               <FiLoader className="h-4 w-4 animate-spin" /> Loading teachers…
             </div>
           ) : available.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-8 text-center text-sm text-slate-500">
+            <p className="rounded-2xl border border-dashed border-border bg-white/[0.02] px-4 py-8 text-center text-sm text-text-subtle">
               {allTeachers.length === 0 ? 'No active teachers found.' : 'All matching teachers are already assigned.'}
             </p>
           ) : (
             <ul className="space-y-2">
               {available.map((t) => (
-                <li key={t._id} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3">
+                <li key={t._id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface px-4 py-3">
                   <div className="flex min-w-0 items-center gap-3">
                     <Avatar person={t} />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-white">{t.name}</p>
-                      {t.address ? <p className="truncate text-xs text-slate-500">{t.address}</p> : null}
+                      <p className="truncate text-sm font-semibold text-text">{t.name}</p>
+                      {t.address ? <p className="truncate text-xs text-text-subtle">{t.address}</p> : null}
                     </div>
                   </div>
                   <button
                     onClick={() => assign(t)}
                     disabled={savingId === t._id}
-                    className="inline-flex flex-none cursor-pointer items-center gap-1.5 rounded-full border border-blue-400/30 bg-blue-500/15 px-3 py-1.5 text-xs font-semibold text-blue-200 transition-colors hover:bg-blue-500/25 disabled:opacity-60"
+                    className="inline-flex flex-none cursor-pointer items-center gap-1.5 rounded-full border border-blue-400/30 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-blue-500/25 disabled:opacity-60"
                   >
                     {savingId === t._id ? <FiLoader className="h-3.5 w-3.5 animate-spin" /> : <FiUserPlus className="h-3.5 w-3.5" />}
                     Assign
@@ -907,13 +907,13 @@ function AnnouncementsTab({ course }) {
   return (
     <div className="space-y-6">
       {/* Composer */}
-      <section className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-white">
+      <section className="rounded-3xl border border-border bg-surface p-6">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-text">
           <FiBell className="h-5 w-5 text-purple-300" /> Send an announcement
         </h2>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-text-muted">
           Notifies all{' '}
-          <span className="font-semibold text-slate-200">{studentCount}</span> enrolled
+          <span className="font-semibold text-text">{studentCount}</span> enrolled
           {studentCount === 1 ? ' student' : ' students'} in their notifications.
         </p>
 
@@ -933,7 +933,7 @@ function AnnouncementsTab({ course }) {
           />
           <div className="flex items-center justify-between gap-3">
             {studentCount === 0 ? (
-              <p className="text-xs text-amber-300/80">
+              <p className="text-xs text-warning/80">
                 No students are enrolled yet — this will be saved but reaches no one.
               </p>
             ) : (
@@ -942,7 +942,7 @@ function AnnouncementsTab({ course }) {
             <button
               type="submit"
               disabled={sending || !form.title.trim()}
-              className="inline-flex flex-none cursor-pointer items-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex flex-none cursor-pointer items-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {sending ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiSend className="h-4 w-4" />}
               {sending ? 'Sending…' : 'Send announcement'}
@@ -952,29 +952,29 @@ function AnnouncementsTab({ course }) {
       </section>
 
       {/* History */}
-      <section className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
-        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+      <section className="rounded-3xl border border-border bg-surface p-6">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-text-muted">
           Sent announcements
         </h3>
         <div className="mt-4">
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-400">
+            <div className="flex items-center justify-center gap-2 py-10 text-sm text-text-muted">
               <FiLoader className="h-4 w-4 animate-spin" /> Loading…
             </div>
           ) : announcements.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-10 text-center text-sm text-slate-500">
+            <p className="rounded-2xl border border-dashed border-border bg-white/[0.02] px-4 py-10 text-center text-sm text-text-subtle">
               No announcements sent yet.
             </p>
           ) : (
             <ul className="space-y-3">
               {announcements.map((a) => (
-                <li key={a._id} className="rounded-2xl border border-white/10 bg-slate-900/60 px-5 py-4">
+                <li key={a._id} className="rounded-2xl border border-border bg-surface px-5 py-4">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="font-semibold text-white">{a.title}</p>
-                    <span className="flex-none text-xs text-slate-500">{fmtDateTimeFull(a.createdAt)}</span>
+                    <p className="font-semibold text-text">{a.title}</p>
+                    <span className="flex-none text-xs text-text-subtle">{fmtDateTimeFull(a.createdAt)}</span>
                   </div>
-                  {a.body && <p className="mt-1.5 whitespace-pre-line text-sm text-slate-400">{a.body}</p>}
-                  <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+                  {a.body && <p className="mt-1.5 whitespace-pre-line text-sm text-text-muted">{a.body}</p>}
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-text-subtle">
                     <FiUsers className="h-3.5 w-3.5" /> Sent to {a.recipientCount}{' '}
                     {a.recipientCount === 1 ? 'student' : 'students'}
                     {a.sentBy?.name ? ` · by ${a.sentBy.name}` : ''}
@@ -1014,35 +1014,35 @@ function WishlistTab({ courseId }) {
   }, [courseId]);
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
-      <h2 className="flex items-center gap-2 text-lg font-bold text-white">
-        <FiHeart className="h-5 w-5 text-rose-300" /> Wishlisted by
+    <section className="rounded-3xl border border-border bg-surface p-6">
+      <h2 className="flex items-center gap-2 text-lg font-bold text-text">
+        <FiHeart className="h-5 w-5 text-danger" /> Wishlisted by
         {!loading && (
-          <span className="rounded-full bg-white/10 px-2 py-0.5 text-sm font-semibold text-slate-300">{users.length}</span>
+          <span className="rounded-full bg-surface-muted px-2 py-0.5 text-sm font-semibold text-text-muted">{users.length}</span>
         )}
       </h2>
 
       <div className="mt-5">
         {loading ? (
-          <div className="flex items-center justify-center gap-2 py-12 text-sm text-slate-400">
+          <div className="flex items-center justify-center gap-2 py-12 text-sm text-text-muted">
             <FiLoader className="h-4 w-4 animate-spin" /> Loading…
           </div>
         ) : users.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-10 text-center text-sm text-slate-500">
+          <p className="rounded-2xl border border-dashed border-border bg-white/[0.02] px-4 py-10 text-center text-sm text-text-subtle">
             No one has added this course to their wishlist yet.
           </p>
         ) : (
           <ul className="grid gap-2 sm:grid-cols-2">
             {users.map((u) => (
-              <li key={u._id} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3">
+              <li key={u._id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface px-4 py-3">
                 <div className="flex min-w-0 items-center gap-3">
                   <Avatar person={u} />
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-white">{u.name}</p>
-                    <p className="truncate text-xs text-slate-500">{u.email}</p>
+                    <p className="truncate text-sm font-semibold text-text">{u.name}</p>
+                    <p className="truncate text-xs text-text-subtle">{u.email}</p>
                   </div>
                 </div>
-                <span className="flex-none rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-semibold capitalize text-slate-400 ring-1 ring-white/10">
+                <span className="flex-none rounded-full bg-surface-muted px-2.5 py-1 text-[11px] font-semibold capitalize text-text-muted ring-1 ring-border">
                   {u.role || 'user'}
                 </span>
               </li>

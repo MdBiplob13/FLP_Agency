@@ -54,14 +54,14 @@ function timeAgo(value) {
 
 const roleStyles = {
   user: 'text-sky-300 bg-sky-500/10 ring-sky-500/20',
-  teacher: 'text-purple-300 bg-purple-500/10 ring-purple-500/20',
-  admin: 'text-amber-300 bg-amber-500/10 ring-amber-500/20',
-  superadmin: 'text-rose-300 bg-rose-500/10 ring-rose-500/20',
+  teacher: 'text-purple-300 bg-accent/10 ring-purple-500/20',
+  admin: 'text-warning bg-warning/10 ring-amber-500/20',
+  superadmin: 'text-danger bg-danger/10 ring-rose-500/20',
 };
 const statusStyles = {
-  draft: 'text-amber-300 bg-amber-500/10 ring-amber-500/20',
-  published: 'text-emerald-300 bg-emerald-500/10 ring-emerald-500/20',
-  archived: 'text-slate-400 bg-slate-500/10 ring-slate-500/20',
+  draft: 'text-warning bg-warning/10 ring-amber-500/20',
+  published: 'text-success bg-success/10 ring-emerald-500/20',
+  archived: 'text-text-muted bg-slate-500/10 ring-slate-500/20',
 };
 
 /* ------------------------------------------------------------------ */
@@ -105,13 +105,13 @@ function CountUp({ to = 0, duration = 1.4 }) {
 function ChartTooltip({ active, payload, label, money }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-white/10 bg-[#0a0a12]/95 px-3 py-2 text-xs shadow-2xl shadow-black/50 backdrop-blur">
-      {label ? <p className="mb-1 font-semibold text-white">{label}</p> : null}
+    <div className="rounded-xl border border-border bg-surface-elevated/95 px-3 py-2 text-xs shadow-2xl shadow-black/50 backdrop-blur">
+      {label ? <p className="mb-1 font-semibold text-text">{label}</p> : null}
       {payload.map((p, i) => (
-        <p key={i} className="flex items-center gap-2 text-slate-300">
+        <p key={i} className="flex items-center gap-2 text-text-muted">
           <span className="h-2 w-2 rounded-full" style={{ background: p.color || p.payload?.fill }} />
           <span className="capitalize">{p.name}</span>
-          <span className="ml-auto pl-3 font-semibold text-white">
+          <span className="ml-auto pl-3 font-semibold text-text">
             {money ? taka(p.value) : fmt(p.value)}
           </span>
         </p>
@@ -122,7 +122,7 @@ function ChartTooltip({ active, payload, label, money }) {
 
 function Card({ children, className = '' }) {
   return (
-    <div className={`rounded-3xl border border-white/10 bg-slate-950/60 p-5 sm:p-6 ${className}`}>
+    <div className={`rounded-3xl border border-border bg-surface p-5 sm:p-6 ${className}`}>
       {children}
     </div>
   );
@@ -133,13 +133,13 @@ function ChartHeading({ icon: Icon, title, subtitle, action }) {
     <div className="mb-5 flex items-start justify-between gap-3">
       <div className="flex items-center gap-3">
         {Icon ? (
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-border">
             <Icon className="h-4.5 w-4.5" />
           </span>
         ) : null}
         <div>
-          <h3 className="text-base font-semibold text-white">{title}</h3>
-          {subtitle ? <p className="text-xs text-slate-400">{subtitle}</p> : null}
+          <h3 className="text-base font-semibold text-text">{title}</h3>
+          {subtitle ? <p className="text-xs text-text-muted">{subtitle}</p> : null}
         </div>
       </div>
       {action}
@@ -177,8 +177,8 @@ function DonutCard({ icon, title, subtitle, data }) {
               </PieChart>
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold text-white">{fmt(total)}</span>
-              <span className="text-xs text-slate-500">Total</span>
+              <span className="text-2xl font-bold text-text">{fmt(total)}</span>
+              <span className="text-xs text-text-subtle">Total</span>
             </div>
           </div>
           <div className="mt-4 space-y-2">
@@ -188,9 +188,9 @@ function DonutCard({ icon, title, subtitle, data }) {
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: STATUS_COLORS[d.name] || COLORS[i % COLORS.length] }}
                 />
-                <span className="text-slate-300">{d.name}</span>
-                <span className="ml-auto font-semibold text-white">{fmt(d.value)}</span>
-                <span className="w-12 text-right text-xs text-slate-500">
+                <span className="text-text-muted">{d.name}</span>
+                <span className="ml-auto font-semibold text-text">{fmt(d.value)}</span>
+                <span className="w-12 text-right text-xs text-text-subtle">
                   {total ? Math.round((d.value / total) * 100) : 0}%
                 </span>
               </div>
@@ -204,7 +204,7 @@ function DonutCard({ icon, title, subtitle, data }) {
 
 function EmptyChart() {
   return (
-    <div className="flex h-52 flex-col items-center justify-center text-center text-slate-500">
+    <div className="flex h-52 flex-col items-center justify-center text-center text-text-subtle">
       <FiActivity className="h-8 w-8" />
       <p className="mt-2 text-sm">No data yet</p>
     </div>
@@ -260,13 +260,13 @@ export default function AdminOverviewPage() {
   const kpis = t
     ? [
         { label: 'Total users', value: t.users, icon: FiUsers, accent: 'from-sky-500/20 to-blue-500/5', ring: 'text-sky-300', sub: `${fmt(t.activeUsers)} active`, href: '/pages/dashboard/admin/users' },
-        { label: 'Revenue', value: t.revenue, money: true, icon: FiDollarSign, accent: 'from-emerald-500/20 to-emerald-500/5', ring: 'text-emerald-300', sub: `${fmt(t.enrollments)} enrollments` },
-        { label: 'Enrollments', value: t.enrollments, icon: FiTrendingUp, accent: 'from-blue-500/20 to-indigo-500/5', ring: 'text-blue-300', sub: `${fmt(t.wishlists)} wishlisted` },
+        { label: 'Revenue', value: t.revenue, money: true, icon: FiDollarSign, accent: 'from-emerald-500/20 to-emerald-500/5', ring: 'text-success', sub: `${fmt(t.enrollments)} enrollments` },
+        { label: 'Enrollments', value: t.enrollments, icon: FiTrendingUp, accent: 'from-blue-500/20 to-indigo-500/5', ring: 'text-primary', sub: `${fmt(t.wishlists)} wishlisted` },
         { label: 'Courses', value: t.courses, icon: FiBookOpen, accent: 'from-purple-500/20 to-fuchsia-500/5', ring: 'text-purple-300', sub: `${fmt(t.publishedCourses)} published`, href: '/pages/dashboard/admin/courses' },
         { label: 'Blog posts', value: t.blogs, icon: FiFileText, accent: 'from-pink-500/20 to-rose-500/5', ring: 'text-pink-300', sub: `${fmt(t.publishedBlogs)} published`, href: '/pages/dashboard/admin/blogs' },
         { label: 'Teachers', value: t.teachers, icon: FiUserCheck, accent: 'from-violet-500/20 to-purple-500/5', ring: 'text-violet-300', sub: 'Mentors', href: '/pages/dashboard/admin/teachers' },
         { label: 'Blog views', value: t.blogViews, icon: FiEye, accent: 'from-cyan-500/20 to-sky-500/5', ring: 'text-cyan-300', sub: 'All-time reads' },
-        { label: 'Categories', value: t.categories, icon: FiTag, accent: 'from-amber-500/20 to-orange-500/5', ring: 'text-amber-300', sub: 'Topics', href: '/pages/dashboard/admin/categories' },
+        { label: 'Categories', value: t.categories, icon: FiTag, accent: 'from-amber-500/20 to-orange-500/5', ring: 'text-warning', sub: 'Topics', href: '/pages/dashboard/admin/categories' },
       ]
     : [];
 
@@ -275,11 +275,11 @@ export default function AdminOverviewPage() {
       {/* ===== Header ===== */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Dashboard</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">
+          <p className="text-sm uppercase tracking-[0.35em] text-primary">Dashboard</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-text">
             Welcome back{user ? `, ${user.name.split(' ')[0]}` : ''}.
           </h1>
-          <p className="mt-2 text-slate-400">{today}</p>
+          <p className="mt-2 text-text-muted">{today}</p>
         </div>
         
       </div>
@@ -294,23 +294,23 @@ export default function AdminOverviewPage() {
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {loading
           ? Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-32 animate-pulse rounded-3xl border border-white/10 bg-slate-950/60" />
+              <div key={i} className="h-32 animate-pulse rounded-3xl border border-border bg-surface" />
             ))
           : kpis.map((k, i) => {
               const inner = (
                 <Reveal delay={i * 0.04} className="h-full">
-                  <div className={`group relative h-full overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br ${k.accent} p-5 transition-colors hover:border-blue-500/30`}>
+                  <div className={`group relative h-full overflow-hidden rounded-3xl border border-border bg-linear-to-br ${k.accent} p-5 transition-colors hover:border-primary/30`}>
                     <div className="flex items-center justify-between">
-                      <span className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 ring-1 ring-white/10 ${k.ring}`}>
+                      <span className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-muted ring-1 ring-border ${k.ring}`}>
                         <k.icon className="h-5 w-5" />
                       </span>
-                      {k.href && <FiArrowUpRight className="h-4 w-4 text-slate-500 transition-colors group-hover:text-blue-300" />}
+                      {k.href && <FiArrowUpRight className="h-4 w-4 text-text-subtle transition-colors group-hover:text-primary" />}
                     </div>
-                    <p className="mt-4 text-3xl font-bold text-white">
+                    <p className="mt-4 text-3xl font-bold text-text">
                       {k.money ? <>৳<CountUp to={k.value} /></> : <CountUp to={k.value} />}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-slate-300">{k.label}</p>
-                    <p className="text-xs text-slate-500">{k.sub}</p>
+                    <p className="mt-1 text-sm font-medium text-text-muted">{k.label}</p>
+                    <p className="text-xs text-text-subtle">{k.sub}</p>
                   </div>
                 </Reveal>
               );
@@ -328,21 +328,21 @@ export default function AdminOverviewPage() {
           <Link
             key={a.label}
             href={a.href}
-            className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition-colors hover:border-blue-500/30"
+            className="group flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3 transition-colors hover:border-primary/30"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-border">
               <a.icon className="h-4 w-4" />
             </span>
-            <span className="text-sm font-semibold text-white">{a.label}</span>
-            <FiArrowRight className="ml-auto h-4 w-4 text-slate-500 transition-transform group-hover:translate-x-1" />
+            <span className="text-sm font-semibold text-text">{a.label}</span>
+            <FiArrowRight className="ml-auto h-4 w-4 text-text-subtle transition-transform group-hover:translate-x-1" />
           </Link>
         ))}
       </div>
 
       {loading ? (
         <div className="mt-6 grid gap-5 lg:grid-cols-3">
-          <div className="h-80 animate-pulse rounded-3xl border border-white/10 bg-slate-950/60 lg:col-span-2" />
-          <div className="h-80 animate-pulse rounded-3xl border border-white/10 bg-slate-950/60" />
+          <div className="h-80 animate-pulse rounded-3xl border border-border bg-surface lg:col-span-2" />
+          <div className="h-80 animate-pulse rounded-3xl border border-border bg-surface" />
         </div>
       ) : stats ? (
         <>
@@ -378,7 +378,7 @@ export default function AdminOverviewPage() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-400">
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-text-muted">
                   <Legend color="#3b82f6" label="Users" />
                   <Legend color="#a855f7" label="Courses" />
                   <Legend color="#34d399" label="Blogs" />
@@ -400,7 +400,7 @@ export default function AdminOverviewPage() {
                   title="Top courses by enrollment"
                   subtitle="Your best performers"
                   action={
-                    <Link href="/pages/dashboard/admin/courses" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-300 hover:text-blue-200">
+                    <Link href="/pages/dashboard/admin/courses" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary">
                       All courses <FiArrowRight className="h-4 w-4" />
                     </Link>
                   }
@@ -486,19 +486,19 @@ export default function AdminOverviewPage() {
                 <ChartHeading
                   icon={FiUsers}
                   title="New members"
-                  action={<Link href="/pages/dashboard/admin/users" className="text-sm font-semibold text-blue-300 hover:text-blue-200">All</Link>}
+                  action={<Link href="/pages/dashboard/admin/users" className="text-sm font-semibold text-primary hover:text-primary">All</Link>}
                 />
                 <ActivityList
                   items={stats.recentUsers}
                   empty="No users yet"
                   render={(u) => (
                     <>
-                      <span className="flex h-9 w-9 flex-none items-center justify-center overflow-hidden rounded-full bg-white/5 text-xs font-bold text-white ring-1 ring-white/10">
+                      <span className="flex h-9 w-9 flex-none items-center justify-center overflow-hidden rounded-full bg-surface-muted text-xs font-bold text-text ring-1 ring-border">
                         {u.photo ? <img src={u.photo} alt={u.name} className="h-full w-full object-cover" /> : (u.name?.[0] || '?')}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-white">{u.name}</p>
-                        <p className="truncate text-xs text-slate-500">{u.email}</p>
+                        <p className="truncate text-sm font-semibold text-text">{u.name}</p>
+                        <p className="truncate text-xs text-text-subtle">{u.email}</p>
                       </div>
                       <span className={`flex-none rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ring-1 ${roleStyles[u.role] || roleStyles.user}`}>
                         {u.role}
@@ -515,19 +515,19 @@ export default function AdminOverviewPage() {
                 <ChartHeading
                   icon={FiBookOpen}
                   title="Latest courses"
-                  action={<Link href="/pages/dashboard/admin/courses" className="text-sm font-semibold text-blue-300 hover:text-blue-200">All</Link>}
+                  action={<Link href="/pages/dashboard/admin/courses" className="text-sm font-semibold text-primary hover:text-primary">All</Link>}
                 />
                 <ActivityList
                   items={stats.recentCourses}
                   empty="No courses yet"
                   render={(c) => (
                     <>
-                      <span className="flex h-9 w-12 flex-none items-center justify-center overflow-hidden rounded-lg bg-white/5 ring-1 ring-white/10">
-                        {c.thumbnail ? <img src={c.thumbnail} alt={c.title} className="h-full w-full object-cover" /> : <FiBookOpen className="h-4 w-4 text-slate-500" />}
+                      <span className="flex h-9 w-12 flex-none items-center justify-center overflow-hidden rounded-lg bg-surface-muted ring-1 ring-border">
+                        {c.thumbnail ? <img src={c.thumbnail} alt={c.title} className="h-full w-full object-cover" /> : <FiBookOpen className="h-4 w-4 text-text-subtle" />}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-white">{c.title}</p>
-                        <p className="truncate text-xs text-slate-500">{c.students} students · {timeAgo(c.createdAt)}</p>
+                        <p className="truncate text-sm font-semibold text-text">{c.title}</p>
+                        <p className="truncate text-xs text-text-subtle">{c.students} students · {timeAgo(c.createdAt)}</p>
                       </div>
                       <span className={`flex-none rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ring-1 ${statusStyles[c.status] || statusStyles.draft}`}>
                         {c.status}
@@ -544,19 +544,19 @@ export default function AdminOverviewPage() {
                 <ChartHeading
                   icon={FiFileText}
                   title="Latest posts"
-                  action={<Link href="/pages/dashboard/admin/blogs" className="text-sm font-semibold text-blue-300 hover:text-blue-200">All</Link>}
+                  action={<Link href="/pages/dashboard/admin/blogs" className="text-sm font-semibold text-primary hover:text-primary">All</Link>}
                 />
                 <ActivityList
                   items={stats.recentBlogs}
                   empty="No posts yet"
                   render={(b) => (
                     <>
-                      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-white/5 text-slate-500 ring-1 ring-white/10">
+                      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-surface-muted text-text-subtle ring-1 ring-border">
                         <FiFileText className="h-4 w-4" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-white">{b.title}</p>
-                        <p className="truncate text-xs text-slate-500">{fmt(b.views)} views · {timeAgo(b.createdAt)}</p>
+                        <p className="truncate text-sm font-semibold text-text">{b.title}</p>
+                        <p className="truncate text-xs text-text-subtle">{fmt(b.views)} views · {timeAgo(b.createdAt)}</p>
                       </div>
                       <span className={`flex-none rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ring-1 ${statusStyles[b.status] || statusStyles.draft}`}>
                         {b.status}
@@ -589,7 +589,7 @@ function Legend({ color, label }) {
 function ActivityList({ items, render, empty }) {
   if (!items || items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-center text-slate-500">
+      <div className="flex flex-col items-center justify-center py-10 text-center text-text-subtle">
         <FiPlus className="h-7 w-7" />
         <p className="mt-2 text-sm">{empty}</p>
       </div>
@@ -598,7 +598,7 @@ function ActivityList({ items, render, empty }) {
   return (
     <ul className="space-y-1">
       {items.map((it) => (
-        <li key={it.id} className="flex items-center gap-3 rounded-2xl px-2 py-2 transition-colors hover:bg-white/5">
+        <li key={it.id} className="flex items-center gap-3 rounded-2xl px-2 py-2 transition-colors hover:bg-surface-muted">
           {render(it)}
         </li>
       ))}

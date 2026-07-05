@@ -137,7 +137,7 @@ function Stars({ n = 5 }) {
   );
 }
 
-function Socials({ links, className = "text-slate-400" }) {
+function Socials({ links, className = "text-text-muted" }) {
   const items = [
     { href: links?.linkedin, Icon: FiLinkedin },
     { href: links?.facebook, Icon: FiFacebook },
@@ -155,7 +155,7 @@ function Socials({ links, className = "text-slate-400" }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Social profile"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 transition-colors hover:bg-blue-600 hover:text-white"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-muted ring-1 ring-border transition-colors hover:bg-blue-600 hover:text-white"
         >
           <Icon className="h-4 w-4" />
         </a>
@@ -171,8 +171,8 @@ function Socials({ links, className = "text-slate-400" }) {
 function CourseCard({ course }) {
   const p = coursePrice(course);
   return (
-    <Link href={`/pages/courses/${course._id}`} className="group block h-full">
-      <SpotlightCard className="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-950/60 shadow-xl shadow-black/20 transition-colors hover:border-blue-500/30">
+    <Link href={`/pages/courses/${course.slug || course._id}`} className="group block h-full">
+      <SpotlightCard className="flex h-full flex-col rounded-3xl border border-border bg-surface shadow-xl shadow-black/20 transition-colors hover:border-primary/30">
         <div className="relative overflow-hidden rounded-t-3xl">
           <img
             src={course.thumbnail || FALLBACK_IMG}
@@ -187,21 +187,21 @@ function CourseCard({ course }) {
           )}
         </div>
         <div className="flex flex-1 flex-col p-5">
-          <h3 className="line-clamp-2 flex-1 text-lg font-semibold leading-snug text-white group-hover:text-blue-200">
+          <h3 className="line-clamp-2 flex-1 text-lg font-semibold leading-snug text-white group-hover:text-primary">
             {course.title}
           </h3>
           <div className="mt-4 flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-xs text-slate-400">
-              <FiUsers className="h-3.5 w-3.5 text-blue-300" />
+            <span className="flex items-center gap-1.5 text-xs text-text-muted">
+              <FiUsers className="h-3.5 w-3.5 text-primary" />
               {(course.studentsEnrolled || []).length.toLocaleString()} enrolled
             </span>
             {p.isFree ? (
-              <span className="text-base font-bold text-emerald-300">Free</span>
+              <span className="text-base font-bold text-success">Free</span>
             ) : (
               <span className="flex items-baseline gap-1.5">
                 <span className="text-base font-bold text-white">৳{p.price}</span>
                 {p.oldPrice ? (
-                  <span className="text-xs text-slate-500 line-through">৳{p.oldPrice}</span>
+                  <span className="text-xs text-text-subtle line-through">৳{p.oldPrice}</span>
                 ) : null}
               </span>
             )}
@@ -241,7 +241,7 @@ export default function TeacherDetailPage({ params }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#020205] font-sans text-slate-100 antialiased">
+    <div className="min-h-screen bg-background font-sans text-text antialiased">
       <Navbar />
 
       {/* Ambient background */}
@@ -254,7 +254,7 @@ export default function TeacherDetailPage({ params }) {
         <div className="mb-8">
           <button
             onClick={() => router.push("/pages/teachers")}
-            className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white"
+            className="group inline-flex items-center gap-2 rounded-full border border-border bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-white"
           >
             <FiArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Back to teachers
@@ -264,30 +264,30 @@ export default function TeacherDetailPage({ params }) {
         {/* ---- Loading ---- */}
         {teacherLoading ? (
           <div className="grid gap-10 lg:grid-cols-[360px_minmax(0,1fr)]">
-            <div className="h-96 animate-pulse rounded-[2rem] border border-white/10 bg-slate-950/60" />
+            <div className="h-96 animate-pulse rounded-[2rem] border border-border bg-surface" />
             <div className="space-y-6">
-              <div className="h-10 w-2/3 animate-pulse rounded bg-white/10" />
-              <div className="h-4 w-full animate-pulse rounded bg-white/5" />
+              <div className="h-10 w-2/3 animate-pulse rounded bg-surface-muted" />
+              <div className="h-4 w-full animate-pulse rounded bg-surface-muted" />
               <div className="grid grid-cols-3 gap-4">
-                <div className="h-24 animate-pulse rounded-2xl bg-white/5" />
-                <div className="h-24 animate-pulse rounded-2xl bg-white/5" />
-                <div className="h-24 animate-pulse rounded-2xl bg-white/5" />
+                <div className="h-24 animate-pulse rounded-2xl bg-surface-muted" />
+                <div className="h-24 animate-pulse rounded-2xl bg-surface-muted" />
+                <div className="h-24 animate-pulse rounded-2xl bg-surface-muted" />
               </div>
             </div>
           </div>
         ) : teacherError || !teacher ? (
           /* ---- Error / not found ---- */
           <div className="rounded-3xl border border-rose-400/20 bg-rose-500/5 p-12 text-center">
-            <FiX className="mx-auto h-10 w-10 text-rose-400" />
+            <FiX className="mx-auto h-10 w-10 text-danger" />
             <p className="mt-4 text-lg font-semibold text-white">
               {teacherError || "Teacher not found"}
             </p>
-            <p className="mt-1 text-slate-400">
+            <p className="mt-1 text-text-muted">
               The mentor you’re looking for may no longer be available.
             </p>
             <Link
               href="/pages/teachers"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-3 text-sm font-semibold text-white"
             >
               Meet all teachers <FiArrowRight className="h-4 w-4" />
             </Link>
@@ -304,8 +304,8 @@ export default function TeacherDetailPage({ params }) {
                 className="lg:sticky lg:top-28"
               >
                 <Tilt3D>
-                  <SpotlightCard className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/50 backdrop-blur-xl">
-                    <div className="relative overflow-hidden rounded-[1.4rem] border border-white/10">
+                  <SpotlightCard className="rounded-[2rem] border border-border bg-surface-elevated p-4 shadow-2xl shadow-black/50 backdrop-blur-xl">
+                    <div className="relative overflow-hidden rounded-[1.4rem] border border-border">
                       <img
                         src={teacher.photo || FALLBACK_IMG}
                         alt={teacher.name}
@@ -319,8 +319,8 @@ export default function TeacherDetailPage({ params }) {
                       )}
                       <div className="absolute bottom-4 left-4 right-4">
                         <h1 className="text-2xl font-semibold text-white">{teacher.name}</h1>
-                        <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-300">
-                          <FiMapPin className="h-3.5 w-3.5 text-blue-300" />
+                        <p className="mt-1 flex items-center gap-1.5 text-sm text-text-muted">
+                          <FiMapPin className="h-3.5 w-3.5 text-primary" />
                           {teacher.address || "Location not set"}
                         </p>
                       </div>
@@ -328,7 +328,7 @@ export default function TeacherDetailPage({ params }) {
                     <div className="flex items-center justify-between gap-3 px-2 pb-1 pt-4">
                       <div className="flex items-center gap-2">
                         <Stars n={5} />
-                        <span className="text-sm text-slate-300">4.9</span>
+                        <span className="text-sm text-text-muted">4.9</span>
                       </div>
                       <Socials links={teacher.socialLinks} />
                     </div>
@@ -344,11 +344,11 @@ export default function TeacherDetailPage({ params }) {
                 className="space-y-10"
               >
                 <div>
-                  <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Instructor</p>
+                  <p className="text-sm uppercase tracking-[0.35em] text-primary">Instructor</p>
                   <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
                     Learn directly from {teacher.name}
                   </h2>
-                  <p className="mt-4 max-w-2xl text-base leading-8 text-slate-300">
+                  <p className="mt-4 max-w-2xl text-base leading-8 text-text-muted">
                     {firstName} mentors students with hands-on, industry-tested guidance —
                     reviewing real work, sharing career-ready advice, and helping you build
                     skills and a portfolio that stand out.
@@ -360,11 +360,11 @@ export default function TeacherDetailPage({ params }) {
                   {stats.map((s) => (
                     <SpotlightCard
                       key={s.label}
-                      className="rounded-2xl border border-white/10 bg-slate-950/60 p-5 text-center"
+                      className="rounded-2xl border border-border bg-surface p-5 text-center"
                     >
-                      <s.icon className="mx-auto h-5 w-5 text-blue-300" />
+                      <s.icon className="mx-auto h-5 w-5 text-primary" />
                       <p className="mt-2 text-2xl font-bold text-white">{s.value}</p>
-                      <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{s.label}</p>
+                      <p className="text-xs uppercase tracking-[0.18em] text-text-subtle">{s.label}</p>
                     </SpotlightCard>
                   ))}
                 </div>
@@ -373,21 +373,21 @@ export default function TeacherDetailPage({ params }) {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                   <Link
                     href="/pages/courses"
-                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
+                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-primary/25 transition hover:brightness-110"
                   >
                     Explore courses
                     <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                   </Link>
                   <Link
                     href="/pages/contact"
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-base font-semibold text-white backdrop-blur transition-colors hover:border-blue-500/40 hover:text-blue-200"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-border-strong bg-surface-muted px-8 py-4 text-base font-semibold text-white backdrop-blur transition-colors hover:border-primary/40 hover:text-primary"
                   >
                     Talk to a mentor
                   </Link>
                 </div>
 
                 {/* Trust strip */}
-                <ul className="grid gap-3 border-t border-white/5 pt-6 text-sm text-slate-300 sm:grid-cols-2">
+                <ul className="grid gap-3 border-t border-border pt-6 text-sm text-text-muted sm:grid-cols-2">
                   {[
                     "Live feedback on real projects",
                     "Career-ready guidance",
@@ -395,7 +395,7 @@ export default function TeacherDetailPage({ params }) {
                     "Small, focused cohorts",
                   ].map((item) => (
                     <li key={item} className="flex items-center gap-3">
-                      <FiCheck className="h-4 w-4 flex-none text-emerald-300" />
+                      <FiCheck className="h-4 w-4 flex-none text-success" />
                       {item}
                     </li>
                   ))}
@@ -407,10 +407,10 @@ export default function TeacherDetailPage({ params }) {
             <section className="mt-20">
               <div className="flex items-end justify-between gap-4">
                 <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
-                  <FiAward className="h-5 w-5 text-blue-300" /> Courses by {firstName}
+                  <FiAward className="h-5 w-5 text-primary" /> Courses by {firstName}
                 </h2>
                 {teacherCourses.length > 0 && (
-                  <span className="text-sm text-slate-400">
+                  <span className="text-sm text-text-muted">
                     {teacherCourses.length} course{teacherCourses.length > 1 ? "s" : ""}
                   </span>
                 )}
@@ -431,15 +431,15 @@ export default function TeacherDetailPage({ params }) {
                   ))}
                 </div>
               ) : (
-                <div className="mt-7 rounded-3xl border border-white/10 bg-slate-950/60 p-12 text-center">
-                  <FiBookOpen className="mx-auto h-10 w-10 text-blue-300" />
+                <div className="mt-7 rounded-3xl border border-border bg-surface p-12 text-center">
+                  <FiBookOpen className="mx-auto h-10 w-10 text-primary" />
                   <p className="mt-4 text-lg font-semibold text-white">No published courses yet</p>
-                  <p className="mt-2 text-sm text-slate-400">
+                  <p className="mt-2 text-sm text-text-muted">
                     {firstName} hasn’t published a course yet. Browse the full catalogue in the meantime.
                   </p>
                   <Link
                     href="/pages/courses"
-                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white"
+                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-3 text-sm font-semibold text-white"
                   >
                     Browse all courses <FiArrowRight className="h-4 w-4" />
                   </Link>

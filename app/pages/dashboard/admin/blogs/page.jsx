@@ -32,13 +32,13 @@ const EMPTY_FORM = {
 };
 
 const statusStyles = {
-  draft: 'text-amber-300 bg-amber-500/10 ring-amber-500/20',
-  published: 'text-emerald-300 bg-emerald-500/10 ring-emerald-500/20',
-  archived: 'text-slate-400 bg-slate-500/10 ring-slate-500/20',
+  draft: 'text-warning bg-warning/10 ring-amber-500/20',
+  published: 'text-success bg-success/10 ring-emerald-500/20',
+  archived: 'text-text-muted bg-slate-500/10 ring-slate-500/20',
 };
 
 const inputClass =
-  'mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
+  'mt-2 w-full rounded-2xl border border-border bg-surface-elevated/80 px-4 py-3 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
 
 function formatDate(value) {
   if (!value) return '—';
@@ -274,13 +274,13 @@ export default function AdminBlogsPage() {
       {/* ---- Header ---- */}
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Blogs</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">Blog management</h1>
-          <p className="mt-2 text-slate-400">Write, publish, and manage blog posts.</p>
+          <p className="text-sm uppercase tracking-[0.35em] text-primary">Blogs</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-text">Blog management</h1>
+          <p className="mt-2 text-text-muted">Write, publish, and manage blog posts.</p>
         </div>
         <button
           onClick={openCreate}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:brightness-110"
         >
           <FiPlus className="h-4 w-4" /> New post
         </button>
@@ -289,13 +289,13 @@ export default function AdminBlogsPage() {
       {/* ---- Stats ---- */}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         {stats.map((s) => (
-          <div key={s.label} className="flex items-center gap-4 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
-            <span className="flex h-12 w-12 flex-none items-center justify-center rounded-2xl bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+          <div key={s.label} className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-5">
+            <span className="flex h-12 w-12 flex-none items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-border">
               <s.icon className="h-6 w-6" />
             </span>
             <div>
-              <p className="text-2xl font-bold text-white">{s.value}</p>
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{s.label}</p>
+              <p className="text-2xl font-bold text-text">{s.value}</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-text-subtle">{s.label}</p>
             </div>
           </div>
         ))}
@@ -304,12 +304,12 @@ export default function AdminBlogsPage() {
       {/* ---- Toolbar ---- */}
       <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <label className="relative w-full max-w-sm">
-          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-subtle" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search posts…"
-            className="w-full rounded-full border border-white/10 bg-slate-900/80 py-2.5 pl-11 pr-4 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+            className="w-full rounded-full border border-border bg-surface-elevated/80 py-2.5 pl-11 pr-4 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
           />
         </label>
         <div className="flex flex-wrap gap-2">
@@ -319,8 +319,8 @@ export default function AdminBlogsPage() {
               onClick={() => setStatusFilter(s)}
               className={`rounded-full px-4 py-2 text-sm font-medium capitalize transition-colors ${
                 statusFilter === s
-                  ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white'
-                  : 'border border-white/10 bg-white/5 text-slate-300 hover:border-blue-500/30 hover:text-blue-200'
+                  ? 'bg-linear-to-r from-primary to-accent text-white'
+                  : 'border border-border bg-surface-muted text-text-muted hover:border-primary/30 hover:text-primary'
               }`}
             >
               {s}
@@ -333,13 +333,13 @@ export default function AdminBlogsPage() {
       <div className="mt-6 space-y-3">
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-24 animate-pulse rounded-3xl border border-white/10 bg-slate-950/60" />
+            <div key={i} className="h-24 animate-pulse rounded-3xl border border-border bg-surface" />
           ))
         ) : filtered.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-white/15 bg-slate-950/40 py-20 text-center">
-            <FiFileText className="mx-auto h-10 w-10 text-slate-600" />
-            <p className="mt-4 text-lg font-semibold text-white">No posts found</p>
-            <p className="mt-1 text-sm text-slate-400">
+          <div className="rounded-3xl border border-dashed border-border-strong bg-surface py-20 text-center">
+            <FiFileText className="mx-auto h-10 w-10 text-text-subtle" />
+            <p className="mt-4 text-lg font-semibold text-text">No posts found</p>
+            <p className="mt-1 text-sm text-text-muted">
               {blogs.length === 0 ? 'Create your first blog post to get started.' : 'Try a different search or filter.'}
             </p>
           </div>
@@ -347,7 +347,7 @@ export default function AdminBlogsPage() {
           filtered.map((blog) => (
             <div
               key={blog._id}
-              className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-slate-950/60 p-4 sm:flex-row sm:items-center"
+              className="flex flex-col gap-4 rounded-3xl border border-border bg-surface p-4 sm:flex-row sm:items-center"
             >
               <div className="relative h-20 w-full flex-none overflow-hidden rounded-2xl sm:w-28">
                 <img src={blog.coverImage || '/image1.jpg'} alt={blog.title} className="h-full w-full object-cover" />
@@ -358,15 +358,15 @@ export default function AdminBlogsPage() {
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ring-1 ${statusStyles[blog.status] || statusStyles.draft}`}>
                     {blog.status}
                   </span>
-                  <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-xs text-blue-200 ring-1 ring-white/10">{blog.category}</span>
+                  <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-xs text-primary ring-1 ring-border">{blog.category}</span>
                   {blog.isFeatured && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-300 ring-1 ring-amber-500/20">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2.5 py-0.5 text-xs font-semibold text-warning ring-1 ring-amber-500/20">
                       <FiStar className="h-3 w-3 fill-amber-300" /> Featured
                     </span>
                   )}
                 </div>
-                <h3 className="mt-2 truncate text-lg font-semibold text-white">{blog.title}</h3>
-                <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
+                <h3 className="mt-2 truncate text-lg font-semibold text-text">{blog.title}</h3>
+                <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
                   <span className="inline-flex items-center gap-1"><FiEye className="h-3.5 w-3.5" /> {(blog.views || 0).toLocaleString()} views</span>
                   <span>{blog.author?.name || 'Unknown author'}</span>
                   <span>{formatDate(blog.createdAt)}</span>
@@ -380,8 +380,8 @@ export default function AdminBlogsPage() {
                   title={blog.isFeatured ? 'Unfeature' : 'Feature on blog page'}
                   className={`flex h-9 w-9 items-center justify-center rounded-xl ring-1 transition-colors disabled:opacity-50 ${
                     blog.isFeatured
-                      ? 'bg-amber-500/15 text-amber-300 ring-amber-500/30'
-                      : 'bg-white/5 text-slate-400 ring-white/10 hover:text-amber-300'
+                      ? 'bg-warning/15 text-warning ring-amber-500/30'
+                      : 'bg-surface-muted text-text-muted ring-border hover:text-warning'
                   }`}
                 >
                   {togglingId === blog._id ? (
@@ -393,14 +393,14 @@ export default function AdminBlogsPage() {
                 <button
                   onClick={() => openEdit(blog)}
                   title="Edit"
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-300 ring-1 ring-white/10 transition-colors hover:text-blue-300"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface-muted text-text-muted ring-1 ring-border transition-colors hover:text-primary"
                 >
                   <FiEdit2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setDeleteTarget(blog)}
                   title="Delete"
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-300 ring-1 ring-white/10 transition-colors hover:text-rose-400"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface-muted text-text-muted ring-1 ring-border transition-colors hover:text-danger"
                 >
                   <FiTrash2 className="h-4 w-4" />
                 </button>
@@ -413,17 +413,17 @@ export default function AdminBlogsPage() {
       {/* ---- Create / edit modal ---- */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:p-8">
-          <div className="relative w-full max-w-2xl rounded-3xl border border-white/10 bg-[#0a0a12] p-6 shadow-2xl shadow-black/60 sm:p-8">
+          <div className="relative w-full max-w-2xl rounded-3xl border border-border bg-surface-elevated p-6 shadow-2xl shadow-black/60 sm:p-8">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-white">{editingId ? 'Edit post' : 'New post'}</h2>
-                <p className="mt-1 text-sm text-slate-400">
+                <h2 className="text-xl font-semibold text-text">{editingId ? 'Edit post' : 'New post'}</h2>
+                <p className="mt-1 text-sm text-text-muted">
                   {editingId ? 'Update this blog post.' : 'Write and publish a new blog post.'}
                 </p>
               </div>
               <button
                 onClick={() => setModalOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 ring-1 ring-white/10 transition-colors hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface-muted text-text-muted ring-1 ring-border transition-colors hover:text-text"
               >
                 <FiX className="h-4 w-4" />
               </button>
@@ -431,17 +431,17 @@ export default function AdminBlogsPage() {
 
             <form onSubmit={handleSave} className="mt-6 space-y-5">
               <label className="block">
-                <span className="text-sm font-medium text-slate-300">Title</span>
+                <span className="text-sm font-medium text-text-muted">Title</span>
                 <input name="title" value={form.title} onChange={handleField} className={inputClass} placeholder="A great blog post title" />
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium text-slate-300">Excerpt <span className="text-slate-500">(optional)</span></span>
+                <span className="text-sm font-medium text-text-muted">Excerpt <span className="text-text-subtle">(optional)</span></span>
                 <textarea name="excerpt" value={form.excerpt} onChange={handleField} rows={2} className={inputClass} placeholder="A short summary shown on cards. Left blank, it's taken from the content." />
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium text-slate-300">Content</span>
+                <span className="text-sm font-medium text-text-muted">Content</span>
                 <div className="relative">
                   <textarea
                     name="content"
@@ -452,7 +452,7 @@ export default function AdminBlogsPage() {
                     placeholder="Write your post here… Line breaks are preserved."
                   />
                   {loadingForm && (
-                    <span className="absolute right-3 top-5 inline-flex items-center gap-1.5 text-xs text-slate-400">
+                    <span className="absolute right-3 top-5 inline-flex items-center gap-1.5 text-xs text-text-muted">
                       <FiLoader className="h-3.5 w-3.5 animate-spin" /> loading…
                     </span>
                   )}
@@ -466,28 +466,28 @@ export default function AdminBlogsPage() {
                   categories={categories}
                 />
                 <label className="block">
-                  <span className="text-sm font-medium text-slate-300">Tags <span className="text-slate-500">(comma separated)</span></span>
+                  <span className="text-sm font-medium text-text-muted">Tags <span className="text-text-subtle">(comma separated)</span></span>
                   <input name="tags" value={form.tags} onChange={handleField} className={inputClass} placeholder="career, design, tips" />
                 </label>
               </div>
 
               <label className="block">
-                <span className="text-sm font-medium text-slate-300">Cover image URL</span>
+                <span className="text-sm font-medium text-text-muted">Cover image URL</span>
                 <input name="coverImage" value={form.coverImage} onChange={handleField} className={inputClass} placeholder="https://… or /image1.jpg" />
               </label>
 
               <div className="grid items-end gap-5 sm:grid-cols-2">
                 <label className="block">
-                  <span className="text-sm font-medium text-slate-300">Status</span>
+                  <span className="text-sm font-medium text-text-muted">Status</span>
                   <select name="status" value={form.status} onChange={handleField} className={`${inputClass} capitalize`}>
                     {STATUSES.map((s) => (
-                      <option key={s} value={s} className="bg-[#0a0a12] capitalize">{s}</option>
+                      <option key={s} value={s} className="bg-surface-elevated capitalize">{s}</option>
                     ))}
                   </select>
                 </label>
-                <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border bg-surface-elevated/80 px-4 py-3">
                   <input type="checkbox" name="isFeatured" checked={form.isFeatured} onChange={handleField} className="h-4 w-4 accent-blue-600" />
-                  <span className="text-sm text-slate-300">Feature on blog page</span>
+                  <span className="text-sm text-text-muted">Feature on blog page</span>
                 </label>
               </div>
 
@@ -495,14 +495,14 @@ export default function AdminBlogsPage() {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:text-white"
+                  className="rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:text-text"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:brightness-110 disabled:opacity-60"
                 >
                   {saving ? <FiLoader className="h-4 w-4 animate-spin" /> : null}
                   {editingId ? 'Save changes' : 'Create post'}
@@ -516,18 +516,18 @@ export default function AdminBlogsPage() {
       {/* ---- Delete confirmation ---- */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0a0a12] p-6 shadow-2xl shadow-black/60">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20">
+          <div className="w-full max-w-md rounded-3xl border border-border bg-surface-elevated p-6 shadow-2xl shadow-black/60">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-danger/10 text-danger ring-1 ring-rose-500/20">
               <FiAlertTriangle className="h-6 w-6" />
             </div>
-            <h2 className="mt-5 text-lg font-semibold text-white">Delete this post?</h2>
-            <p className="mt-2 text-sm text-slate-400">
+            <h2 className="mt-5 text-lg font-semibold text-text">Delete this post?</h2>
+            <p className="mt-2 text-sm text-text-muted">
               “{deleteTarget.title}” will be permanently removed. This action cannot be undone.
             </p>
             <div className="mt-6 flex items-center justify-end gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:text-white"
+                className="rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:text-text"
               >
                 Cancel
               </button>

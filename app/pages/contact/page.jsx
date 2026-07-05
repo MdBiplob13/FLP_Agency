@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   motion,
-  animate,
-  useInView,
   useTransform,
   useSpring,
   useMotionValue,
@@ -28,14 +26,10 @@ import {
 import Footer from '../../components/footer/page.jsx';
 import Navbar from '@/app/components/navbar/page.jsx';
 
-/* ------------------------------------------------------------------ */
-/*  Data                                                              */
-/* ------------------------------------------------------------------ */
-
 const supportCards = [
   { icon: FiMail, title: 'Email support', detail: 'support@flp.com' },
-  { icon: FiPhone, title: 'Call us', detail: '+1 234 567 890' },
-  { icon: FiClock, title: 'Office hours', detail: 'Mon – Fri, 9am – 6pm' },
+  { icon: FiPhone, title: 'Call us', detail: '+880 1234 567890' },
+  { icon: FiClock, title: 'Office hours', detail: 'Sun – Thu, 10am – 7pm' },
 ];
 
 const officeDetails = [
@@ -45,9 +39,9 @@ const officeDetails = [
 ];
 
 const faqItems = [
-  { question: 'How quickly do you respond?', answer: 'Our team replies to all contact requests within 24 hours on business days.' },
-  { question: 'Can I get a custom learning proposal?', answer: 'Yes, we design course plans to match your goals and experience level.' },
-  { question: 'Do you provide mentorship support?', answer: 'We connect learners with mentors, feedback loops, and project reviews.' },
+  { question: 'কত দ্রুত reply পাবো?', answer: 'Business days-এ আমাদের team সব contact request-এ 24 hours-এর মধ্যে reply করে।' },
+  { question: 'Custom learning proposal কি পাবো?', answer: 'Yes — আপনার goals আর experience level অনুযায়ী course plans design করে দিই।' },
+  { question: 'Mentorship support থাকে?', answer: 'প্রতিটা learner-কে mentors, feedback loops, আর project reviews-এর সাথে connect করা হয়।' },
 ];
 
 const heroStats = [
@@ -55,10 +49,6 @@ const heroStats = [
   { k: 'Support', v: 'Global team' },
   { k: 'Projects', v: 'Career-friendly' },
 ];
-
-/* ------------------------------------------------------------------ */
-/*  Helpers (shared design language)                                  */
-/* ------------------------------------------------------------------ */
 
 const easeOut = [0.22, 1, 0.36, 1];
 
@@ -168,9 +158,9 @@ function Tilt3D({ children, className = '', max = 12 }) {
 
 function Socials() {
   return (
-    <div className="flex items-center gap-2 text-slate-400">
+    <div className="flex items-center gap-2 text-text-muted">
       {[FiLinkedin, FiTwitter, FiGithub].map((Icon, i) => (
-        <a key={i} href="#" aria-label="Social profile" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 transition-colors hover:bg-blue-600 hover:text-white">
+        <a key={i} href="#" aria-label="Social profile" className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-muted ring-1 ring-border transition-colors hover:bg-primary hover:text-white">
           <Icon className="h-4 w-4" />
         </a>
       ))}
@@ -178,14 +168,9 @@ function Socials() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Page                                                              */
-/* ------------------------------------------------------------------ */
-
 export default function ContactPage() {
   const reduce = useReducedMotion();
 
-  /* ---- Hero spotlight + parallax ---- */
   const heroRef = useRef(null);
   const spotX = useMotionValue(0);
   const spotY = useMotionValue(0);
@@ -212,9 +197,8 @@ export default function ContactPage() {
     offX.set(0);
     offY.set(0);
   }
-  const heroSpotlight = useMotionTemplate`radial-gradient(550px circle at ${sSpotX}px ${sSpotY}px, rgba(99,102,241,0.16), transparent 65%)`;
+  const heroSpotlight = useMotionTemplate`radial-gradient(550px circle at ${sSpotX}px ${sSpotY}px, rgba(99,102,241,0.14), transparent 65%)`;
 
-  /* ---- Contact form ---- */
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
@@ -236,84 +220,82 @@ export default function ContactPage() {
     setForm({ name: '', email: '', subject: '', message: '' });
   }
 
-  /* ---- FAQ accordion ---- */
   const [openFaq, setOpenFaq] = useState(0);
 
   const inputClass =
-    'mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
+    'mt-2 w-full rounded-2xl border border-border bg-surface-elevated px-4 py-3 text-text outline-none transition placeholder:text-text-subtle focus:border-primary/50 focus:ring-4 focus:ring-primary/10';
 
   return (
-    <div className="bg-[#020205] font-sans text-slate-100 antialiased">
+    <div className="bg-background font-sans text-text antialiased">
       <Navbar />
 
-      {/* ============================ HERO ============================ */}
+      {/* HERO */}
       <section
         ref={heroRef}
         onMouseMove={handleHeroMove}
         onMouseLeave={handleHeroLeave}
         className="relative overflow-hidden pt-28 pb-20 lg:pt-36 lg:pb-24"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(79,70,229,0.22),transparent_40%),radial-gradient(circle_at_85%_25%,rgba(168,85,247,0.18),transparent_42%)]" />
-        <div className="absolute inset-0 bg-linear-to-b from-[#020205]/0 via-[#020205]/40 to-[#020205]" />
-        <div className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:56px_56px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(79,70,229,0.10),transparent_45%),radial-gradient(circle_at_85%_25%,rgba(168,85,247,0.08),transparent_45%),linear-gradient(to_bottom,#ffffff,#f8fafc)] dark:bg-[radial-gradient(circle_at_15%_15%,rgba(79,70,229,0.22),transparent_40%),radial-gradient(circle_at_85%_25%,rgba(168,85,247,0.18),transparent_42%)]" />
+        <div className="absolute inset-0 dark:bg-linear-to-b dark:from-transparent dark:via-background/40 dark:to-background" />
+        <div className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] [background-size:56px_56px] text-slate-400 dark:text-white" />
         {!reduce && <motion.div aria-hidden style={{ background: heroSpotlight }} className="pointer-events-none absolute inset-0" />}
-        <motion.div aria-hidden style={{ x: orb1X, y: orb1Y }} className="pointer-events-none absolute -left-20 top-24 h-72 w-72 rounded-full bg-blue-600/20 blur-[100px]" />
-        <motion.div aria-hidden style={{ x: orb2X, y: orb2Y }} className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-purple-600/20 blur-[110px]" />
+        <motion.div aria-hidden style={{ x: orb1X, y: orb1Y }} className="pointer-events-none absolute -left-20 top-24 h-72 w-72 rounded-full bg-primary/10 blur-[100px] dark:bg-primary/20" />
+        <motion.div aria-hidden style={{ x: orb2X, y: orb2Y }} className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-accent/10 blur-[110px] dark:bg-accent/20" />
 
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-[1.1fr_0.9fr]">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: easeOut }} className="space-y-8">
-            <span className="inline-flex items-center gap-3 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 ring-1 ring-blue-200/10">
+            <span className="inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-medium text-primary ring-1 ring-primary/10">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
               Contact our support team
             </span>
 
-            <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl xl:text-7xl">
-              Let’s build your next{' '}
-              <span className="bg-linear-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">learning experience.</span>
+            <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-text sm:text-5xl md:text-6xl xl:text-7xl">
+              আপনার পরবর্তী{' '}
+              <span className="bg-linear-to-r from-primary via-primary to-accent bg-clip-text text-transparent">learning experience build করি।</span>
             </h1>
 
-            <p className="max-w-xl text-lg leading-8 text-slate-300">
-              Send a message, request a course proposal, or ask about mentoring. We’re here to help you choose the right path and move faster.
+            <p className="max-w-xl text-lg leading-8 text-text-muted">
+              একটা message পাঠান, custom course proposal চান, বা mentoring জিজ্ঞেস করুন — right path বেছে নিতে আর দ্রুত এগোতে আমরা সাহায্য করব।
             </p>
 
             <div className="grid max-w-lg gap-4 sm:grid-cols-3">
               {heroStats.map((s) => (
-                <div key={s.k} className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{s.k}</p>
-                  <p className="mt-2 text-sm font-semibold text-white">{s.v}</p>
+                <div key={s.k} className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+                  <p className="text-xs uppercase tracking-[0.25em] text-text-subtle">{s.k}</p>
+                  <p className="mt-2 text-sm font-semibold text-text">{s.v}</p>
                 </div>
               ))}
             </div>
           </motion.div>
 
-          {/* support card — 3D tilt */}
           <motion.div initial={{ opacity: 0, y: 40, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.9, delay: 0.15, ease: easeOut }}>
             <Tilt3D>
-              <SpotlightCard className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-8 shadow-2xl shadow-black/50 backdrop-blur-xl">
-                <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Need help now?</p>
-                <h2 className="mt-3 text-2xl font-bold text-white">Get direct support from our team</h2>
-                <p className="mt-3 leading-7 text-slate-400">Whether you want a course recommendation or a custom learning plan, our experts are ready.</p>
+              <SpotlightCard className="rounded-[2rem] border border-border bg-surface-elevated p-8 shadow-elevated backdrop-blur-xl">
+                <p className="text-sm uppercase tracking-[0.35em] text-primary">Need help now?</p>
+                <h2 className="mt-3 text-2xl font-bold text-text">Direct support পান আমাদের team থেকে</h2>
+                <p className="mt-3 leading-7 text-text-muted">Course recommendation চান বা custom learning plan — আমাদের experts ready আছে।</p>
                 <div className="mt-7 space-y-3">
                   {supportCards.map((card) => {
                     const Icon = card.icon;
                     return (
-                      <div key={card.title} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:border-blue-500/30">
-                        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+                      <div key={card.title} className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition-colors hover:border-primary/30">
+                        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-border">
                           <Icon className="h-5 w-5" />
                         </span>
                         <div>
-                          <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{card.title}</p>
-                          <p className="mt-0.5 font-semibold text-white">{card.detail}</p>
+                          <p className="text-xs uppercase tracking-[0.25em] text-text-subtle">{card.title}</p>
+                          <p className="mt-0.5 font-semibold text-text">{card.detail}</p>
                         </div>
                       </div>
                     );
                   })}
                 </div>
-                <div className="mt-7 flex items-center justify-between border-t border-white/5 pt-6">
-                  <span className="text-sm text-slate-400">Follow us</span>
+                <div className="mt-7 flex items-center justify-between border-t border-border pt-6">
+                  <span className="text-sm text-text-muted">Follow us</span>
                   <Socials />
                 </div>
               </SpotlightCard>
@@ -322,16 +304,15 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* ============================ FORM + SIDEBAR ============================ */}
-      <section className="bg-slate-950/40 py-24">
+      {/* FORM + SIDEBAR */}
+      <section className="bg-surface py-24">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-8 lg:grid-cols-[1fr_0.85fr]">
-            {/* form */}
             <Reveal>
-              <SpotlightCard className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-8 sm:p-10">
-                <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Tell us about your goals</p>
-                <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">Start with a quick message</h2>
-                <p className="mt-3 leading-7 text-slate-400">Fill out the form and we’ll reach out with the best next step for your learning journey.</p>
+              <SpotlightCard className="rounded-[2rem] border border-border bg-surface-elevated p-8 shadow-card sm:p-10">
+                <p className="text-sm uppercase tracking-[0.35em] text-primary">Tell us about your goals</p>
+                <h2 className="mt-3 text-3xl font-bold tracking-tight text-text sm:text-4xl">একটা quick message দিয়ে শুরু করুন</h2>
+                <p className="mt-3 leading-7 text-text-muted">Form টা fill up করুন — আপনার learning journey-এর best next step নিয়ে আমরা reach out করব।</p>
 
                 <AnimatePresence mode="wait">
                   {sent ? (
@@ -340,12 +321,12 @@ export default function ContactPage() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="mt-10 flex flex-col items-center rounded-3xl border border-emerald-400/20 bg-emerald-500/10 p-10 text-center"
+                      className="mt-10 flex flex-col items-center rounded-3xl border border-success/20 bg-success/10 p-10 text-center"
                     >
-                      <FiCheckCircle className="h-12 w-12 text-emerald-400" />
-                      <h3 className="mt-4 text-xl font-semibold text-white">Message sent!</h3>
-                      <p className="mt-2 text-slate-300">Thanks for reaching out — we’ll get back to you within 24 hours.</p>
-                      <button onClick={() => setSent(false)} className="mt-6 rounded-full border border-white/15 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200">
+                      <FiCheckCircle className="h-12 w-12 text-success" />
+                      <h3 className="mt-4 text-xl font-semibold text-text">Message sent!</h3>
+                      <p className="mt-2 text-text-muted">Thanks for reaching out — 24 hours-এর মধ্যে reply পাবেন।</p>
+                      <button onClick={() => setSent(false)} className="mt-6 rounded-full border border-border-strong bg-surface-elevated px-6 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary">
                         Send another
                       </button>
                     </motion.div>
@@ -353,32 +334,32 @@ export default function ContactPage() {
                     <motion.form key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onSubmit={handleSubmit} noValidate className="mt-10 space-y-6">
                       <div className="grid gap-6 sm:grid-cols-2">
                         <label className="block">
-                          <span className="text-sm font-medium text-slate-300">Name</span>
+                          <span className="text-sm font-medium text-text-muted">Name</span>
                           <input type="text" name="name" value={form.name} onChange={handleChange} placeholder="Your name" className={inputClass} />
-                          {errors.name && <p className="mt-2 text-sm text-red-400">{errors.name}</p>}
+                          {errors.name && <p className="mt-2 text-sm text-danger">{errors.name}</p>}
                         </label>
                         <label className="block">
-                          <span className="text-sm font-medium text-slate-300">Email</span>
+                          <span className="text-sm font-medium text-text-muted">Email</span>
                           <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="you@example.com" className={inputClass} />
-                          {errors.email && <p className="mt-2 text-sm text-red-400">{errors.email}</p>}
+                          {errors.email && <p className="mt-2 text-sm text-danger">{errors.email}</p>}
                         </label>
                       </div>
 
                       <label className="block">
-                        <span className="text-sm font-medium text-slate-300">Subject</span>
+                        <span className="text-sm font-medium text-text-muted">Subject</span>
                         <input type="text" name="subject" value={form.subject} onChange={handleChange} placeholder="What would you like to discuss?" className={inputClass} />
                       </label>
 
                       <label className="block">
-                        <span className="text-sm font-medium text-slate-300">Message</span>
+                        <span className="text-sm font-medium text-text-muted">Message</span>
                         <textarea rows={6} name="message" value={form.message} onChange={handleChange} placeholder="Tell us more about your needs" className={inputClass} />
-                        {errors.message && <p className="mt-2 text-sm text-red-400">{errors.message}</p>}
+                        {errors.message && <p className="mt-2 text-sm text-danger">{errors.message}</p>}
                       </label>
 
                       <MagneticButton
                         as="button"
                         type="submit"
-                        className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-blue-600/25"
+                        className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-primary/25"
                       >
                         Send message
                         <FiSend className="transition-transform group-hover:translate-x-1" />
@@ -389,23 +370,22 @@ export default function ContactPage() {
               </SpotlightCard>
             </Reveal>
 
-            {/* sidebar */}
             <div className="space-y-8">
               <Reveal>
-                <SpotlightCard className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-8">
-                  <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Office details</p>
-                  <h3 className="mt-3 text-2xl font-bold text-white">Accessible worldwide</h3>
+                <SpotlightCard className="rounded-[2rem] border border-border bg-surface-elevated p-8 shadow-card">
+                  <p className="text-sm uppercase tracking-[0.35em] text-primary">Office details</p>
+                  <h3 className="mt-3 text-2xl font-bold text-text">Accessible worldwide</h3>
                   <div className="mt-7 space-y-5">
                     {officeDetails.map((d) => {
                       const Icon = d.icon;
                       return (
                         <div key={d.label} className="flex items-start gap-4">
-                          <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+                          <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-border">
                             <Icon className="h-5 w-5" />
                           </span>
                           <div>
-                            <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{d.label}</p>
-                            <p className="mt-1 text-white">{d.value}</p>
+                            <p className="text-xs uppercase tracking-[0.25em] text-text-subtle">{d.label}</p>
+                            <p className="mt-1 text-text">{d.value}</p>
                           </div>
                         </div>
                       );
@@ -415,23 +395,23 @@ export default function ContactPage() {
               </Reveal>
 
               <Reveal delay={0.05}>
-                <SpotlightCard className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-8">
-                  <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Frequently asked</p>
+                <SpotlightCard className="rounded-[2rem] border border-border bg-surface-elevated p-8 shadow-card">
+                  <p className="text-sm uppercase tracking-[0.35em] text-primary">Frequently asked</p>
                   <div className="mt-6 space-y-3">
                     {faqItems.map((item, i) => {
                       const open = openFaq === i;
                       return (
-                        <div key={item.question} className="overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+                        <div key={item.question} className="overflow-hidden rounded-2xl border border-border bg-surface">
                           <button onClick={() => setOpenFaq(open ? -1 : i)} className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left" aria-expanded={open}>
-                            <span className="font-medium text-white">{item.question}</span>
-                            <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }} className="flex-none text-blue-300">
+                            <span className="font-medium text-text">{item.question}</span>
+                            <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }} className="flex-none text-primary">
                               <FiChevronDown className="h-5 w-5" />
                             </motion.span>
                           </button>
                           <AnimatePresence initial={false}>
                             {open && (
                               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: easeOut }}>
-                                <p className="px-5 pb-4 leading-7 text-slate-400">{item.answer}</p>
+                                <p className="px-5 pb-4 leading-7 text-text-muted">{item.answer}</p>
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -446,24 +426,24 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* ============================ FINAL CTA ============================ */}
+      {/* FINAL CTA */}
       <section className="relative overflow-hidden py-24">
         <div className="mx-auto max-w-7xl px-6">
           <Reveal>
             <SpotlightCard
               glow="rgba(99,102,241,0.25)"
-              className="relative rounded-[2.5rem] border border-white/10 bg-linear-to-br from-blue-600/15 via-slate-950/70 to-purple-600/15 p-10 text-center shadow-2xl shadow-black/40 sm:p-16"
+              className="relative rounded-[2.5rem] border border-border bg-linear-to-br from-primary/10 via-surface to-accent/10 p-10 text-center shadow-elevated sm:p-16"
             >
-              <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:44px_44px]" />
+              <div className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] [background-size:44px_44px] text-text" />
               <div className="relative">
-                <h2 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">Still have questions?</h2>
-                <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">
-                  Reach out for consultations, course matching, or collaboration ideas. We respond quickly and keep things simple.
+                <h2 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-text sm:text-5xl">এখনো questions আছে?</h2>
+                <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-text-muted">
+                  Consultation, course matching, বা collaboration ideas — যেকোনো কিছুর জন্য reach out করুন। Quick response, simple communication।
                 </p>
                 <div className="mt-10 flex justify-center">
                   <MagneticButton
                     href="mailto:hello@flp.com"
-                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-10 py-4 text-base font-semibold text-white shadow-xl shadow-blue-600/30"
+                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-10 py-4 text-base font-semibold text-white shadow-xl shadow-primary/30"
                   >
                     Message us now
                     <FiArrowRight className="transition-transform group-hover:translate-x-1" />

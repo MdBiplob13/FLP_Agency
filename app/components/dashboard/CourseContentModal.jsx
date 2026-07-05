@@ -21,7 +21,7 @@ import { authHeaders } from '@/lib/clientAuth';
 import { toLocalInput, toIsoOrNull } from '@/lib/datetime';
 
 const inputClass =
-  'w-full rounded-xl border border-white/10 bg-slate-900/80 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
+  'w-full rounded-xl border border-border bg-surface-elevated/80 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10';
 
 const BATCH_STATUSES = ['upcoming', 'ongoing', 'completed'];
 
@@ -75,16 +75,16 @@ export default function CourseContentModal({ course: initialCourse, onClose, onC
 
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:p-8">
-      <div className="relative w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0a0a12] shadow-2xl shadow-black/50">
+      <div className="relative w-full max-w-3xl rounded-3xl border border-border bg-surface-elevated shadow-2xl shadow-black/50">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-5">
+        <div className="flex items-start justify-between gap-4 border-b border-border px-6 py-5">
           <div className="min-w-0">
             <h2 className="text-lg font-semibold text-white">Manage content</h2>
-            <p className="mt-1 truncate text-sm text-slate-400">{course.title}</p>
+            <p className="mt-1 truncate text-sm text-text-muted">{course.title}</p>
           </div>
           <button
             onClick={onClose}
-            className="inline-flex h-9 w-9 flex-none cursor-pointer items-center justify-center rounded-full bg-white/5 text-slate-300 transition-colors hover:text-white"
+            className="inline-flex h-9 w-9 flex-none cursor-pointer items-center justify-center rounded-full bg-surface-muted text-text-muted transition-colors hover:text-white"
             aria-label="Close"
           >
             <FiX className="h-5 w-5" />
@@ -92,7 +92,7 @@ export default function CourseContentModal({ course: initialCourse, onClose, onC
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-white/10 px-6 py-3">
+        <div className="flex gap-2 border-b border-border px-6 py-3">
           {tabs.map((t) => {
             const Icon = t.icon;
             const active = tab === t.key;
@@ -102,14 +102,14 @@ export default function CourseContentModal({ course: initialCourse, onClose, onC
                 onClick={() => setTab(t.key)}
                 className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   active
-                    ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white'
-                    : 'border border-white/10 bg-white/5 text-slate-300 hover:text-white'
+                    ? 'bg-linear-to-r from-primary to-accent text-white'
+                    : 'border border-border bg-surface-muted text-text-muted hover:text-white'
                 }`}
               >
                 <Icon className="h-4 w-4" />
                 {t.label}
                 {t.count != null && (
-                  <span className={`rounded-full px-1.5 text-xs ${active ? 'bg-white/20' : 'bg-white/10 text-slate-400'}`}>
+                  <span className={`rounded-full px-1.5 text-xs ${active ? 'bg-white/20' : 'bg-surface-muted text-text-muted'}`}>
                     {t.count}
                   </span>
                 )}
@@ -131,10 +131,10 @@ export default function CourseContentModal({ course: initialCourse, onClose, onC
           )}
         </div>
 
-        <div className="flex items-center justify-end border-t border-white/10 px-6 py-4">
+        <div className="flex items-center justify-end border-t border-border px-6 py-4">
           <button
             onClick={onClose}
-            className="cursor-pointer rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
+            className="cursor-pointer rounded-full bg-linear-to-r from-primary to-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
           >
             Done
           </button>
@@ -180,7 +180,7 @@ export function CurriculumEditor({ courseId, sections, apply, lessonCount }) {
         <button
           type="submit"
           disabled={adding || !newTitle.trim()}
-          className="inline-flex flex-none cursor-pointer items-center gap-1.5 rounded-xl bg-linear-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex flex-none cursor-pointer items-center gap-1.5 rounded-xl bg-linear-to-r from-primary to-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {adding ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiPlus className="h-4 w-4" />}
           Section
@@ -188,11 +188,11 @@ export function CurriculumEditor({ courseId, sections, apply, lessonCount }) {
       </form>
 
       {sections.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-8 text-center text-sm text-slate-500">
+        <p className="rounded-2xl border border-dashed border-border bg-white/[0.02] px-4 py-8 text-center text-sm text-text-subtle">
           No sections yet. Add your first module above.
         </p>
       ) : (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-text-subtle">
           {sections.length} sections · {lessonCount} lessons
         </p>
       )}
@@ -238,29 +238,29 @@ function SectionRow({ courseId, section, index, apply }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950/60">
-      <div className="flex items-center justify-between gap-3 border-b border-white/5 bg-white/5 px-4 py-3">
+    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+      <div className="flex items-center justify-between gap-3 border-b border-border bg-surface-muted px-4 py-3">
         {editing ? (
           <div className="flex flex-1 items-center gap-2">
             <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} autoFocus />
-            <button onClick={saveTitle} disabled={busy} className="inline-flex h-9 w-9 flex-none cursor-pointer items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 disabled:opacity-50" aria-label="Save">
+            <button onClick={saveTitle} disabled={busy} className="inline-flex h-9 w-9 flex-none cursor-pointer items-center justify-center rounded-lg bg-success/15 text-success hover:bg-emerald-500/25 disabled:opacity-50" aria-label="Save">
               {busy ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiCheck className="h-4 w-4" />}
             </button>
-            <button onClick={() => { setEditing(false); setTitle(section.title); }} className="inline-flex h-9 w-9 flex-none cursor-pointer items-center justify-center rounded-lg bg-white/5 text-slate-300 hover:text-white" aria-label="Cancel">
+            <button onClick={() => { setEditing(false); setTitle(section.title); }} className="inline-flex h-9 w-9 flex-none cursor-pointer items-center justify-center rounded-lg bg-surface-muted text-text-muted hover:text-white" aria-label="Cancel">
               <FiX className="h-4 w-4" />
             </button>
           </div>
         ) : (
           <>
             <h4 className="min-w-0 truncate font-semibold text-white">
-              <span className="text-blue-300">{String(index + 1).padStart(2, '0')}.</span> {section.title}
+              <span className="text-primary">{String(index + 1).padStart(2, '0')}.</span> {section.title}
             </h4>
             <div className="flex flex-none items-center gap-1.5">
-              <span className="mr-1 text-xs text-slate-400">{section.lessons?.length || 0} lessons</span>
-              <button onClick={() => setEditing(true)} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white/5 text-slate-300 hover:text-blue-200" aria-label="Rename section">
+              <span className="mr-1 text-xs text-text-muted">{section.lessons?.length || 0} lessons</span>
+              <button onClick={() => setEditing(true)} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-surface-muted text-text-muted hover:text-primary" aria-label="Rename section">
                 <FiEdit2 className="h-3.5 w-3.5" />
               </button>
-              <button onClick={removeSection} disabled={busy} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-red-400/20 bg-red-500/10 text-red-300 hover:bg-red-500/20 disabled:opacity-50" aria-label="Delete section">
+              <button onClick={removeSection} disabled={busy} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-danger/20 bg-danger/10 text-danger hover:bg-danger/20 disabled:opacity-50" aria-label="Delete section">
                 {busy ? <FiLoader className="h-3.5 w-3.5 animate-spin" /> : <FiTrash2 className="h-3.5 w-3.5" />}
               </button>
             </div>
@@ -307,18 +307,18 @@ function LessonRow({ courseId, sectionId, lesson, apply }) {
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white/[0.02] px-3 py-2.5">
       <div className="flex min-w-0 items-center gap-2.5">
-        {lesson.isPreview ? <FiPlayCircle className="h-4 w-4 flex-none text-emerald-300" /> : <FiLock className="h-4 w-4 flex-none text-slate-500" />}
-        <span className="truncate text-sm text-slate-200">{lesson.title}</span>
-        {lesson.isPreview && <span className="flex-none rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-emerald-300">Preview</span>}
+        {lesson.isPreview ? <FiPlayCircle className="h-4 w-4 flex-none text-success" /> : <FiLock className="h-4 w-4 flex-none text-text-subtle" />}
+        <span className="truncate text-sm text-text">{lesson.title}</span>
+        {lesson.isPreview && <span className="flex-none rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-success">Preview</span>}
       </div>
       <div className="flex flex-none items-center gap-2">
-        {lesson.duration ? <span className="text-xs text-slate-500">{lesson.duration}m</span> : null}
-        <button onClick={() => setEditing(true)} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white/5 text-slate-300 hover:text-blue-200" aria-label="Edit lesson">
+        {lesson.duration ? <span className="text-xs text-text-subtle">{lesson.duration}m</span> : null}
+        <button onClick={() => setEditing(true)} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-surface-muted text-text-muted hover:text-primary" aria-label="Edit lesson">
           <FiEdit2 className="h-3.5 w-3.5" />
         </button>
-        <button onClick={remove} disabled={busy} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-red-400/20 bg-red-500/10 text-red-300 hover:bg-red-500/20 disabled:opacity-50" aria-label="Delete lesson">
+        <button onClick={remove} disabled={busy} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-danger/20 bg-danger/10 text-danger hover:bg-danger/20 disabled:opacity-50" aria-label="Delete lesson">
           {busy ? <FiLoader className="h-3.5 w-3.5 animate-spin" /> : <FiTrash2 className="h-3.5 w-3.5" />}
         </button>
       </div>
@@ -369,26 +369,26 @@ function LessonForm({ courseId, sectionId, lesson, apply, onDone }) {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] p-3">
+    <form onSubmit={submit} className="rounded-xl border border-dashed border-border bg-white/[0.02] p-3">
       <div className="grid gap-2 sm:grid-cols-[1fr_1fr_90px]">
         <input name="title" value={form.title} onChange={field} placeholder="Lesson title" className={inputClass} />
         <label className="relative block">
-          <FiVideo className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <FiVideo className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-subtle" />
           <input name="videoUrl" value={form.videoUrl} onChange={field} placeholder="Video URL" className={`${inputClass} pl-9`} />
         </label>
         <label className="relative block">
-          <FiClock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <FiClock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-subtle" />
           <input name="duration" type="number" min="0" value={form.duration} onChange={field} placeholder="min" className={`${inputClass} pl-9`} />
         </label>
       </div>
       <div className="mt-2 flex items-center justify-between gap-3">
-        <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-slate-300">
+        <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-text-muted">
           <input type="checkbox" name="isPreview" checked={form.isPreview} onChange={field} className="h-4 w-4 cursor-pointer accent-emerald-500" />
           Free preview
         </label>
         <div className="flex items-center gap-2">
           {editMode && (
-            <button type="button" onClick={onDone} className="cursor-pointer rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white">
+            <button type="button" onClick={onDone} className="cursor-pointer rounded-lg border border-border bg-surface-muted px-3 py-1.5 text-xs font-semibold text-text-muted hover:text-white">
               Cancel
             </button>
           )}
@@ -480,8 +480,8 @@ export function ScheduleEditor({ courseId, schedule, apply }) {
 
   return (
     <div className="space-y-5">
-      <form onSubmit={add} className="rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-        <p className="text-sm font-medium text-slate-300">Schedule a class</p>
+      <form onSubmit={add} className="rounded-2xl border border-border bg-surface p-4">
+        <p className="text-sm font-medium text-text-muted">Schedule a class</p>
         <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
           <input
             value={form.title}
@@ -498,7 +498,7 @@ export function ScheduleEditor({ courseId, schedule, apply }) {
           <button
             type="submit"
             disabled={busy}
-            className="inline-flex flex-none cursor-pointer items-center gap-1.5 rounded-xl bg-linear-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex flex-none cursor-pointer items-center gap-1.5 rounded-xl bg-linear-to-r from-primary to-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <FiPlus className="h-4 w-4" /> Add
           </button>
@@ -506,22 +506,22 @@ export function ScheduleEditor({ courseId, schedule, apply }) {
       </form>
 
       {sorted.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-8 text-center text-sm text-slate-500">
+        <p className="rounded-2xl border border-dashed border-border bg-white/[0.02] px-4 py-8 text-center text-sm text-text-subtle">
           No classes scheduled yet.
         </p>
       ) : (
         <ul className="space-y-2">
           {sorted.map((slot) => (
-            <li key={slot._id} className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3">
+            <li key={slot._id} className="rounded-2xl border border-border bg-surface px-4 py-3">
               {editingId === slot._id ? (
                 <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
                   <input value={editForm.title} onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))} placeholder="Title (optional)" className={inputClass} />
                   <input type="datetime-local" value={editForm.startDate} onChange={(e) => setEditForm((p) => ({ ...p, startDate: e.target.value }))} className={inputClass} />
                   <div className="flex items-center gap-2">
-                    <button onClick={() => saveEdit(slot._id)} disabled={busy} className="inline-flex h-9 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-emerald-500/15 px-3 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/25 disabled:opacity-50">
+                    <button onClick={() => saveEdit(slot._id)} disabled={busy} className="inline-flex h-9 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-success/15 px-3 text-xs font-semibold text-success hover:bg-emerald-500/25 disabled:opacity-50">
                       {busy ? <FiLoader className="h-3.5 w-3.5 animate-spin" /> : <FiCheck className="h-3.5 w-3.5" />} Save
                     </button>
-                    <button onClick={() => setEditingId(null)} className="inline-flex h-9 cursor-pointer items-center justify-center rounded-lg bg-white/5 px-3 text-xs font-semibold text-slate-300 hover:text-white">
+                    <button onClick={() => setEditingId(null)} className="inline-flex h-9 cursor-pointer items-center justify-center rounded-lg bg-surface-muted px-3 text-xs font-semibold text-text-muted hover:text-white">
                       Cancel
                     </button>
                   </div>
@@ -529,17 +529,17 @@ export function ScheduleEditor({ courseId, schedule, apply }) {
               ) : (
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
-                    <FiCalendar className="h-4 w-4 flex-none text-blue-300" />
+                    <FiCalendar className="h-4 w-4 flex-none text-primary" />
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-white">{slot.title || 'Class'}</p>
-                      <p className="text-xs text-slate-400">{fmtDateTime(slot.startDate)}</p>
+                      <p className="text-xs text-text-muted">{fmtDateTime(slot.startDate)}</p>
                     </div>
                   </div>
                   <div className="flex flex-none items-center gap-1.5">
-                    <button onClick={() => startEdit(slot)} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white/5 text-slate-300 hover:text-blue-200" aria-label="Edit class">
+                    <button onClick={() => startEdit(slot)} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-surface-muted text-text-muted hover:text-primary" aria-label="Edit class">
                       <FiEdit2 className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={() => remove(slot._id)} disabled={busy} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-red-400/20 bg-red-500/10 text-red-300 hover:bg-red-500/20 disabled:opacity-50" aria-label="Delete class">
+                    <button onClick={() => remove(slot._id)} disabled={busy} className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-danger/20 bg-danger/10 text-danger hover:bg-danger/20 disabled:opacity-50" aria-label="Delete class">
                       <FiTrash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -622,42 +622,42 @@ export function BatchEditor({ courseId, batch, apply }) {
     <form onSubmit={save} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
-          <span className="text-sm font-medium text-slate-300">Batch name</span>
+          <span className="text-sm font-medium text-text-muted">Batch name</span>
           <input name="name" value={form.name} onChange={field} placeholder="Batch 7" className={`${inputClass} mt-2`} />
         </label>
         <label className="block">
-          <span className="text-sm font-medium text-slate-300">Seat capacity</span>
+          <span className="text-sm font-medium text-text-muted">Seat capacity</span>
           <input name="seatCapacity" type="number" min="0" value={form.seatCapacity} onChange={field} className={`${inputClass} mt-2`} />
         </label>
         <label className="block">
-          <span className="text-sm font-medium text-slate-300">Status</span>
+          <span className="text-sm font-medium text-text-muted">Status</span>
           <select name="status" value={form.status} onChange={field} className={`${inputClass} mt-2`}>
             {BATCH_STATUSES.map((s) => (
-              <option key={s} value={s} className="bg-slate-900 capitalize">{s}</option>
+              <option key={s} value={s} className="bg-surface-elevated capitalize">{s}</option>
             ))}
           </select>
         </label>
         <div className="flex items-end">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-text-muted">
             Enrolled: <span className="font-semibold text-white">{batch?.enrolledCount ?? 0}</span>
           </p>
         </div>
         <label className="block">
-          <span className="text-sm font-medium text-slate-300">Batch starts</span>
+          <span className="text-sm font-medium text-text-muted">Batch starts</span>
           <input name="startDate" type="datetime-local" value={form.startDate} onChange={field} className={`${inputClass} mt-2`} />
         </label>
         <label className="block">
-          <span className="text-sm font-medium text-slate-300">Batch ends</span>
+          <span className="text-sm font-medium text-text-muted">Batch ends</span>
           <input name="endDate" type="datetime-local" value={form.endDate} onChange={field} className={`${inputClass} mt-2`} />
         </label>
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-white/5 pt-4">
+      <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
         <button
           type="button"
           onClick={clear}
           disabled={clearing || !batch}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-red-400/20 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-danger/20 bg-danger/10 px-4 py-2 text-sm font-semibold text-danger transition-colors hover:bg-danger/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {clearing ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiTrash2 className="h-4 w-4" />}
           Clear batch
@@ -665,7 +665,7 @@ export function BatchEditor({ courseId, batch, apply }) {
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-linear-to-r from-primary to-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiCheck className="h-4 w-4" />}
           Save batch

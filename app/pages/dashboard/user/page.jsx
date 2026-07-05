@@ -60,21 +60,21 @@ function normalize(c) {
 
 function StatCard({ icon: Icon, label, value, accent }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
+    <div className="rounded-3xl border border-border bg-surface p-6">
       <div className="flex items-center justify-between">
-        <span className={`flex h-11 w-11 items-center justify-center rounded-xl ring-1 ring-white/10 ${accent}`}>
+        <span className={`flex h-11 w-11 items-center justify-center rounded-xl ring-1 ring-border ${accent}`}>
           <Icon className="h-5 w-5" />
         </span>
-        <span className="text-3xl font-bold text-white">{value}</span>
+        <span className="text-3xl font-bold text-text">{value}</span>
       </div>
-      <p className="mt-4 text-sm uppercase tracking-[0.2em] text-slate-400">{label}</p>
+      <p className="mt-4 text-sm uppercase tracking-[0.2em] text-text-muted">{label}</p>
     </div>
   );
 }
 
 function CourseCard({ course }) {
   return (
-    <div className="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60 transition-colors hover:border-white/20">
+    <div className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-surface transition-colors hover:border-border-strong">
       {/* Thumbnail */}
       <div className="relative h-40 w-full overflow-hidden">
         <img
@@ -90,30 +90,30 @@ function CourseCard({ course }) {
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="line-clamp-2 text-base font-semibold leading-snug text-white">{course.title}</h3>
-        {course.instructor && <p className="mt-1 text-xs text-slate-400">by {course.instructor}</p>}
+        <h3 className="line-clamp-2 text-base font-semibold leading-snug text-text">{course.title}</h3>
+        {course.instructor && <p className="mt-1 text-xs text-text-muted">by {course.instructor}</p>}
 
         {/* Meta */}
-        <div className="mt-4 flex items-center gap-4 text-xs text-slate-400">
+        <div className="mt-4 flex items-center gap-4 text-xs text-text-muted">
           <span className="flex items-center gap-1.5">
-            <FiLayers className="h-3.5 w-3.5 text-blue-300" /> {course.lessons} lessons
+            <FiLayers className="h-3.5 w-3.5 text-primary" /> {course.lessons} lessons
           </span>
           <span className="flex items-center gap-1.5">
-            <FiClock className="h-3.5 w-3.5 text-blue-300" /> {course.hours}h
+            <FiClock className="h-3.5 w-3.5 text-primary" /> {course.hours}h
           </span>
         </div>
 
         {course.nextClass && (
-          <p className="mt-3 flex items-center gap-2 text-xs text-slate-400">
-            <FiCalendar className="h-3.5 w-3.5 text-emerald-300" /> Next class: {fmtDateTime(course.nextClass)}
+          <p className="mt-3 flex items-center gap-2 text-xs text-text-muted">
+            <FiCalendar className="h-3.5 w-3.5 text-success" /> Next class: {fmtDateTime(course.nextClass)}
           </p>
         )}
 
         {/* Action */}
-        <div className="mt-5 border-t border-white/5 pt-4">
+        <div className="mt-5 border-t border-border pt-4">
           <Link
             href={`/pages/dashboard/user/learn/${course.id}`}
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-linear-to-r from-primary to-accent px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:brightness-110"
           >
             <FiPlay className="h-4 w-4" /> Continue learning
           </Link>
@@ -138,10 +138,10 @@ export default function MyCoursesPage() {
     const totalHours = courses.reduce((n, c) => n + c.hours, 0);
     const upcoming = courses.filter((c) => c.nextClass).length;
     return [
-      { icon: FiBookOpen, label: 'Enrolled', value: courses.length, accent: 'bg-blue-500/15 text-blue-300' },
-      { icon: FiLayers, label: 'Total lessons', value: totalLessons, accent: 'bg-purple-500/15 text-purple-300' },
-      { icon: FiClock, label: 'Hours', value: totalHours, accent: 'bg-emerald-500/15 text-emerald-300' },
-      { icon: FiCalendar, label: 'Upcoming classes', value: upcoming, accent: 'bg-amber-500/15 text-amber-300' },
+      { icon: FiBookOpen, label: 'Enrolled', value: courses.length, accent: 'bg-primary/15 text-primary' },
+      { icon: FiLayers, label: 'Total lessons', value: totalLessons, accent: 'bg-accent/15 text-purple-300' },
+      { icon: FiClock, label: 'Hours', value: totalHours, accent: 'bg-success/15 text-success' },
+      { icon: FiCalendar, label: 'Upcoming classes', value: upcoming, accent: 'bg-warning/15 text-warning' },
     ];
   }, [courses]);
 
@@ -157,9 +157,9 @@ export default function MyCoursesPage() {
     <div>
       {/* Header */}
       <div>
-        <p className="text-sm uppercase tracking-[0.35em] text-blue-300">My learning</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">My courses</h1>
-        <p className="mt-2 text-slate-400">Everything you’re enrolled in, in one place.</p>
+        <p className="text-sm uppercase tracking-[0.35em] text-primary">My learning</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-text">My courses</h1>
+        <p className="mt-2 text-text-muted">Everything you’re enrolled in, in one place.</p>
       </div>
 
       {/* Stats */}
@@ -172,12 +172,12 @@ export default function MyCoursesPage() {
       {/* Search */}
       <div className="mt-10">
         <label className="relative block w-full sm:max-w-xs">
-          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-subtle" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search my courses…"
-            className="w-full rounded-full border border-white/10 bg-slate-900/80 py-3 pl-12 pr-4 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+            className="w-full rounded-full border border-border bg-surface-elevated/80 py-3 pl-12 pr-4 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
           />
         </label>
       </div>
@@ -185,27 +185,27 @@ export default function MyCoursesPage() {
       {/* Grid / states */}
       <div className="mt-6">
         {coursesLoading ? (
-          <div className="flex items-center justify-center gap-3 rounded-3xl border border-white/10 bg-slate-950/60 py-20 text-slate-400">
+          <div className="flex items-center justify-center gap-3 rounded-3xl border border-border bg-surface py-20 text-text-muted">
             <FiLoader className="h-5 w-5 animate-spin" /> Loading your courses…
           </div>
         ) : coursesError ? (
           <div className="rounded-3xl border border-rose-400/20 bg-rose-500/5 py-16 text-center">
-            <FiAlertTriangle className="mx-auto h-10 w-10 text-rose-400" />
-            <p className="mt-4 text-lg font-semibold text-white">Couldn’t load your courses</p>
-            <p className="mt-1 text-slate-400">{coursesError}</p>
+            <FiAlertTriangle className="mx-auto h-10 w-10 text-danger" />
+            <p className="mt-4 text-lg font-semibold text-text">Couldn’t load your courses</p>
+            <p className="mt-1 text-text-muted">{coursesError}</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-slate-950/60 py-20 text-center">
-            <FiBookOpen className="mx-auto h-10 w-10 text-slate-600" />
-            <p className="mt-4 text-lg font-semibold text-white">No courses here yet</p>
-            <p className="mt-1 text-slate-400">
+          <div className="rounded-3xl border border-border bg-surface py-20 text-center">
+            <FiBookOpen className="mx-auto h-10 w-10 text-text-subtle" />
+            <p className="mt-4 text-lg font-semibold text-text">No courses here yet</p>
+            <p className="mt-1 text-text-muted">
               {courses.length === 0
                 ? "You haven't enrolled in any courses yet."
                 : 'Try a different search term.'}
             </p>
             <Link
               href="/pages/courses"
-              className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+              className="mt-6 inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary"
             >
               Browse courses <FiArrowRight className="h-4 w-4" />
             </Link>

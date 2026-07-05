@@ -68,7 +68,7 @@ export default function UserLayout({ children }) {
   // Block render until we know the user is authenticated
   if (userLoading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#020205] text-slate-300">
+      <div className="flex min-h-screen items-center justify-center bg-background text-text-muted">
         <FiLoader className="h-6 w-6 animate-spin" />
       </div>
     );
@@ -78,16 +78,16 @@ export default function UserLayout({ children }) {
     <div className="flex h-full flex-col">
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-6 py-6">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-600/30">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-accent text-white shadow-lg shadow-primary/30">
           <FiZap className="h-5 w-5" />
         </span>
-        <span className="text-lg font-bold tracking-tight text-white">
-          FLP <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Learner</span>
+        <span className="text-lg font-bold tracking-tight text-text">
+          GHLearning <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">Learner</span>
         </span>
       </div>
 
       {/* Identity */}
-      <div className="mx-3 mb-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+      <div className="mx-3 mb-2 flex items-center gap-3 rounded-2xl border border-border bg-surface-muted px-3 py-3">
         <img
           src={user.photo || FALLBACK_AVATAR}
           alt={user.name || 'Avatar'}
@@ -97,8 +97,8 @@ export default function UserLayout({ children }) {
           }}
         />
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">{user.name || 'Learner'}</p>
-          <p className="truncate text-xs text-slate-400">{user.email}</p>
+          <p className="truncate text-sm font-semibold text-text">{user.name || 'Learner'}</p>
+          <p className="truncate text-xs text-text-muted">{user.email}</p>
         </div>
       </div>
 
@@ -113,8 +113,8 @@ export default function UserLayout({ children }) {
               href={item.href}
               className={`flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
                 active
-                  ? 'bg-linear-to-r from-blue-600/90 to-purple-600/90 text-white shadow-lg shadow-blue-600/20'
-                  : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                  ? 'bg-linear-to-r from-blue-600/90 to-purple-600/90 text-white shadow-lg shadow-primary/20'
+                  : 'text-text-muted hover:bg-surface-muted hover:text-text'
               }`}
             >
               <Icon className="h-4.5 w-4.5" />
@@ -125,17 +125,17 @@ export default function UserLayout({ children }) {
       </nav>
 
       {/* Footer actions */}
-      <div className="space-y-1 border-t border-white/10 px-3 py-4">
+      <div className="space-y-1 border-t border-border px-3 py-4">
         <Link
           href="/"
-          className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+          className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-text-muted transition-colors hover:bg-surface-muted hover:text-text"
         >
           <FiHome className="h-4.5 w-4.5" />
           Back to site
         </Link>
         <button
           onClick={handleLogout}
-          className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200"
+          className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-danger transition-colors hover:bg-danger/10 hover:text-danger"
         >
           <FiLogOut className="h-4.5 w-4.5" />
           Log out
@@ -145,20 +145,20 @@ export default function UserLayout({ children }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#020205] text-slate-100">
+    <div className="min-h-screen bg-background text-text">
       {/* Desktop sidebar — fixed */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-white/10 bg-slate-950/60 backdrop-blur-xl lg:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-surface backdrop-blur-xl lg:block">
         <SidebarContent />
       </aside>
 
       {/* Mobile drawer */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-64 border-r border-white/10 bg-[#0a0a12]">
+          <div className="absolute inset-0 cursor-pointer bg-black/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-64 border-r border-border bg-surface-elevated">
             <button
               onClick={() => setSidebarOpen(false)}
-              className="absolute right-3 top-5 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white/5 text-slate-300 hover:text-white"
+              className="absolute right-3 top-5 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-surface-muted text-text-muted hover:text-text"
               aria-label="Close menu"
             >
               <FiX className="h-5 w-5" />
@@ -171,16 +171,16 @@ export default function UserLayout({ children }) {
       {/* Main content area */}
       <div className="lg:pl-64">
         {/* Mobile top bar */}
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-white/10 bg-[#020205]/80 px-4 py-3 backdrop-blur-xl lg:hidden">
+        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-background/80 px-4 py-3 backdrop-blur-xl lg:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 hover:text-white"
+            className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-border bg-surface-muted text-text hover:text-text"
             aria-label="Open menu"
           >
             <FiMenu className="h-5 w-5" />
           </button>
-          <span className="text-base font-bold text-white">
-            FLP <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Learner</span>
+          <span className="text-base font-bold text-text">
+            GHLearning <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">Learner</span>
           </span>
           <div className="ml-auto">
             <NotificationBell href={NOTIFICATIONS_HREF} />
@@ -188,7 +188,7 @@ export default function UserLayout({ children }) {
         </header>
 
         {/* Desktop top bar — holds the notification bell */}
-        <header className="sticky top-0 z-30 hidden items-center justify-end border-b border-white/10 bg-[#020205]/80 px-8 py-3 backdrop-blur-xl lg:flex lg:px-10">
+        <header className="sticky top-0 z-30 hidden items-center justify-end border-b border-border bg-background/80 px-8 py-3 backdrop-blur-xl lg:flex lg:px-10">
           <NotificationBell href={NOTIFICATIONS_HREF} />
         </header>
 

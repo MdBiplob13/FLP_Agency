@@ -104,15 +104,15 @@ function AuthorBadge({ author, date, readTime }) {
           className="h-11 w-11 flex-none rounded-full object-cover ring-2 ring-blue-500/30"
         />
       ) : (
-        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-purple-500 text-sm font-bold text-white">
+        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-linear-to-br from-primary to-accent text-sm font-bold text-white">
           {initials(author?.name) || "F"}
         </span>
       )}
       <div className="text-sm">
-        <p className="font-semibold text-white">{author?.name || "FLP Agency"}</p>
-        <p className="flex items-center gap-2 text-slate-400">
+        <p className="font-semibold text-white">{author?.name || "GHLearning"}</p>
+        <p className="flex items-center gap-2 text-text-muted">
           {date}
-          <span className="text-slate-600">·</span>
+          <span className="text-text-subtle">·</span>
           <span className="inline-flex items-center gap-1">
             <FiClock className="h-3.5 w-3.5" /> {readTime || 1} min read
           </span>
@@ -129,7 +129,7 @@ function AuthorBadge({ author, date, readTime }) {
 function RelatedCard({ blog }) {
   return (
     <Link href={`/pages/blogs/${blog._id}`} className="group block">
-      <SpotlightCard className="flex gap-4 rounded-2xl border border-white/10 bg-slate-950/60 p-3 transition-colors hover:border-blue-500/30">
+      <SpotlightCard className="flex gap-4 rounded-2xl border border-border bg-surface p-3 transition-colors hover:border-primary/30">
         <div className="relative h-20 w-24 flex-none overflow-hidden rounded-xl">
           <img
             src={blog.coverImage || FALLBACK_IMG}
@@ -138,10 +138,10 @@ function RelatedCard({ blog }) {
           />
         </div>
         <div className="flex min-w-0 flex-col justify-between py-0.5">
-          <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-white group-hover:text-blue-200">
+          <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-white group-hover:text-primary">
             {blog.title}
           </h4>
-          <span className="text-xs text-slate-400">{blog.category}</span>
+          <span className="text-xs text-text-muted">{blog.category}</span>
         </div>
       </SpotlightCard>
     </Link>
@@ -159,7 +159,7 @@ export default function BlogDetailPage({ params }) {
   const { blog, relatedBlogs, blogLoading, blogError } = useBlog(id);
 
   return (
-    <div className="min-h-screen bg-[#020205] font-sans text-slate-100 antialiased">
+    <div className="min-h-screen bg-background font-sans text-text antialiased">
       <Navbar />
 
       {/* Ambient background */}
@@ -172,7 +172,7 @@ export default function BlogDetailPage({ params }) {
         <div className="mb-8">
           <button
             onClick={() => router.push("/pages/blogs")}
-            className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white"
+            className="group inline-flex items-center gap-2 rounded-full border border-border bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-white"
           >
             <FiArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Back to blog
@@ -182,28 +182,28 @@ export default function BlogDetailPage({ params }) {
         {/* ---- Loading ---- */}
         {blogLoading ? (
           <div className="space-y-6">
-            <div className="h-6 w-32 animate-pulse rounded bg-white/10" />
-            <div className="h-10 w-3/4 animate-pulse rounded bg-white/10" />
-            <div className="h-72 animate-pulse rounded-3xl border border-white/10 bg-slate-950/60 sm:h-96" />
+            <div className="h-6 w-32 animate-pulse rounded bg-surface-muted" />
+            <div className="h-10 w-3/4 animate-pulse rounded bg-surface-muted" />
+            <div className="h-72 animate-pulse rounded-3xl border border-border bg-surface sm:h-96" />
             <div className="space-y-3">
-              <div className="h-4 w-full animate-pulse rounded bg-white/5" />
-              <div className="h-4 w-5/6 animate-pulse rounded bg-white/5" />
-              <div className="h-4 w-4/6 animate-pulse rounded bg-white/5" />
+              <div className="h-4 w-full animate-pulse rounded bg-surface-muted" />
+              <div className="h-4 w-5/6 animate-pulse rounded bg-surface-muted" />
+              <div className="h-4 w-4/6 animate-pulse rounded bg-surface-muted" />
             </div>
           </div>
         ) : blogError || !blog ? (
           /* ---- Error / not found ---- */
           <div className="rounded-3xl border border-rose-400/20 bg-rose-500/5 p-12 text-center">
-            <FiX className="mx-auto h-10 w-10 text-rose-400" />
+            <FiX className="mx-auto h-10 w-10 text-danger" />
             <p className="mt-4 text-lg font-semibold text-white">
               {blogError || "Post not found"}
             </p>
-            <p className="mt-1 text-slate-400">
+            <p className="mt-1 text-text-muted">
               The article you’re looking for may have been moved or unpublished.
             </p>
             <Link
               href="/pages/blogs"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-3 text-sm font-semibold text-white"
             >
               Browse all posts <FiArrowRight className="h-4 w-4" />
             </Link>
@@ -221,11 +221,11 @@ export default function BlogDetailPage({ params }) {
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-600/90 px-3 py-1 text-xs font-semibold text-white">
                   <FiTag className="h-3 w-3" /> {blog.category}
                 </span>
-                <span className="inline-flex items-center gap-1.5 text-slate-400">
-                  <FiCalendar className="h-4 w-4 text-blue-300" /> {formatDate(blog.createdAt)}
+                <span className="inline-flex items-center gap-1.5 text-text-muted">
+                  <FiCalendar className="h-4 w-4 text-primary" /> {formatDate(blog.createdAt)}
                 </span>
-                <span className="inline-flex items-center gap-1.5 text-slate-400">
-                  <FiEye className="h-4 w-4 text-blue-300" /> {(blog.views || 0).toLocaleString()} views
+                <span className="inline-flex items-center gap-1.5 text-text-muted">
+                  <FiEye className="h-4 w-4 text-primary" /> {(blog.views || 0).toLocaleString()} views
                 </span>
               </div>
 
@@ -234,10 +234,10 @@ export default function BlogDetailPage({ params }) {
               </h1>
 
               {blog.excerpt && (
-                <p className="mt-5 text-lg leading-8 text-slate-300">{blog.excerpt}</p>
+                <p className="mt-5 text-lg leading-8 text-text-muted">{blog.excerpt}</p>
               )}
 
-              <div className="mt-6 flex items-center gap-3 border-y border-white/5 py-5">
+              <div className="mt-6 flex items-center gap-3 border-y border-border py-5">
                 {blog.author?.photo ? (
                   <img
                     src={blog.author.photo}
@@ -245,15 +245,15 @@ export default function BlogDetailPage({ params }) {
                     className="h-11 w-11 flex-none rounded-full object-cover ring-2 ring-blue-500/30"
                   />
                 ) : (
-                  <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-purple-500 text-sm font-bold text-white">
+                  <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-linear-to-br from-primary to-accent text-sm font-bold text-white">
                     {initials(blog.author?.name) || "F"}
                   </span>
                 )}
                 <div className="text-sm">
                   <p className="flex items-center gap-1.5 font-semibold text-white">
-                    <FiUser className="h-3.5 w-3.5 text-blue-300" /> {blog.author?.name || "FLP Agency"}
+                    <FiUser className="h-3.5 w-3.5 text-primary" /> {blog.author?.name || "GHLearning"}
                   </p>
-                  <p className="flex items-center gap-1.5 text-slate-400">
+                  <p className="flex items-center gap-1.5 text-text-muted">
                     <FiClock className="h-3.5 w-3.5" /> {blog.readTime || 1} min read
                   </p>
                 </div>
@@ -261,7 +261,7 @@ export default function BlogDetailPage({ params }) {
             </header>
 
             {/* Cover */}
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/40">
+            <div className="relative overflow-hidden rounded-3xl border border-border shadow-2xl shadow-black/40">
               <img
                 src={blog.coverImage || FALLBACK_IMG}
                 alt={blog.title}
@@ -271,7 +271,7 @@ export default function BlogDetailPage({ params }) {
             </div>
 
             {/* Body */}
-            <div className="mt-10 whitespace-pre-line text-lg leading-8 text-slate-300">
+            <div className="mt-10 whitespace-pre-line text-lg leading-8 text-text-muted">
               {blog.content}
             </div>
 
@@ -281,7 +281,7 @@ export default function BlogDetailPage({ params }) {
                 {blog.tags.map((t) => (
                   <span
                     key={t}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300"
+                    className="rounded-full border border-border bg-surface-muted px-3 py-1 text-xs text-text-muted"
                   >
                     #{t}
                   </span>
@@ -290,7 +290,7 @@ export default function BlogDetailPage({ params }) {
             )}
 
             {/* Author footer */}
-            <div className="mt-12 rounded-3xl border border-white/10 bg-slate-950/60 p-6">
+            <div className="mt-12 rounded-3xl border border-border bg-surface p-6">
               <AuthorBadge author={blog.author} date={formatDate(blog.createdAt)} readTime={blog.readTime} />
             </div>
 
@@ -298,7 +298,7 @@ export default function BlogDetailPage({ params }) {
             {relatedBlogs.length > 0 && (
               <section className="mt-16">
                 <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
-                  <FiBookOpen className="h-5 w-5 text-blue-300" /> Related reads
+                  <FiBookOpen className="h-5 w-5 text-primary" /> Related reads
                 </h2>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {relatedBlogs.map((r) => (
@@ -312,7 +312,7 @@ export default function BlogDetailPage({ params }) {
             <div className="mt-14 flex justify-center">
               <Link
                 href="/pages/blogs"
-                className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-3 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+                className="group inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface-muted px-7 py-3 text-sm font-semibold text-white transition-colors hover:border-primary/40 hover:text-primary"
               >
                 Read more articles <FiArrowUpRight className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </Link>

@@ -208,7 +208,7 @@ function Stars({ n = 5 }) {
   );
 }
 
-function Socials({ links, className = 'text-slate-400' }) {
+function Socials({ links, className = 'text-text-muted' }) {
   const items = [
     { href: links?.linkedin, Icon: FiLinkedin },
     { href: links?.facebook, Icon: FiFacebook },
@@ -226,7 +226,7 @@ function Socials({ links, className = 'text-slate-400' }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Social profile"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 transition-colors hover:bg-blue-600 hover:text-white"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-muted ring-1 ring-border transition-colors hover:bg-blue-600 hover:text-white"
         >
           <Icon className="h-4 w-4" />
         </a>
@@ -283,7 +283,7 @@ export default function TeachersPage() {
   const heroSpotlight = useMotionTemplate`radial-gradient(550px circle at ${sSpotX}px ${sSpotY}px, rgba(99,102,241,0.16), transparent 65%)`;
 
   return (
-    <div className="bg-[#020205] font-sans text-slate-100 antialiased">
+    <div className="bg-background font-sans text-text antialiased">
       <Navbar />
 
       {/* ============================ HERO ============================ */}
@@ -294,15 +294,15 @@ export default function TeachersPage() {
         className="relative overflow-hidden pt-28 pb-20 lg:pt-36 lg:pb-24"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(79,70,229,0.22),transparent_40%),radial-gradient(circle_at_85%_25%,rgba(168,85,247,0.18),transparent_42%)]" />
-        <div className="absolute inset-0 bg-linear-to-b from-[#020205]/0 via-[#020205]/40 to-[#020205]" />
+        <div className="absolute inset-0 dark:bg-linear-to-b dark:from-[#020205]/0 dark:via-[#020205]/40 dark:to-[#020205]" />
         <div className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:56px_56px]" />
         {!reduce && <motion.div aria-hidden style={{ background: heroSpotlight }} className="pointer-events-none absolute inset-0" />}
-        <motion.div aria-hidden style={{ x: orb1X, y: orb1Y }} className="pointer-events-none absolute -left-20 top-24 h-72 w-72 rounded-full bg-blue-600/20 blur-[100px]" />
-        <motion.div aria-hidden style={{ x: orb2X, y: orb2Y }} className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-purple-600/20 blur-[110px]" />
+        <motion.div aria-hidden style={{ x: orb1X, y: orb1Y }} className="pointer-events-none absolute -left-20 top-24 h-72 w-72 rounded-full bg-primary/20 blur-[100px]" />
+        <motion.div aria-hidden style={{ x: orb2X, y: orb2Y }} className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-accent/20 blur-[110px]" />
 
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-[1.05fr_0.95fr]">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: easeOut }} className="space-y-8">
-            <span className="inline-flex items-center gap-3 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 ring-1 ring-blue-200/10">
+            <span className="inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-medium text-primary ring-1 ring-blue-200/10">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
@@ -312,24 +312,24 @@ export default function TeachersPage() {
 
             <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl xl:text-7xl">
               Learn from mentors who{' '}
-              <span className="bg-linear-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">ship real products.</span>
+              <span className="bg-linear-to-r from-primary via-primary to-accent bg-clip-text text-transparent">ship real products.</span>
             </h1>
 
-            <p className="max-w-xl text-lg leading-8 text-slate-300">
+            <p className="max-w-xl text-lg leading-8 text-text-muted">
               Our instructors combine industry experience with hands-on coaching, so you build work that stands out and grow with confidence.
             </p>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <MagneticButton
                 href="/pages/courses"
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-blue-600/25"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-primary/25"
               >
                 Explore courses
                 <FiArrowRight className="transition-transform group-hover:translate-x-1" />
               </MagneticButton>
               <MagneticButton
                 href="/pages/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-base font-semibold text-white backdrop-blur transition-colors hover:border-blue-500/40 hover:text-blue-200"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-border-strong bg-surface-muted px-8 py-4 text-base font-semibold text-white backdrop-blur transition-colors hover:border-primary/40 hover:text-primary"
               >
                 Talk to a mentor
               </MagneticButton>
@@ -339,8 +339,8 @@ export default function TeachersPage() {
           {/* featured mentor — 3D tilt, driven by the featured teacher */}
           <motion.div initial={{ opacity: 0, y: 40, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.9, delay: 0.15, ease: easeOut }}>
             <Tilt3D>
-              <SpotlightCard className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/50 backdrop-blur-xl">
-                <div className="relative overflow-hidden rounded-[1.4rem] border border-white/10">
+              <SpotlightCard className="rounded-[2rem] border border-border bg-surface-elevated p-4 shadow-2xl shadow-black/50 backdrop-blur-xl">
+                <div className="relative overflow-hidden rounded-[1.4rem] border border-border">
                   <img
                     src={featured?.photo || FALLBACK_IMG}
                     alt={featured ? featured.name : 'Featured mentor'}
@@ -354,12 +354,12 @@ export default function TeachersPage() {
                     <h2 className="text-2xl font-semibold text-white">
                       {featured ? featured.name : teachersLoading ? 'Loading…' : 'Our mentors'}
                     </h2>
-                    <p className="text-sm text-slate-300">{featured?.address || 'Instructor'}</p>
-                    <div className="mt-2 flex items-center gap-2"><Stars n={5} /> <span className="text-sm text-slate-300">4.9</span></div>
+                    <p className="text-sm text-text-muted">{featured?.address || 'Instructor'}</p>
+                    <div className="mt-2 flex items-center gap-2"><Stars n={5} /> <span className="text-sm text-text-muted">4.9</span></div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-3 px-2 pb-1 pt-4">
-                  <p className="max-w-[16rem] text-sm leading-6 text-slate-400">Guided code reviews, real-world demos, and portfolio feedback.</p>
+                  <p className="max-w-[16rem] text-sm leading-6 text-text-muted">Guided code reviews, real-world demos, and portfolio feedback.</p>
                   <Socials links={featured?.socialLinks} />
                 </div>
               </SpotlightCard>
@@ -374,12 +374,12 @@ export default function TeachersPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {liveStats.map((s, i) => (
               <Reveal key={s.label} delay={i * 0.08}>
-                <SpotlightCard className="rounded-3xl border border-white/10 bg-slate-950/60 p-7 text-center">
-                  <p className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-4xl font-bold text-transparent">
+                <SpotlightCard className="rounded-3xl border border-border bg-surface p-7 text-center">
+                  <p className="bg-linear-to-r from-primary to-accent bg-clip-text text-4xl font-bold text-transparent">
                     {s.display ? s.display : <CountUp to={s.to} />}
                     {s.suffix}
                   </p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.2em] text-slate-400">{s.label}</p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.2em] text-text-muted">{s.label}</p>
                 </SpotlightCard>
               </Reveal>
             ))}
@@ -391,20 +391,20 @@ export default function TeachersPage() {
       <section className="py-24">
         <div className="mx-auto max-w-7xl px-6">
           <Reveal className="mx-auto mb-16 max-w-2xl text-center">
-            <p className="mb-4 text-sm uppercase tracking-[0.35em] text-blue-300">Meet the team</p>
+            <p className="mb-4 text-sm uppercase tracking-[0.35em] text-primary">Meet the team</p>
             <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Instructors, mentors & career coaches</h2>
-            <p className="mt-4 text-slate-400">Every teacher brings practical experience from startups, agencies, and product teams to help you build work-ready skills.</p>
+            <p className="mt-4 text-text-muted">Every teacher brings practical experience from startups, agencies, and product teams to help you build work-ready skills.</p>
           </Reveal>
 
           {/* loading skeletons */}
           {teachersLoading && !teachers.length && (
             <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60">
-                  <div className="h-64 w-full animate-pulse bg-white/5" />
+                <div key={i} className="overflow-hidden rounded-3xl border border-border bg-surface">
+                  <div className="h-64 w-full animate-pulse bg-surface-muted" />
                   <div className="space-y-3 p-6">
-                    <div className="h-4 w-2/3 animate-pulse rounded bg-white/5" />
-                    <div className="h-4 w-1/2 animate-pulse rounded bg-white/5" />
+                    <div className="h-4 w-2/3 animate-pulse rounded bg-surface-muted" />
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-surface-muted" />
                   </div>
                 </div>
               ))}
@@ -413,10 +413,10 @@ export default function TeachersPage() {
 
           {/* empty state */}
           {!teachersLoading && !teachers.length && (
-            <div className="mx-auto max-w-md rounded-3xl border border-white/10 bg-slate-950/60 p-12 text-center">
-              <FiUsers className="mx-auto h-10 w-10 text-blue-300" />
+            <div className="mx-auto max-w-md rounded-3xl border border-border bg-surface p-12 text-center">
+              <FiUsers className="mx-auto h-10 w-10 text-primary" />
               <p className="mt-4 text-lg font-semibold text-white">No mentors to show yet</p>
-              <p className="mt-2 text-sm text-slate-400">Our teaching team is being onboarded. Please check back soon.</p>
+              <p className="mt-2 text-sm text-text-muted">Our teaching team is being onboarded. Please check back soon.</p>
             </div>
           )}
 
@@ -425,7 +425,7 @@ export default function TeachersPage() {
               {teachers.map((teacher, i) => (
                 <Reveal key={teacher._id || teacher.name} delay={i * 0.06}>
                   <motion.div whileHover={reduce ? undefined : { y: -8 }} transition={{ duration: 0.3 }} className="h-full">
-                    <SpotlightCard className="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-950/60 shadow-xl shadow-black/20">
+                    <SpotlightCard className="flex h-full flex-col rounded-3xl border border-border bg-surface shadow-xl shadow-black/20">
                       <div className="relative overflow-hidden rounded-t-3xl">
                         <img src={teacher.photo || FALLBACK_IMG} alt={teacher.name} className="h-64 w-full object-cover transition-transform duration-500 hover:scale-105" />
                         <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/10 to-transparent" />
@@ -442,24 +442,24 @@ export default function TeachersPage() {
                         </div>
                       </div>
                       <div className="flex flex-1 flex-col p-6">
-                        <div className="flex-1 space-y-3 text-sm text-slate-400">
+                        <div className="flex-1 space-y-3 text-sm text-text-muted">
                           <p className="flex items-center gap-2">
-                            <FiMapPin className="h-4 w-4 flex-none text-blue-300" />
+                            <FiMapPin className="h-4 w-4 flex-none text-primary" />
                             {teacher.address || 'Location not set'}
                           </p>
                           <p className="flex items-center gap-2">
-                            <FiCalendar className="h-4 w-4 flex-none text-blue-300" />
+                            <FiCalendar className="h-4 w-4 flex-none text-primary" />
                             Joined {formatDate(teacher.createdAt)}
                           </p>
                         </div>
-                        <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-4">
+                        <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
                           <div className="flex items-center gap-2">
                             <Stars n={5} />
-                            <span className="text-sm text-slate-300">4.9</span>
+                            <span className="text-sm text-text-muted">4.9</span>
                           </div>
                           <Link
                             href={`/pages/teachers/${teacher._id}`}
-                            className="group inline-flex items-center gap-1.5 text-sm font-semibold text-blue-300 transition-colors hover:text-blue-200"
+                            className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-primary"
                           >
                             View profile
                             <FiArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -476,15 +476,15 @@ export default function TeachersPage() {
       </section>
 
       {/* ============================ WHY MENTORS MATTER ============================ */}
-      <section className="bg-slate-950/40 py-24">
+      <section className="bg-surface py-24">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             {/* reasons */}
             <Reveal>
-              <SpotlightCard className="h-full rounded-[2rem] border border-white/10 bg-slate-950/60 p-8 sm:p-10">
-                <p className="mb-4 text-sm uppercase tracking-[0.35em] text-blue-300">Why mentors matter</p>
+              <SpotlightCard className="h-full rounded-[2rem] border border-border bg-surface p-8 sm:p-10">
+                <p className="mb-4 text-sm uppercase tracking-[0.35em] text-primary">Why mentors matter</p>
                 <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Feedback and direction that accelerates your growth</h2>
-                <p className="mt-4 leading-8 text-slate-400">
+                <p className="mt-4 leading-8 text-text-muted">
                   Our teachers do more than share lessons. They review your work, highlight what matters, and keep you on track with career-focused guidance.
                 </p>
                 <div className="mt-8 grid gap-5 sm:grid-cols-2">
@@ -492,12 +492,12 @@ export default function TeachersPage() {
                     const Icon = r.icon;
                     return (
                       <div key={r.title} className="flex items-start gap-4">
-                        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+                        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-border">
                           <Icon className="h-5 w-5" />
                         </span>
                         <div>
                           <h3 className="font-semibold text-white">{r.title}</h3>
-                          <p className="mt-1 text-sm leading-6 text-slate-400">{r.desc}</p>
+                          <p className="mt-1 text-sm leading-6 text-text-muted">{r.desc}</p>
                         </div>
                       </div>
                     );
@@ -508,20 +508,20 @@ export default function TeachersPage() {
 
             {/* success stories */}
             <Reveal delay={0.1}>
-              <SpotlightCard glow="rgba(168,85,247,0.18)" className="flex h-full flex-col gap-5 rounded-4xl border border-white/10 bg-linear-to-br from-purple-600/10 to-slate-950/60 p-8 sm:p-10">
+              <SpotlightCard glow="rgba(168,85,247,0.18)" className="flex h-full flex-col gap-5 rounded-4xl border border-border bg-linear-to-br from-accent/8 to-surface-muted p-8 dark:from-purple-600/10 dark:to-slate-950/60 sm:p-10">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Trusted results</p>
-                  <h3 className="mt-3 text-2xl font-bold text-white">Real student success stories</h3>
+                  <p className="text-sm uppercase tracking-[0.35em] text-primary">Trusted results</p>
+                  <h3 className="mt-3 text-2xl font-bold text-text">Real student success stories</h3>
                 </div>
                 {successStories.map((s) => (
-                  <div key={s.name} className="flex flex-1 flex-col justify-center rounded-2xl border border-white/10 bg-black/40 p-6 mt-3">
+                  <div key={s.name} className="flex flex-1 flex-col justify-center rounded-2xl border border-border bg-surface-elevated/80 p-6 mt-3 dark:bg-black/40">
                     <div className="mb-3"><Stars n={5} /></div>
-                    <p className="text-lg leading-relaxed text-slate-200">“{s.quote}”</p>
+                    <p className="text-lg leading-relaxed text-text">“{s.quote}”</p>
                     <div className="mt-4 flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-purple-500 font-bold text-white">{s.name.charAt(0)}</span>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-primary to-accent font-bold text-white">{s.name.charAt(0)}</span>
                       <div>
-                        <p className="text-sm font-semibold text-white">{s.name}</p>
-                        <p className="text-xs text-slate-400">{s.role}</p>
+                        <p className="text-sm font-semibold text-text">{s.name}</p>
+                        <p className="text-xs text-text-muted">{s.role}</p>
                       </div>
                     </div>
                   </div>
@@ -538,24 +538,24 @@ export default function TeachersPage() {
           <Reveal>
             <SpotlightCard
               glow="rgba(99,102,241,0.25)"
-              className="relative rounded-[2.5rem] border border-white/10 bg-linear-to-br from-blue-600/15 via-slate-950/70 to-purple-600/15 p-10 text-center shadow-2xl shadow-black/40 sm:p-16"
+              className="relative rounded-[2.5rem] border border-border bg-linear-to-br from-primary/10 via-surface-elevated to-accent/10 p-10 text-center shadow-elevated dark:from-blue-600/15 dark:via-slate-950/70 dark:to-purple-600/15 dark:shadow-2xl dark:shadow-black/40 sm:p-16"
             >
-              <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:44px_44px]" />
+              <div className="pointer-events-none absolute inset-0 hidden opacity-[0.06] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:44px_44px] dark:block" />
               <div className="relative">
-                <h2 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">Ready to learn from mentors who’ve done it?</h2>
-                <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+                <h2 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-text sm:text-5xl">Ready to learn from mentors who’ve done it?</h2>
+                <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-text-muted">
                   Join a cohort, get personal feedback, and build the skills and portfolio that get you hired.
                 </p>
                 <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <MagneticButton
                     href="/pages/courses"
-                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-10 py-4 text-base font-semibold text-white shadow-xl shadow-blue-600/30"
+                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-10 py-4 text-base font-semibold text-white shadow-xl shadow-primary/30"
                   >
                     Explore courses
                     <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                   </MagneticButton>
-                  <span className="flex items-center gap-2 text-sm text-slate-400">
-                    <FiCheck className="h-4 w-4 text-emerald-400" /> Mentored by industry experts
+                  <span className="flex items-center gap-2 text-sm text-text-muted">
+                    <FiCheck className="h-4 w-4 text-success" /> Mentored by industry experts
                   </span>
                 </div>
               </div>

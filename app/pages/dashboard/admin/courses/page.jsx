@@ -28,9 +28,9 @@ import CourseForm, {
 } from '@/app/components/dashboard/CourseForm';
 
 const statusStyles = {
-  draft: 'text-amber-300 bg-amber-500/10 ring-amber-500/20',
-  published: 'text-emerald-300 bg-emerald-500/10 ring-emerald-500/20',
-  archived: 'text-slate-400 bg-slate-500/10 ring-slate-500/20',
+  draft: 'text-warning bg-warning/10 ring-amber-500/20',
+  published: 'text-success bg-success/10 ring-emerald-500/20',
+  archived: 'text-text-muted bg-slate-500/10 ring-slate-500/20',
 };
 
 const STATUSES = ['draft', 'published', 'archived'];
@@ -273,13 +273,13 @@ export default function AdminCoursesPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Courses</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">Course management</h1>
-          <p className="mt-2 text-slate-400">Create, edit, and publish your courses.</p>
+          <p className="text-sm uppercase tracking-[0.35em] text-primary">Courses</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-text">Course management</h1>
+          <p className="mt-2 text-text-muted">Create, edit, and publish your courses.</p>
         </div>
         <button
           onClick={openCreate}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
+          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:brightness-110"
         >
           <FiPlus className="h-4 w-4" /> New course
         </button>
@@ -290,14 +290,14 @@ export default function AdminCoursesPage() {
         {stats.map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
+            <div key={s.label} className="rounded-3xl border border-border bg-surface p-6">
               <div className="flex items-center justify-between">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-border">
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className="text-3xl font-bold text-white">{s.value}</span>
+                <span className="text-3xl font-bold text-text">{s.value}</span>
               </div>
-              <p className="mt-4 text-sm uppercase tracking-[0.2em] text-slate-400">{s.label}</p>
+              <p className="mt-4 text-sm uppercase tracking-[0.2em] text-text-muted">{s.label}</p>
             </div>
           );
         })}
@@ -306,12 +306,12 @@ export default function AdminCoursesPage() {
       {/* Toolbar */}
       <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <label className="relative block w-full sm:max-w-xs">
-          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+          <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-subtle" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search courses…"
-            className="w-full rounded-full border border-white/10 bg-slate-900/80 py-3 pl-12 pr-4 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+            className="w-full rounded-full border border-border bg-surface-elevated/80 py-3 pl-12 pr-4 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
           />
         </label>
 
@@ -322,8 +322,8 @@ export default function AdminCoursesPage() {
               onClick={() => setStatusFilter(s)}
               className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium capitalize transition-colors ${
                 statusFilter === s
-                  ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white'
-                  : 'border border-white/10 bg-white/5 text-slate-300 hover:text-white'
+                  ? 'bg-linear-to-r from-primary to-accent text-white'
+                  : 'border border-border bg-surface-muted text-text-muted hover:text-text'
               }`}
             >
               {s}
@@ -333,24 +333,24 @@ export default function AdminCoursesPage() {
       </div>
 
       {/* Homepage capacity hint */}
-      <p className="mt-4 text-xs text-slate-500">
-        Homepage spots used: <span className="font-semibold text-slate-300">{featuredCount}/{MAX_FEATURED_COURSES}</span>
+      <p className="mt-4 text-xs text-text-subtle">
+        Homepage spots used: <span className="font-semibold text-text-muted">{featuredCount}/{MAX_FEATURED_COURSES}</span>
       </p>
 
       {/* Course cards */}
       <div className="mt-4">
         {loading ? (
-          <div className="flex items-center justify-center gap-3 rounded-3xl border border-white/10 bg-slate-950/60 py-20 text-slate-400">
+          <div className="flex items-center justify-center gap-3 rounded-3xl border border-border bg-surface py-20 text-text-muted">
             <FiLoader className="h-5 w-5 animate-spin" /> Loading courses…
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-slate-950/60 py-20 text-center">
-            <FiBookOpen className="mx-auto h-10 w-10 text-slate-600" />
-            <p className="mt-4 text-lg font-semibold text-white">No courses yet</p>
-            <p className="mt-1 text-slate-400">Create your first course to get started.</p>
+          <div className="rounded-3xl border border-border bg-surface py-20 text-center">
+            <FiBookOpen className="mx-auto h-10 w-10 text-text-subtle" />
+            <p className="mt-4 text-lg font-semibold text-text">No courses yet</p>
+            <p className="mt-1 text-text-muted">Create your first course to get started.</p>
             <button
               onClick={openCreate}
-              className="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+              className="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary"
             >
               <FiPlus className="h-4 w-4" /> New course
             </button>
@@ -362,12 +362,12 @@ export default function AdminCoursesPage() {
               return (
                 <div
                   key={c._id}
-                  className="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-slate-950/60 transition-colors hover:border-white/20"
+                  className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-surface transition-colors hover:border-border-strong"
                 >
                   {/* Thumbnail — links through to the course management page */}
                   <Link
                     href={`/pages/dashboard/admin/courses/${c._id}`}
-                    className="relative block h-44 w-full overflow-hidden bg-white/5"
+                    className="relative block h-44 w-full overflow-hidden bg-surface-muted"
                   >
                     {c.thumbnail ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -378,7 +378,7 @@ export default function AdminCoursesPage() {
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center">
-                        <FiBookOpen className="h-9 w-9 text-slate-600" />
+                        <FiBookOpen className="h-9 w-9 text-text-subtle" />
                       </div>
                     )}
                     <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/10 to-transparent" />
@@ -395,7 +395,7 @@ export default function AdminCoursesPage() {
                       {c.isBestseller && (
                         <span
                           title="Bestseller"
-                          className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 ring-1 ring-amber-400/30 backdrop-blur"
+                          className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/20 text-warning ring-1 ring-amber-400/30 backdrop-blur"
                         >
                           <FiAward className="h-3.5 w-3.5" />
                         </span>
@@ -403,7 +403,7 @@ export default function AdminCoursesPage() {
                       {c.isFeatured && (
                         <span
                           title="On homepage"
-                          className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 ring-1 ring-blue-400/30 backdrop-blur"
+                          className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary ring-1 ring-blue-400/30 backdrop-blur"
                         >
                           <FiHome className="h-3.5 w-3.5" />
                         </span>
@@ -411,7 +411,7 @@ export default function AdminCoursesPage() {
                       {c.isHidden && (
                         <span
                           title="Hidden from public"
-                          className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-500/30 text-slate-200 ring-1 ring-slate-400/30 backdrop-blur"
+                          className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-500/30 text-text ring-1 ring-slate-400/30 backdrop-blur"
                         >
                           <FiEyeOff className="h-3.5 w-3.5" />
                         </span>
@@ -427,7 +427,7 @@ export default function AdminCoursesPage() {
                       ) : c.priceTier === 'discounted' && c.discountPrice ? (
                         <span className="inline-flex items-baseline gap-1.5 rounded-full bg-black/50 px-3 py-1 backdrop-blur">
                           <span className="text-sm font-bold text-white">৳{c.discountPrice}</span>
-                          <span className="text-xs text-slate-400 line-through">৳{c.price}</span>
+                          <span className="text-xs text-white/60 line-through">৳{c.price}</span>
                         </span>
                       ) : (
                         <span className="rounded-full bg-black/50 px-3 py-1 text-sm font-bold text-white backdrop-blur">
@@ -439,14 +439,14 @@ export default function AdminCoursesPage() {
 
                   {/* Body */}
                   <div className="flex flex-1 flex-col p-5">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <div className="flex items-center gap-1.5 text-xs text-text-muted">
                       <span className="truncate">{c.category}</span>
-                      <span className="text-slate-600">·</span>
+                      <span className="text-text-subtle">·</span>
                       <span className="capitalize">{c.level}</span>
                     </div>
                     <Link
                       href={`/pages/dashboard/admin/courses/${c._id}`}
-                      className="mt-2 line-clamp-2 text-base font-semibold leading-snug text-white transition-colors hover:text-blue-200"
+                      className="mt-2 line-clamp-2 text-base font-semibold leading-snug text-text transition-colors hover:text-primary"
                     >
                       {c.title}
                     </Link>
@@ -454,10 +454,10 @@ export default function AdminCoursesPage() {
                     {/* Meta: students + wishlist + teachers */}
                     <div className="mt-4 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1.5 text-sm text-slate-400" title="Enrolled students">
+                        <span className="flex items-center gap-1.5 text-sm text-text-muted" title="Enrolled students">
                           <FiUsers className="h-4 w-4" /> {c.studentsEnrolled?.length || 0}
                         </span>
-                        <span className="flex items-center gap-1.5 text-sm text-slate-400" title="Wishlisted by">
+                        <span className="flex items-center gap-1.5 text-sm text-text-muted" title="Wishlisted by">
                           <FiHeart className="h-4 w-4" /> {c.inWishlistOf?.length || 0}
                         </span>
                       </div>
@@ -473,8 +473,8 @@ export default function AdminCoursesPage() {
                         aria-pressed={!!c.isBestseller}
                         className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${
                           c.isBestseller
-                            ? 'border-amber-400/30 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25'
-                            : 'cursor-pointer border-white/10 bg-white/5 text-slate-400 hover:text-amber-200'
+                            ? 'border-amber-400/30 bg-warning/15 text-warning hover:bg-amber-500/25'
+                            : 'cursor-pointer border-border bg-surface-muted text-text-muted hover:text-amber-200'
                         }`}
                       >
                         {togglingKey === `${c._id}:isBestseller` ? (
@@ -501,10 +501,10 @@ export default function AdminCoursesPage() {
                         aria-pressed={!!c.isFeatured}
                         className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                           c.isFeatured
-                            ? 'cursor-pointer border-blue-400/30 bg-blue-500/15 text-blue-300 hover:bg-blue-500/25'
+                            ? 'cursor-pointer border-blue-400/30 bg-primary/15 text-primary hover:bg-blue-500/25'
                             : featuredCount >= MAX_FEATURED_COURSES
-                              ? 'cursor-not-allowed border-white/5 bg-white/[0.02] text-slate-600'
-                              : 'cursor-pointer border-white/10 bg-white/5 text-slate-400 hover:text-blue-200'
+                              ? 'cursor-not-allowed border-border bg-white/[0.02] text-text-subtle'
+                              : 'cursor-pointer border-border bg-surface-muted text-text-muted hover:text-primary'
                         }`}
                       >
                         {togglingKey === `${c._id}:isFeatured` ? (
@@ -517,10 +517,10 @@ export default function AdminCoursesPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="mt-4 flex items-center gap-2 border-t border-white/5 pt-4">
+                    <div className="mt-4 flex items-center gap-2 border-t border-border pt-4">
                       <Link
                         href={`/pages/dashboard/admin/courses/${c._id}`}
-                        className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-blue-200"
+                        className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full border border-border bg-surface-muted px-4 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-primary"
                       >
                         <FiSettings className="h-4 w-4" /> Manage
                       </Link>
@@ -540,8 +540,8 @@ export default function AdminCoursesPage() {
                         aria-pressed={!!c.isHidden}
                         className={`inline-flex h-10 w-10 flex-none items-center justify-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                           c.isHidden
-                            ? 'cursor-pointer border-slate-400/30 bg-slate-500/20 text-slate-200 hover:bg-slate-500/30'
-                            : 'cursor-pointer border-white/10 bg-white/5 text-slate-300 hover:text-white'
+                            ? 'cursor-pointer border-slate-400/30 bg-slate-500/20 text-text hover:bg-slate-500/30'
+                            : 'cursor-pointer border-border bg-surface-muted text-text-muted hover:text-text'
                         }`}
                         aria-label={c.isHidden ? 'Make course visible' : 'Hide course'}
                       >
@@ -555,7 +555,7 @@ export default function AdminCoursesPage() {
                       </button>
                       <button
                         onClick={() => setDeleteTarget(c)}
-                        className="inline-flex h-10 w-10 flex-none cursor-pointer items-center justify-center rounded-full border border-red-400/20 bg-red-500/10 text-red-300 transition-colors hover:bg-red-500/20"
+                        className="inline-flex h-10 w-10 flex-none cursor-pointer items-center justify-center rounded-full border border-danger/20 bg-danger/10 text-danger transition-colors hover:bg-danger/20"
                         aria-label="Delete course"
                       >
                         <FiTrash2 className="h-4 w-4" />
@@ -572,12 +572,12 @@ export default function AdminCoursesPage() {
       {/* ---- Create modal ---- */}
       {modalOpen && (
         <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:p-8">
-          <div className="relative w-full max-w-2xl rounded-3xl border border-white/10 bg-[#0a0a12] shadow-2xl shadow-black/50">
-            <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
-              <h2 className="text-lg font-semibold text-white">Create course</h2>
+          <div className="relative w-full max-w-2xl rounded-3xl border border-border bg-surface-elevated shadow-2xl shadow-black/50">
+            <div className="flex items-center justify-between border-b border-border px-6 py-5">
+              <h2 className="text-lg font-semibold text-text">Create course</h2>
               <button
                 onClick={() => setModalOpen(false)}
-                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white/5 text-slate-300 transition-colors hover:text-white"
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-surface-muted text-text-muted transition-colors hover:text-text"
                 aria-label="Close"
               >
                 <FiX className="h-5 w-5" />
@@ -593,18 +593,18 @@ export default function AdminCoursesPage() {
                 featuredCount={featuredCount}
               />
 
-              <div className="mt-6 flex items-center justify-end gap-3 border-t border-white/10 pt-5">
+              <div className="mt-6 flex items-center justify-end gap-3 border-t border-border pt-5">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="cursor-pointer rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:text-blue-200"
+                  className="cursor-pointer rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:text-primary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {saving && <FiLoader className="h-4 w-4 animate-spin" />}
                   {saving ? 'Saving…' : 'Create course'}
@@ -618,14 +618,14 @@ export default function AdminCoursesPage() {
       {/* ---- Delete confirmation ---- */}
       {deleteTarget && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0a0a12] p-7 shadow-2xl shadow-black/50">
+          <div className="w-full max-w-md rounded-3xl border border-border bg-surface-elevated p-7 shadow-2xl shadow-black/50">
             <div className="flex items-start gap-4">
-              <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-red-500/15 text-red-300 ring-1 ring-red-400/20">
+              <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-red-500/15 text-danger ring-1 ring-red-400/20">
                 <FiAlertTriangle className="h-6 w-6" />
               </span>
               <div>
-                <h3 className="text-lg font-semibold text-white">Delete course?</h3>
-                <p className="mt-1 text-sm leading-6 text-slate-400">
+                <h3 className="text-lg font-semibold text-text">Delete course?</h3>
+                <p className="mt-1 text-sm leading-6 text-text-muted">
                   “{deleteTarget.title}” will be permanently removed. This cannot be undone.
                 </p>
               </div>
@@ -633,7 +633,7 @@ export default function AdminCoursesPage() {
             <div className="mt-6 flex items-center justify-end gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="cursor-pointer rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:text-blue-200"
+                className="cursor-pointer rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:text-primary"
               >
                 Cancel
               </button>
@@ -670,7 +670,7 @@ function initials(name = '') {
 // Stacked avatars shown on each course card
 function TeacherAvatars({ teachers = [] }) {
   if (teachers.length === 0) {
-    return <span className="text-xs italic text-slate-600">No teachers</span>;
+    return <span className="text-xs italic text-text-subtle">No teachers</span>;
   }
   const shown = teachers.slice(0, 3);
   const extra = teachers.length - shown.length;
@@ -690,14 +690,14 @@ function TeacherAvatars({ teachers = [] }) {
           <span
             key={t._id}
             title={t.name}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20 text-[10px] font-semibold text-blue-200 ring-2 ring-slate-950"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-[10px] font-semibold text-primary ring-2 ring-slate-950"
           >
             {initials(t.name) || '?'}
           </span>
         )
       )}
       {extra > 0 && (
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-slate-300 ring-2 ring-slate-950">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-muted text-[10px] font-semibold text-text-muted ring-2 ring-slate-950">
           +{extra}
         </span>
       )}

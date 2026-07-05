@@ -21,12 +21,13 @@ import {
   FiInstagram,
 } from 'react-icons/fi';
 import { authHeaders } from '@/lib/clientAuth';
+import hostPhoto from '@/app/components/hostPhoto/hostPhoto';
 
 const FALLBACK_AVATAR =
   'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
 
 const inputClass =
-  'w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 disabled:opacity-60';
+  'w-full rounded-2xl border border-border bg-surface-elevated/80 px-4 py-3 text-sm text-text outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 disabled:opacity-60';
 
 const EMPTY_PROFILE = {
   name: '',
@@ -46,12 +47,12 @@ const EMPTY_PASSWORD = { currentPassword: '', newPassword: '', confirmPassword: 
 function Field({ label, icon: Icon, children, hint }) {
   return (
     <label className="block">
-      <span className="flex items-center gap-2 text-sm font-medium text-slate-300">
-        {Icon ? <Icon className="h-4 w-4 text-blue-300" /> : null}
+      <span className="flex items-center gap-2 text-sm font-medium text-text-muted">
+        {Icon ? <Icon className="h-4 w-4 text-primary" /> : null}
         {label}
       </span>
       <div className="mt-2">{children}</div>
-      {hint ? <span className="mt-1.5 block text-xs text-slate-500">{hint}</span> : null}
+      {hint ? <span className="mt-1.5 block text-xs text-text-subtle">{hint}</span> : null}
     </label>
   );
 }
@@ -68,6 +69,8 @@ export default function AdminProfilePage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [editing, setEditing] = useState(false);
   const [original, setOriginal] = useState(EMPTY_PROFILE);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const [pwd, setPwd] = useState(EMPTY_PASSWORD);
   const [savingPwd, setSavingPwd] = useState(false);
@@ -126,9 +129,17 @@ export default function AdminProfilePage() {
     setPwd((p) => ({ ...p, [name]: value }));
   }
 
+  function handlePhotoChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedPhoto(file);
+    setProfile((p) => ({ ...p, photo: URL.createObjectURL(file) }));
+  }
+
   // Discard in-progress edits and leave edit mode.
   function handleCancelEdit() {
     setProfile(original);
+    setSelectedPhoto(null);
     setEditing(false);
   }
 
@@ -142,6 +153,19 @@ export default function AdminProfilePage() {
 
     setSavingProfile(true);
     try {
+      let photoUrl = profile.photo.trim();
+      if (selectedPhoto) {
+        setUploadingPhoto(true);
+        photoUrl = await hostPhoto(selectedPhoto);
+        if (!photoUrl) {
+          toast.error('Image upload failed.');
+          setUploadingPhoto(false);
+          setSavingProfile(false);
+          return;
+        }
+        setUploadingPhoto(false);
+      }
+
       const res = await fetch('/api/users/me', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
@@ -149,7 +173,7 @@ export default function AdminProfilePage() {
           name: profile.name.trim(),
           phone: profile.phone.trim(),
           address: profile.address.trim() || 'No address provided',
-          photo: profile.photo.trim(),
+          photo: photoUrl,
           socialLinks: profile.socialLinks,
         }),
       });
@@ -159,6 +183,7 @@ export default function AdminProfilePage() {
         return;
       }
       toast.success('Profile updated.');
+      setSelectedPhoto(null);
       setEditing(false);
       loadProfile();
     } catch {
@@ -216,21 +241,21 @@ export default function AdminProfilePage() {
     <div>
       {/* ---- Header ---- */}
       <div>
-        <p className="text-sm uppercase tracking-[0.35em] text-blue-300">Account</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">My profile</h1>
-        <p className="mt-2 text-slate-400">Update your personal details and change your password.</p>
+        <p className="text-sm uppercase tracking-[0.35em] text-primary">Account</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-text">My profile</h1>
+        <p className="mt-2 text-text-muted">Update your personal details and change your password.</p>
       </div>
 
       {loading ? (
         <div className="mt-10 space-y-6">
-          <div className="h-40 animate-pulse rounded-3xl border border-white/10 bg-slate-950/60" />
-          <div className="h-72 animate-pulse rounded-3xl border border-white/10 bg-slate-950/60" />
+          <div className="h-40 animate-pulse rounded-3xl border border-border bg-surface" />
+          <div className="h-72 animate-pulse rounded-3xl border border-border bg-surface" />
         </div>
       ) : (
         <div className="mt-8 grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
           {/* ===== Identity card ===== */}
           <aside className="lg:sticky lg:top-8 lg:h-fit">
-            <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-6 text-center">
+            <div className="rounded-3xl border border-border bg-surface p-6 text-center">
               <div className="relative mx-auto h-28 w-28">
                 <img
                   src={profile.photo || FALLBACK_AVATAR}
@@ -241,12 +266,12 @@ export default function AdminProfilePage() {
                   }}
                 />
               </div>
-              <h2 className="mt-4 text-xl font-semibold text-white">{profile.name || 'Admin'}</h2>
-              <p className="mt-1 truncate text-sm text-slate-400">{profile.email}</p>
-              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold capitalize text-blue-200 ring-1 ring-blue-500/20">
+              <h2 className="mt-4 text-xl font-semibold text-text">{profile.name || 'Admin'}</h2>
+              <p className="mt-1 truncate text-sm text-text-muted">{profile.email}</p>
+              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold capitalize text-primary ring-1 ring-blue-500/20">
                 <FiShield className="h-3 w-3" /> {meta.role || 'admin'}
               </span>
-              <div className="mt-5 border-t border-white/5 pt-4 text-xs text-slate-500">
+              <div className="mt-5 border-t border-border pt-4 text-xs text-text-subtle">
                 Member since {memberSince}
               </div>
             </div>
@@ -255,22 +280,22 @@ export default function AdminProfilePage() {
           {/* ===== Forms ===== */}
           <div className="space-y-6">
             {/* Profile details */}
-            <form onSubmit={handleProfileSave} className="rounded-3xl border border-white/10 bg-slate-950/60 p-6 sm:p-8">
+            <form onSubmit={handleProfileSave} className="rounded-3xl border border-border bg-surface p-6 sm:p-8">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-300 ring-1 ring-white/10">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-border">
                     <FiUser className="h-5 w-5" />
                   </span>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">Profile details</h3>
-                    <p className="text-sm text-slate-400">Your personal information.</p>
+                    <h3 className="text-lg font-semibold text-text">Profile details</h3>
+                    <p className="text-sm text-text-muted">Your personal information.</p>
                   </div>
                 </div>
                 {!editing && (
                   <button
                     type="button"
                     onClick={() => setEditing(true)}
-                    className="inline-flex flex-none items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:border-blue-500/40 hover:text-white"
+                    className="inline-flex flex-none items-center gap-2 rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:text-text"
                   >
                     <FiEdit2 className="h-4 w-4" /> Edit
                   </button>
@@ -291,15 +316,16 @@ export default function AdminProfilePage() {
                   <input name="address" value={profile.address} onChange={handleProfileField} disabled={!editing} className={inputClass} placeholder="City, Country" />
                 </Field>
                 <div className="sm:col-span-2">
-                  <Field label="Photo URL" icon={FiImage} hint="Paste a link to your avatar image.">
-                    <input name="photo" value={profile.photo} onChange={handleProfileField} disabled={!editing} className={inputClass} placeholder="https://… or /image1.jpg" />
+                  <Field label="Upload photo" icon={FiImage} hint="Choose a new image to upload to Cloudinary.">
+                    <input type="file" accept="image/*" onChange={handlePhotoChange} disabled={!editing} className="w-full cursor-pointer rounded-2xl border border-border bg-surface-elevated/80 px-4 py-3 text-sm text-text-muted file:mr-4 file:rounded-full file:border-0 file:bg-blue-600/80 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-600" />
+                    {uploadingPhoto && <p className="mt-2 text-sm text-primary">Uploading image…</p>}
                   </Field>
                 </div>
               </div>
 
               {/* Social links */}
               <div className="mt-6">
-                <p className="text-sm font-medium text-slate-300">Social links <span className="text-slate-500">(optional)</span></p>
+                <p className="text-sm font-medium text-text-muted">Social links <span className="text-text-subtle">(optional)</span></p>
                 <div className="mt-3 grid gap-5 sm:grid-cols-3">
                   <Field label="LinkedIn" icon={FiLinkedin}>
                     <input name="linkedin" value={profile.socialLinks.linkedin} onChange={handleSocialField} disabled={!editing} className={inputClass} placeholder="https://linkedin.com/in/…" />
@@ -319,16 +345,16 @@ export default function AdminProfilePage() {
                     type="button"
                     onClick={handleCancelEdit}
                     disabled={savingProfile}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-200 transition-colors hover:text-white disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface-muted px-5 py-3 text-sm font-semibold text-text transition-colors hover:text-text disabled:opacity-60"
                   >
                     <FiX className="h-4 w-4" /> Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={savingProfile}
-                    className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110 disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:brightness-110 disabled:opacity-60"
                   >
-                    {savingProfile ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiSave className="h-4 w-4" />}
+                    {savingProfile || uploadingPhoto ? <FiLoader className="h-4 w-4 animate-spin" /> : <FiSave className="h-4 w-4" />}
                     Save changes
                   </button>
                 </div>
@@ -336,14 +362,14 @@ export default function AdminProfilePage() {
             </form>
 
             {/* Password */}
-            <form onSubmit={handlePasswordSave} className="rounded-3xl border border-white/10 bg-slate-950/60 p-6 sm:p-8">
+            <form onSubmit={handlePasswordSave} className="rounded-3xl border border-border bg-surface p-6 sm:p-8">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-500/15 text-purple-300 ring-1 ring-white/10">
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent/15 text-purple-300 ring-1 ring-border">
                   <FiLock className="h-5 w-5" />
                 </span>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Change password</h3>
-                  <p className="text-sm text-slate-400">Use at least 8 characters.</p>
+                  <h3 className="text-lg font-semibold text-text">Change password</h3>
+                  <p className="text-sm text-text-muted">Use at least 8 characters.</p>
                 </div>
               </div>
 
@@ -387,7 +413,7 @@ export default function AdminProfilePage() {
                 <button
                   type="button"
                   onClick={() => setShowPwd((s) => !s)}
-                  className="inline-flex w-fit items-center gap-2 text-xs font-medium text-slate-400 transition-colors hover:text-blue-200"
+                  className="inline-flex w-fit items-center gap-2 text-xs font-medium text-text-muted transition-colors hover:text-primary"
                 >
                   {showPwd ? <FiEyeOff className="h-3.5 w-3.5" /> : <FiEye className="h-3.5 w-3.5" />}
                   {showPwd ? 'Hide passwords' : 'Show passwords'}

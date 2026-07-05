@@ -81,6 +81,7 @@ function normalizeCourse(c) {
 
   return {
     id: c._id,
+    slug: c.slug || "",
     title: c.title,
     description: c.description,
     category: c.category,
@@ -437,7 +438,7 @@ export default function CoursesPage() {
   }, [courses, categories]);
 
   return (
-    <div className="bg-[#020205] font-sans text-slate-100 antialiased">
+    <div className="bg-background font-sans text-text antialiased">
       <Navbar />
 
       {/* ============================ HERO ============================ */}
@@ -448,7 +449,7 @@ export default function CoursesPage() {
         className="relative overflow-hidden pt-28 pb-20 lg:pt-36 lg:pb-24"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(79,70,229,0.22),transparent_40%),radial-gradient(circle_at_85%_25%,rgba(168,85,247,0.18),transparent_42%)]" />
-        <div className="absolute inset-0 bg-linear-to-b from-[#020205]/0 via-[#020205]/40 to-[#020205]" />
+        <div className="absolute inset-0 dark:bg-linear-to-b dark:from-[#020205]/0 dark:via-[#020205]/40 dark:to-[#020205]" />
         <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-size-[56px_56px]" />
         {!reduce && (
           <motion.div
@@ -460,12 +461,12 @@ export default function CoursesPage() {
         <motion.div
           aria-hidden
           style={{ x: orb1X, y: orb1Y }}
-          className="pointer-events-none absolute -left-20 top-24 h-72 w-72 rounded-full bg-blue-600/20 blur-[100px]"
+          className="pointer-events-none absolute -left-20 top-24 h-72 w-72 rounded-full bg-primary/20 blur-[100px]"
         />
         <motion.div
           aria-hidden
           style={{ x: orb2X, y: orb2Y }}
-          className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-purple-600/20 blur-[110px]"
+          className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-accent/20 blur-[110px]"
         />
 
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-16 px-6 xl:grid-cols-[1.05fr_0.95fr]">
@@ -475,7 +476,7 @@ export default function CoursesPage() {
             transition={{ duration: 0.8, ease: easeOut }}
             className="space-y-8"
           >
-            <span className="inline-flex items-center gap-3 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 ring-1 ring-blue-200/10">
+            <span className="inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-medium text-primary ring-1 ring-blue-200/10">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
@@ -483,14 +484,14 @@ export default function CoursesPage() {
               24+ expert-led courses
             </span>
 
-            <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl xl:text-7xl">
+            <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-text sm:text-5xl md:text-6xl xl:text-7xl">
               Find the course that{" "}
-              <span className="bg-linear-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
                 launches your career.
               </span>
             </h1>
 
-            <p className="max-w-xl text-lg leading-8 text-slate-300">
+            <p className="max-w-xl text-lg leading-8 text-text-muted">
               Browse project-based courses across development, design, and
               marketing. Filter by topic and level to find your perfect match.
             </p>
@@ -498,14 +499,14 @@ export default function CoursesPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <MagneticButton
                 href="#catalogue"
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-blue-600/25"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-primary/25"
               >
                 Explore catalogue
                 <FiArrowRight className="transition-transform group-hover:translate-x-1" />
               </MagneticButton>
-              <span className="flex items-center gap-2 text-sm text-slate-400">
+              <span className="flex items-center gap-2 text-sm text-text-muted">
                 <Stars n={5} />{" "}
-                <span className="font-semibold text-white">4.9/5</span> from
+                <span className="font-semibold text-text">4.9/5</span> from
                 18k+ graduates
               </span>
             </div>
@@ -518,8 +519,8 @@ export default function CoursesPage() {
             transition={{ duration: 0.9, delay: 0.15, ease: easeOut }}
           >
             <Tilt3D>
-              <SpotlightCard className="rounded-4xl border border-white/10 bg-slate-950/70 p-4 shadow-2xl shadow-black/50 backdrop-blur-xl cursor-pointer">
-                <div className="relative overflow-hidden rounded-[1.4rem] border border-white/10">
+              <SpotlightCard className="rounded-4xl border border-border bg-surface-elevated p-4 shadow-2xl shadow-black/50 backdrop-blur-xl cursor-pointer">
+                <div className="relative overflow-hidden rounded-[1.4rem] border border-border">
                   <img
                     src={bestseller?.img || FALLBACK_IMG}
                     alt={
@@ -536,10 +537,10 @@ export default function CoursesPage() {
                   )}
                 </div>
                 <div className="px-2 pb-2 pt-5">
-                  <p className="text-xs uppercase tracking-[0.3em] text-blue-300">
+                  <p className="text-xs uppercase tracking-[0.3em] text-primary">
                     {bestseller ? bestseller.category : "Featured course"}
                   </p>
-                  <h2 className="mt-2 text-xl font-semibold text-white">
+                  <h2 className="mt-2 text-xl font-semibold text-text">
                     {bestseller
                       ? bestseller.title
                       : "Discover your next course"}
@@ -548,16 +549,16 @@ export default function CoursesPage() {
                     <div className="flex items-baseline gap-2">
                       {bestseller ? (
                         bestseller.isFree ? (
-                          <span className="text-2xl font-bold text-emerald-300">
+                          <span className="text-2xl font-bold text-success">
                             Free
                           </span>
                         ) : (
                           <>
-                            <span className="text-2xl font-bold text-white">
+                            <span className="text-2xl font-bold text-text">
                               ৳{bestseller.price}
                             </span>
                             {bestseller.oldPrice ? (
-                              <span className="text-sm text-slate-500 line-through">
+                              <span className="text-sm text-text-subtle line-through">
                                 ৳{bestseller.oldPrice}
                               </span>
                             ) : null}
@@ -574,32 +575,32 @@ export default function CoursesPage() {
       </section>
 
       {/* ============================ CATALOGUE ============================ */}
-      <section id="catalogue" className="bg-slate-950/40 py-20">
+      <section id="catalogue" className="bg-surface py-20">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-10 lg:grid-cols-[340px_minmax(0,1fr)]">
             {/* sidebar filters */}
             <aside className="lg:sticky lg:top-28 lg:h-fit">
               <Reveal>
-                <SpotlightCard className="space-y-8 rounded-3xl border border-white/10 bg-slate-950/60 p-8">
-                  <div className="flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-blue-300">
+                <SpotlightCard className="space-y-8 rounded-3xl border border-border bg-surface p-8">
+                  <div className="flex items-center gap-2 text-sm uppercase tracking-[0.3em] text-primary">
                     <FiSliders className="h-4 w-4" /> Refine
                   </div>
 
                   {/* search */}
                   <label className="relative block">
-                    <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                    <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-subtle" />
                     <input
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Search courses…"
-                      className="w-full rounded-full border border-white/10 bg-slate-900/80 py-3 pl-12 pr-4 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
+                      className="w-full rounded-full border border-border bg-surface-elevated/80 py-3 pl-12 pr-4 text-sm text-white outline-none transition focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10"
                     />
                   </label>
 
                   {/* categories — full-width list so long labels breathe */}
-                  <div className="border-t border-white/5 pt-7">
-                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+                  <div className="border-t border-border pt-7">
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-text-subtle">
                       Category
                     </p>
                     <div className="space-y-2">
@@ -615,13 +616,13 @@ export default function CoursesPage() {
                             onClick={() => setSelectedCategory(cat)}
                             className={`flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium transition-colors ${
                               active
-                                ? "bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-600/20"
-                                : "border border-white/10 bg-white/5 text-slate-300 hover:border-blue-500/30 hover:text-blue-200"
+                                ? "bg-linear-to-r from-primary to-accent text-white shadow-lg shadow-primary/20"
+                                : "border border-border bg-surface-muted text-text-muted hover:border-primary/30 hover:text-primary"
                             }`}
                           >
                             <span>{cat}</span>
                             <span
-                              className={`rounded-full px-2 py-0.5 text-xs ${active ? "bg-white/20 text-white" : "bg-white/10 text-slate-400"}`}
+                              className={`rounded-full px-2 py-0.5 text-xs ${active ? "bg-white/20 text-white" : "bg-surface-muted text-text-muted"}`}
                             >
                               {count}
                             </span>
@@ -632,8 +633,8 @@ export default function CoursesPage() {
                   </div>
 
                   {/* levels */}
-                  <div className="border-t border-white/5 pt-7">
-                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+                  <div className="border-t border-border pt-7">
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-text-subtle">
                       Level
                     </p>
                     <div className="grid grid-cols-2 gap-2.5">
@@ -645,8 +646,8 @@ export default function CoursesPage() {
                             onClick={() => setSelectedLevel(lvl)}
                             className={`rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                               active
-                                ? "bg-white/15 text-white ring-1 ring-white/20"
-                                : "border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
+                                ? "bg-primary text-primary-fg ring-1 ring-primary/30"
+                                : "border border-border bg-surface-muted text-text-muted hover:bg-surface-muted"
                             }`}
                           >
                             {lvl}
@@ -663,7 +664,7 @@ export default function CoursesPage() {
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
                         onClick={resetFilters}
-                        className="inline-flex items-center gap-2 text-sm font-semibold text-blue-300 hover:text-blue-200"
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary"
                       >
                         <FiX className="h-4 w-4" /> Clear all filters
                       </motion.button>
@@ -677,14 +678,14 @@ export default function CoursesPage() {
             <div>
               <Reveal className="mb-8 flex items-end justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.35em] text-blue-300">
+                  <p className="text-sm uppercase tracking-[0.35em] text-primary">
                     Course catalogue
                   </p>
                   <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
                     Choose your best match
                   </h2>
                 </div>
-                <span className="flex-none rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
+                <span className="flex-none rounded-full border border-border bg-surface-muted px-4 py-2 text-sm text-text-muted">
                   {filteredCourses.length} of {courses.length}
                 </span>
               </Reveal>
@@ -695,25 +696,25 @@ export default function CoursesPage() {
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div
                       key={i}
-                      className="h-[22rem] animate-pulse rounded-3xl border border-white/10 bg-slate-950/60"
+                      className="h-[22rem] animate-pulse rounded-3xl border border-border bg-surface"
                     >
-                      <div className="h-40 rounded-t-3xl bg-white/5" />
+                      <div className="h-40 rounded-t-3xl bg-surface-muted" />
                       <div className="space-y-3 p-6">
-                        <div className="h-3 w-1/3 rounded bg-white/10" />
-                        <div className="h-4 w-2/3 rounded bg-white/10" />
-                        <div className="h-3 w-full rounded bg-white/5" />
-                        <div className="h-3 w-4/5 rounded bg-white/5" />
+                        <div className="h-3 w-1/3 rounded bg-surface-muted" />
+                        <div className="h-4 w-2/3 rounded bg-surface-muted" />
+                        <div className="h-3 w-full rounded bg-surface-muted" />
+                        <div className="h-3 w-4/5 rounded bg-surface-muted" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : coursesError ? (
                 <div className="rounded-3xl border border-rose-400/20 bg-rose-500/5 p-12 text-center">
-                  <FiX className="mx-auto h-10 w-10 text-rose-400" />
+                  <FiX className="mx-auto h-10 w-10 text-danger" />
                   <p className="mt-4 text-lg font-semibold text-white">
                     Couldn’t load courses
                   </p>
-                  <p className="mt-1 text-slate-400">{coursesError}</p>
+                  <p className="mt-1 text-text-muted">{coursesError}</p>
                 </div>
               ) : (
                 <>
@@ -737,7 +738,7 @@ export default function CoursesPage() {
                             transition={{ duration: 0.3 }}
                             className="h-full"
                           >
-                            <SpotlightCard className="flex h-full flex-col rounded-3xl border border-white/10 bg-slate-950/60 shadow-xl shadow-black/20">
+                            <SpotlightCard className="flex h-full flex-col rounded-3xl border border-border bg-surface shadow-xl shadow-black/20">
                               {/* Large image */}
                               <div className="relative overflow-hidden rounded-t-3xl">
                                 <img
@@ -763,8 +764,8 @@ export default function CoursesPage() {
                                   aria-pressed={wishlistedIds.has(course.id)}
                                   className={`absolute right-3 top-3 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur transition-colors disabled:opacity-50 ${
                                     wishlistedIds.has(course.id)
-                                      ? "border-rose-400/40 bg-rose-500/20 text-rose-300 hover:bg-rose-500/30"
-                                      : "border-white/15 bg-black/40 text-white hover:bg-black/60"
+                                      ? "border-rose-400/40 bg-rose-500/20 text-danger hover:bg-rose-500/30"
+                                      : "border-border-strong bg-black/40 text-white hover:bg-black/60"
                                   }`}
                                 >
                                   <FiHeart
@@ -781,7 +782,7 @@ export default function CoursesPage() {
 
                                 <div className="mt-3 flex items-baseline gap-2">
                                   {course.isFree ? (
-                                    <span className="text-2xl font-bold text-emerald-300">
+                                    <span className="text-2xl font-bold text-success">
                                       Free
                                     </span>
                                   ) : (
@@ -790,7 +791,7 @@ export default function CoursesPage() {
                                         ৳{course.price}
                                       </span>
                                       {course.oldPrice ? (
-                                        <span className="text-sm text-slate-500 line-through">
+                                        <span className="text-sm text-text-subtle line-through">
                                           ৳{course.oldPrice}
                                         </span>
                                       ) : null}
@@ -800,14 +801,14 @@ export default function CoursesPage() {
 
                                 <div className="mt-auto flex flex-col gap-2.5 pt-6 sm:flex-row">
                                   <Link
-                                    href={`/pages/courses/${course.id}`}
-                                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-white/5 px-4 py-2.5 text-sm font-semibold text-blue-200 ring-1 ring-blue-500/30 transition-colors hover:bg-white/10 hover:text-white"
+                                    href={`/pages/courses/${course.slug || course.id}`}
+                                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-surface-muted px-4 py-2.5 text-sm font-semibold text-primary ring-1 ring-blue-500/30 transition-colors hover:bg-surface-muted hover:text-white"
                                   >
                                     View course
                                   </Link>
                                   {enrolledIds.has(course.id) ? (
                                     /* Already purchased — show status, not a buy CTA */
-                                    <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-semibold text-emerald-200">
+                                    <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-success px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-success/25">
                                       <FiCheck className="h-4 w-4" />
                                       Already bought
                                     </span>
@@ -815,8 +816,8 @@ export default function CoursesPage() {
                                     /* Only offer "Enrol now" while enrollment is actually open */
                                     (now === null || getCourseTiming(course, now).canEnroll) && (
                                       <Link
-                                        href={`/pages/courses/${course.id}`}
-                                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:brightness-110"
+                                        href={`/pages/courses/${course.slug || course.id}`}
+                                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-linear-to-r from-primary to-accent px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:brightness-110"
                                       >
                                         Enrol now{" "}
                                         <FiArrowRight className="h-4 w-4" />
@@ -833,12 +834,12 @@ export default function CoursesPage() {
                   </motion.div>
 
                   {filteredCourses.length === 0 && (
-                    <div className="rounded-3xl border border-white/10 bg-slate-950/60 p-12 text-center">
-                      <FiSearch className="mx-auto h-10 w-10 text-slate-600" />
+                    <div className="rounded-3xl border border-border bg-surface p-12 text-center">
+                      <FiSearch className="mx-auto h-10 w-10 text-text-subtle" />
                       <p className="mt-4 text-lg font-semibold text-white">
                         No courses found
                       </p>
-                      <p className="mt-1 text-slate-400">
+                      <p className="mt-1 text-text-muted">
                         {courses.length === 0
                           ? "No courses have been published yet. Check back soon."
                           : "Try another category, level, or search term."}
@@ -846,7 +847,7 @@ export default function CoursesPage() {
                       {hasFilters && (
                         <button
                           onClick={resetFilters}
-                          className="mt-6 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-blue-500/40 hover:text-blue-200"
+                          className="mt-6 rounded-full border border-border-strong bg-surface-muted px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-primary/40 hover:text-primary"
                         >
                           Reset filters
                         </button>
@@ -866,12 +867,12 @@ export default function CoursesPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map((s, i) => (
               <Reveal key={s.label} delay={i * 0.08}>
-                <SpotlightCard className="rounded-3xl border border-white/10 bg-slate-950/60 p-8 text-center">
-                  <p className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-4xl font-bold text-transparent sm:text-5xl">
+                <SpotlightCard className="rounded-3xl border border-border bg-surface p-8 text-center">
+                  <p className="bg-linear-to-r from-primary to-accent bg-clip-text text-4xl font-bold text-transparent sm:text-5xl">
                     {s.display ? s.display : <CountUp to={s.to} />}
                     {s.suffix}
                   </p>
-                  <p className="mt-3 text-sm uppercase tracking-[0.2em] text-slate-400">
+                  <p className="mt-3 text-sm uppercase tracking-[0.2em] text-text-muted">
                     {s.label}
                   </p>
                 </SpotlightCard>
@@ -887,21 +888,21 @@ export default function CoursesPage() {
           <Reveal>
             <SpotlightCard
               glow="rgba(99,102,241,0.25)"
-              className="relative rounded-[2.5rem] border border-white/10 bg-linear-to-br from-blue-600/15 via-slate-950/70 to-purple-600/15 p-10 text-center shadow-2xl shadow-black/40 sm:p-16"
+              className="relative rounded-[2.5rem] border border-border bg-linear-to-br from-primary/10 via-surface-elevated to-accent/10 p-10 text-center shadow-elevated dark:from-blue-600/15 dark:via-slate-950/70 dark:to-purple-600/15 dark:shadow-2xl dark:shadow-black/40 sm:p-16"
             >
-              <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:44px_44px]" />
+              <div className="pointer-events-none absolute inset-0 hidden opacity-[0.06] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:44px_44px] dark:block" />
               <div className="relative">
-                <h2 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                <h2 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-text sm:text-5xl">
                   Choose a course and start your next project
                 </h2>
-                <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+                <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-text-muted">
                   Learn at your own pace, build real work, and join a supportive
                   community of learners.
                 </p>
                 <div className="mt-10 flex justify-center">
                   <MagneticButton
                     href="#catalogue"
-                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-purple-600 px-10 py-4 text-base font-semibold text-white shadow-xl shadow-blue-600/30"
+                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-primary to-accent px-10 py-4 text-base font-semibold text-white shadow-xl shadow-primary/30"
                   >
                     Start learning
                     <FiArrowRight className="transition-transform group-hover:translate-x-1" />
